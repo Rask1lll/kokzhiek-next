@@ -3,6 +3,12 @@
 import { useSearchParams } from "next/navigation";
 import BookInfoCard from "@/app/components/bookDetailsPage.tsx/BookInfoCard";
 import ChaptersContainer from "@/app/components/bookDetailsPage.tsx/ChaptersContainer";
+import { useEffect, useState } from "react";
+
+type Chapter = {
+  id: number | string;
+  title: string;
+};
 
 const testBook = {
   id: "1",
@@ -21,23 +27,50 @@ export default function BookPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const book = testBook;
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [bookData, setBookData] = useState(testBook);
+
+  useEffect(() => {
+    if (!id) return;
+
+    getChapters();
+
+    async function getChapters() {
+      const token = localStorage.getItem("token");
+      const data = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          method: "GET",
+        }
+      );
+      const res = await data.json();
+      console.log("Book response:", res);
+      setChapters(res.data?.chapters ?? []);
+      setBookData(res.data);
+      console.log(bookData);
+    }
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-6">
       <div className="mx-auto">
         <BookInfoCard
-          title={book.title}
+          title={bookData.title}
           author={book.author}
           subject={book.subject}
           grade={book.grade}
           publisher={book.publisher}
           language={book.language}
-          description={book.description}
+          description={bookData.description}
           coverUrl={book.coverUrl}
         />
       </div>
+
       <div className="mt-4">
-        <ChaptersContainer />
+        <ChaptersContainer chapters={chapters} />
       </div>
     </main>
   );

@@ -7,15 +7,15 @@ export default function ProtectorGuard({
 }: {
   element: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  // const { user, loading } = useAuth();
+  // const router = useRouter();
 
-  if (loading) return null;
+  // if (loading) return null;
 
-  if (!user) {
-    router.replace("/auth/login");
-    return null;
-  }
+  // // if (!user) {
+  // //   router.replace("/auth/login");
+  // //   return null;
+  // // }
 
   return element;
 }

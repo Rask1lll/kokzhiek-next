@@ -43,7 +43,7 @@ export default function LoginPage() {
         }
       );
       const userRes = await userData.json();
-      localStorage.setItem("token", userRes.token);
+      localStorage.setItem("token", userRes.data.token);
       console.log(userRes);
       router.push("/books");
     } catch (e) {

@@ -1,4 +1,88 @@
+"use client";
+
+import { useState, ChangeEvent } from "react";
+
+const SUBJECT_ID_MAP: Record<string, number> = {
+  Математика: 1,
+  Физика: 2,
+  История: 3,
+  Информатика: 4,
+};
+
+const LANGUAGE_CODE_MAP: Record<string, "kk" | "ru" | "en"> = {
+  "Қазақ тілі": "kk",
+  Русский: "ru",
+  English: "en",
+};
+
 export default function CreateBookModal() {
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [subject, setSubject] = useState("Математика");
+  const [grade, setGrade] = useState("1");
+  const [language, setLanguage] = useState("Қазақ тілі");
+  const [description, setDescription] = useState("");
+  const [difficulty, setDifficulty] = useState("Начальный");
+  const [isbn, setIsbn] = useState("");
+  const [, setCoverFile] = useState<File | null>(null);
+
+  const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    setCoverFile(file);
+  };
+
+  const handleCreateBook = async () => {
+    if (!title.trim()) {
+      console.error("Название книги обязательно");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("Token is missing");
+      return;
+    }
+
+    const languageCode = LANGUAGE_CODE_MAP[language] ?? "kk";
+
+    const gradeId = grade ? Number(grade) : undefined;
+
+    const payload = {
+      title: title.trim(),
+      description: description.trim() || undefined,
+      language: languageCode,
+      grade_id: gradeId,
+      isbn: isbn.trim() || undefined,
+      settings: {
+        author: author.trim() || undefined,
+        difficulty,
+      },
+    };
+
+    const data = JSON.stringify(payload);
+
+    console.log(data);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books`,
+        {
+          headers: {
+            "Content-type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          method: "POST",
+          body: data,
+        }
+      );
+
+      const resData = await res.json();
+      console.log("Create book data:", resData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl w-full max-w-3xl max-h-[70vh] flex flex-col overflow-hidden shadow-2xl">
       {/* Header */}
@@ -29,6 +113,8 @@ export default function CreateBookModal() {
               type="text"
               placeholder="Введите название книги"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
@@ -40,6 +126,8 @@ export default function CreateBookModal() {
               type="text"
               placeholder="Имя автора"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
             />
           </div>
         </div>
@@ -58,7 +146,12 @@ export default function CreateBookModal() {
                 <p className="text-xs text-gray-500">JPG, PNG, до 5&nbsp;МБ</p>
                 <label className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors">
                   <span>Выбрать файл</span>
-                  <input type="file" accept="image/*" className="hidden" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverChange}
+                  />
                 </label>
               </div>
             </div>
@@ -77,11 +170,15 @@ export default function CreateBookModal() {
             <label className="block mb-2 text-sm font-medium text-gray-700">
               Предмет *
             </label>
-            <select className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option>Математика</option>
-              <option>Физика</option>
-              <option>История</option>
-              <option>Информатика</option>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            >
+              <option value="Математика">Математика</option>
+              <option value="Физика">Физика</option>
+              <option value="История">История</option>
+              <option value="Информатика">Информатика</option>
             </select>
           </div>
 
@@ -89,12 +186,16 @@ export default function CreateBookModal() {
             <label className="block mb-2 text-sm font-medium text-gray-700">
               Класс *
             </label>
-            <select className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option>1</option>
-              <option>2</option>
-              <option>5</option>
-              <option>9</option>
-              <option>11</option>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="5">5</option>
+              <option value="9">9</option>
+              <option value="11">11</option>
             </select>
           </div>
 
@@ -102,10 +203,14 @@ export default function CreateBookModal() {
             <label className="block mb-2 text-sm font-medium text-gray-700">
               Язык *
             </label>
-            <select className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option>Қазақ тілі</option>
-              <option>Русский</option>
-              <option>English</option>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              <option value="Қазақ тілі">Қазақ тілі</option>
+              <option value="Русский">Русский</option>
+              <option value="English">English</option>
             </select>
           </div>
         </div>
@@ -119,6 +224,8 @@ export default function CreateBookModal() {
             rows={4}
             placeholder="Кратко опишите содержание книги"
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
@@ -128,10 +235,14 @@ export default function CreateBookModal() {
             <label className="block mb-2 text-sm font-medium text-gray-700">
               Уровень сложности
             </label>
-            <select className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option>Начальный</option>
-              <option>Средний</option>
-              <option>Продвинутый</option>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+            >
+              <option value="Начальный">Начальный</option>
+              <option value="Средний">Средний</option>
+              <option value="Продвинутый">Продвинутый</option>
             </select>
           </div>
 
@@ -143,6 +254,8 @@ export default function CreateBookModal() {
               type="text"
               placeholder="978-0-123456-78-9"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={isbn}
+              onChange={(e) => setIsbn(e.target.value)}
             />
           </div>
         </div>
@@ -155,6 +268,7 @@ export default function CreateBookModal() {
         <button
           type="button"
           className="w-full sm:w-auto inline-flex justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+          onClick={handleCreateBook}
         >
           Создать книгу
         </button>

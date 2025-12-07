@@ -9,21 +9,19 @@ export function useAuth() {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    fetch("http://212.233.122.179/api/v1/me", {
+    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
         setUser(data);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return { user, loading };

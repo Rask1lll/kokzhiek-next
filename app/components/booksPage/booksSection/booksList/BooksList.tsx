@@ -1,20 +1,36 @@
+"use client";
+import { useEffect, useState } from "react";
 import BookCard from "./BookCard";
 import style from "./BooksList.module.css";
 
-const testData = [
-  { id: 1, name: "Учебник математики 10 класс" },
-  { id: 2, name: "Учебник истории 7 класс" },
-  { id: 3, name: "Физика. Базовый курс 9 класс" },
-  { id: 4, name: "Информатика и ИКТ 8 класс" },
-  { id: 5, name: "Литература. Хрестоматия 6 класс" },
-  { id: 6, name: "Биология. Подготовка к ЕНТ" },
-];
+type Book = {
+  id: number | string;
+  title: string;
+};
 
 export default function BooksList() {
+  const [books, setBooks] = useState<Book[]>([]);
+  useEffect(() => {
+    getBooks();
+    async function getBooks() {
+      const token = localStorage.getItem("token");
+      const data = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const res = await data.json();
+      console.log(res.data);
+      setBooks(res.data);
+    }
+  }, []);
   return (
     <div className={`w-full ${style.booksGrid} px-10`}>
-      {testData.map((el) => {
-        return <BookCard bookId={String(el.id)} name={el.name} key={el.id} />;
+      {books.map((el) => {
+        return <BookCard bookId={String(el.id)} name={el.title} key={el.id} />;
       })}
     </div>
   );
