@@ -1,5 +1,6 @@
 "use client";
 
+import { redirect } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 export default function RegisterPage() {
@@ -13,23 +14,32 @@ export default function RegisterPage() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     event.preventDefault();
 
-    const data = {
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-      registrationKey,
-      publisher,
-      acceptTerms,
-    };
-
-    // TODO: отправить данные на API регистрации
-    console.log("Registration form data:", data);
+    const userData = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/register`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: firstName,
+          email,
+          password,
+          password_confirmation: confirmPassword,
+        }),
+      }
+    );
+    setLoading(false);
+    const res = await userData.json();
+    localStorage.setItem("token", res.token);
+    redirect("/books");
   };
 
   return (

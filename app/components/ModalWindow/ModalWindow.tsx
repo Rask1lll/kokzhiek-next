@@ -10,7 +10,7 @@ export default function ModalWindow() {
   }
   return (
     <div className="w-full h-full flex items-center justify-center fixed top-0 z-50 bg-gray-600/60">
-      <div className="relative w-fit">
+      <div className="relative">
         {content}{" "}
         <button
           onClick={() => {

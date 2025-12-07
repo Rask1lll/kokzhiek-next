@@ -12,7 +12,6 @@ type BookInfoCardProps = {
   language?: string;
   description?: string;
   coverUrl?: string;
-  onEdit?: () => void;
 };
 
 export default function BookInfoCard({

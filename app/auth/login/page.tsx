@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const data = {
@@ -24,12 +24,26 @@ export default function LoginPage() {
     };
     setLoading(true);
 
-    // TODO: отправить данные на API авторизации
-    console.log("Login form data:", data);
-    setTimeout(() => {
-      setLoading(false);
-      redirect("/books");
-    }, 500);
+    try {
+      const userData = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+          }),
+        }
+      );
+
+      const userRes = await userData.json();
+      localStorage.setItem("token", userRes);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
