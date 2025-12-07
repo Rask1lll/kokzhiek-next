@@ -4,7 +4,7 @@ import Loading from "@/app/components/Loading/Loading";
 import LanguageSwitcher from "@/app/components/navigation/LanguageSwitcher";
 
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 export default function LoginPage() {
@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,6 +25,11 @@ export default function LoginPage() {
     };
     setLoading(true);
 
+    const reqData = JSON.stringify({
+      email: data.email,
+      password: data.password,
+    });
+
     try {
       const userData = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/login`,
@@ -31,16 +37,15 @@ export default function LoginPage() {
           method: "POST",
           headers: {
             "Content-type": "application/json",
+            Accept: "application/json",
           },
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-          }),
+          body: reqData,
         }
       );
-
       const userRes = await userData.json();
-      localStorage.setItem("token", userRes);
+      localStorage.setItem("token", userRes.token);
+      console.log(userRes);
+      router.push("/books");
     } catch (e) {
       console.error(e);
     }

@@ -1,6 +1,6 @@
 export default function CreateBookModal() {
   return (
-    <div className="bg-white rounded-xl w-[100%] max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+    <div className="bg-white rounded-xl w-full max-w-3xl max-h-[70vh] flex flex-col overflow-hidden shadow-2xl">
       {/* Header */}
       <div className="px-8 py-6 border-b bg-gray-50">
         <div className="flex items-start justify-between gap-4">
@@ -20,8 +20,8 @@ export default function CreateBookModal() {
       {/* Content / Form */}
       <div className="flex-1 overflow-auto px-8 py-6 space-y-6">
         {/* Первая строка: Название + Автор */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2">
             <label className="block mb-2 text-sm font-medium text-gray-700">
               Название книги *
             </label>
@@ -41,6 +41,33 @@ export default function CreateBookModal() {
               placeholder="Имя автора"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
+          </div>
+        </div>
+
+        {/* Обложка книги */}
+        <div className="grid grid-cols-1 md:grid-cols-[180px,1fr] gap-4 items-start">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Обложка книги
+            </label>
+            <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">
+                  Загрузите обложку
+                </p>
+                <p className="text-xs text-gray-500">JPG, PNG, до 5&nbsp;МБ</p>
+                <label className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors">
+                  <span>Выбрать файл</span>
+                  <input type="file" accept="image/*" className="hidden" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center justify-center">
+            <div className="h-40 w-28 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
+              Превью обложки
+            </div>
           </div>
         </div>
 
@@ -91,7 +118,7 @@ export default function CreateBookModal() {
           <textarea
             rows={4}
             placeholder="Кратко опишите содержание книги"
-            className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
           />
         </div>
 
@@ -110,18 +137,6 @@ export default function CreateBookModal() {
 
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Оценочные часы
-            </label>
-            <input
-              type="number"
-              min={1}
-              placeholder="Напр. 20"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">
               ISBN (необязательно)
             </label>
             <input
@@ -133,25 +148,6 @@ export default function CreateBookModal() {
         </div>
 
         {/* Теги */}
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">
-            Теги
-          </label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {/* Пример уже добавленных тегов (статично) */}
-            <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
-              Алгебра
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs text-blue-700">
-              7 класс
-            </span>
-          </div>
-          <input
-            type="text"
-            placeholder="Введите тег и нажмите Enter"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
       </div>
 
       {/* Footer */}

@@ -1,7 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export default function BookCard({ bookId }: { bookId: string }) {
+export default function BookCard({
+  bookId,
+  name,
+}: {
+  bookId: string;
+  name: string;
+}) {
   return (
     <div className="relative group">
       <Link
@@ -20,11 +26,9 @@ export default function BookCard({ bookId }: { bookId: string }) {
 
         <div className="p-4 h-24 relative">
           <h3 className="font-semibold text-gray-800 text-lg mb-2 line-clamp-2">
-            Название книги
+            {name}
           </h3>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-            Краткое описание книги.
-          </p>
+
           <div className="absolute bottom-2 right-4 text-xs text-gray-500">
             11 класс
           </div>

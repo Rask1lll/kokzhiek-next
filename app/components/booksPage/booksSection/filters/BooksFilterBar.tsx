@@ -90,7 +90,7 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
           <div className="flex items-center justify-between gap-3 md:justify-end">
             <BooksSortSelect
               options={SORT_OPTIONS}
-              value={sortBy}
+                value={sortBy}
               onChange={handleSortChange}
             />
 

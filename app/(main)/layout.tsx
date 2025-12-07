@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "../components/navigation/Navigation";
 import ModalWindow from "../components/ModalWindow/ModalWindow";
+import ProtectorGuard from "../components/security/ProtectorGuard";
 
 export default function MainLayOut({
   children,
@@ -23,7 +24,7 @@ export default function MainLayOut({
     <>
       <ModalWindow></ModalWindow>
       <Navbar />
-      {children}
+      <ProtectorGuard element={children} />
     </>
   );
 }
