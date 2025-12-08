@@ -76,7 +76,7 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
   };
 
   return (
-    <div className="w-full px-4 py-4 md:px-6 md:py-5">
+    <div className="w-full px-12 py-6">
       <div className="flex flex-col gap-4">
         <BooksSearchInput value={search} onChange={handleSearchChange} />
 

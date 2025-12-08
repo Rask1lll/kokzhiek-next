@@ -7,7 +7,7 @@ export default function CreateBookSection() {
   const { addContent } = useModalWindowStore();
   return (
     <div className="min-h-[100px] sticky top-0 z-20 w-full items-center justify-center">
-      <div className="w-full bg-white px-8 py-6 flex items-center justify-between">
+      <div className="w-full bg-white px-12 py-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
             Книги

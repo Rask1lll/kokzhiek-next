@@ -28,7 +28,7 @@ export default function BooksList() {
     }
   }, []);
   return (
-    <div className={`w-full ${style.booksGrid} px-10`}>
+    <div className={`w-full ${style.booksGrid} px-14`}>
       {books.map((el) => {
         return <BookCard bookId={String(el.id)} name={el.title} key={el.id} />;
       })}
