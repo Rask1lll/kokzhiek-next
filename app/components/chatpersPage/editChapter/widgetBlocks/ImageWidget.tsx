@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import ImageCropModal from "./ImageCropModal";
 
 type ImageWidgetProps = {
   value: string; // URL of the image
@@ -14,15 +15,31 @@ export default function ImageWidget({
   onFileUpload,
 }: ImageWidgetProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [showCrop, setShowCrop] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Открываем модалку обрезки вместо прямой загрузки
+    setSelectedFile(file);
+    setShowCrop(true);
+    
+    // Сбрасываем input, чтобы можно было выбрать тот же файл снова
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    setShowCrop(false);
+    
     if (onFileUpload) {
       setIsUploading(true);
       try {
-        const newUrl = await onFileUpload(file);
+        const newUrl = await onFileUpload(croppedFile);
         if (newUrl) {
           onChange(newUrl);
         }
@@ -30,11 +47,19 @@ export default function ImageWidget({
         console.error("Error uploading image:", err);
       } finally {
         setIsUploading(false);
+        setSelectedFile(null);
       }
     } else {
-      // Fallback: just store file name (for cases without upload handler)
-      onChange(file.name);
+      // Fallback: create object URL for preview
+      const url = URL.createObjectURL(croppedFile);
+      onChange(url);
+      setSelectedFile(null);
     }
+  };
+
+  const handleCropCancel = () => {
+    setShowCrop(false);
+    setSelectedFile(null);
   };
 
   return (
@@ -101,6 +126,7 @@ export default function ImageWidget({
           </>
         )}
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           className="hidden"
@@ -108,6 +134,14 @@ export default function ImageWidget({
           disabled={isUploading}
         />
       </label>
+
+      {showCrop && selectedFile && (
+        <ImageCropModal
+          imageFile={selectedFile}
+          onCrop={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }
