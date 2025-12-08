@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import ReactCrop, {
   Crop,
   PixelCrop,
+  PercentCrop,
   makeAspectCrop,
   centerCrop,
 } from "react-image-crop";
@@ -40,9 +41,9 @@ export default function ImageCropModal({
   // Инициализируем область обрезки при загрузке изображения
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = e.currentTarget;
-    
-    let initialCrop: Crop;
-    
+
+    let initialCrop: PercentCrop;
+
     if (aspectRatio) {
       // Если задано соотношение сторон, создаем обрезку с этим соотношением
       initialCrop = makeAspectCrop(
@@ -53,7 +54,7 @@ export default function ImageCropModal({
         aspectRatio,
         naturalWidth,
         naturalHeight
-      );
+      ) as PercentCrop;
     } else {
       // Свободная обрезка - 80% от изображения по центру
       initialCrop = {
@@ -64,7 +65,7 @@ export default function ImageCropModal({
         height: 80,
       };
     }
-    
+
     const centeredCrop = centerCrop(initialCrop, naturalWidth, naturalHeight);
     setCrop(centeredCrop);
   };
@@ -118,7 +119,9 @@ export default function ImageCropModal({
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">Обрезка изображения</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Обрезка изображения
+          </h2>
           <button
             onClick={onCancel}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
