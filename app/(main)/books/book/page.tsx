@@ -84,7 +84,11 @@ export default function BookPage() {
       </div>
 
       <div className="mt-4">
-        <ChaptersContainer chapters={chapters} isLoading={isLoading} />
+        <ChaptersContainer
+          chapters={chapters}
+          bookId={id as string}
+          isLoading={isLoading}
+        />
       </div>
     </main>
   );
