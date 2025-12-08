@@ -1,53 +1,101 @@
 "use client";
 
 import { create } from "zustand";
+import {
+  ApiBlock,
+  ApiWidget,
+  ApiWidgetData,
+  reverseLayoutTypeMap,
+} from "@/app/services/constructorApi";
 
 export type BlockWidget = {
-  id: string;
+  id: number;
   type: string;
-  content: string;
+  data: ApiWidgetData;
   order: number;
 };
 
 export type ChapterBlock = {
-  id: string;
+  id: number;
   layoutCode: string;
-  createdAt: number;
   order: number;
   widgets: BlockWidget[];
 };
 
 type BlocksStore = {
   blocks: ChapterBlock[];
-  addBlock: (layoutCode: string) => void;
-  swapBlocks: (firstId: string, secondId: string) => void;
-  setSlotWidget: (blockId: string, order: number, widgetType: string) => void;
-  updateWidgetContent: (
-    blockId: string,
-    order: number,
-    content: string
+  chapterId: number | null;
+  isLoading: boolean;
+  error: string | null;
+
+  // State setters
+  setChapterId: (chapterId: number | null) => void;
+  setBlocks: (apiBlocks: ApiBlock[]) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+
+  // Local mutations (will be synced to API by components)
+  addBlockLocal: (block: ApiBlock) => void;
+  removeBlockLocal: (blockId: number) => void;
+  swapBlocksLocal: (firstId: number, secondId: number) => void;
+  updateBlockOrdersLocal: (
+    blocksOrder: { id: number; order: number }[]
   ) => void;
+
+  // Widget operations
+  addWidgetLocal: (blockId: number, widget: ApiWidget) => void;
+  updateWidgetLocal: (widgetId: number, data: ApiWidgetData) => void;
+  removeWidgetLocal: (blockId: number, widgetId: number) => void;
+
   clearBlocks: () => void;
 };
 
+// Convert API block to local format
+function apiBlockToLocal(apiBlock: ApiBlock): ChapterBlock {
+  return {
+    id: apiBlock.id,
+    layoutCode:
+      reverseLayoutTypeMap[apiBlock.layout_type] || apiBlock.layout_type,
+    order: apiBlock.order,
+    widgets: apiBlock.widgets.map((w) => ({
+      id: w.id,
+      type: w.type,
+      data: w.data,
+      order: w.order,
+    })),
+  };
+}
+
 export const useBlocksStore = create<BlocksStore>((set) => ({
   blocks: [],
+  chapterId: null,
+  isLoading: false,
+  error: null,
 
-  addBlock: (layoutCode) =>
+  setChapterId: (chapterId) => set({ chapterId }),
+
+  setBlocks: (apiBlocks) =>
+    set({
+      blocks: apiBlocks.map(apiBlockToLocal).sort((a, b) => a.order - b.order),
+    }),
+
+  setLoading: (isLoading) => set({ isLoading }),
+
+  setError: (error) => set({ error }),
+
+  addBlockLocal: (apiBlock) =>
     set((state) => ({
-      blocks: [
-        ...state.blocks,
-        {
-          id: crypto.randomUUID(),
-          layoutCode,
-          createdAt: Date.now(),
-          order: state.blocks.length,
-          widgets: [],
-        },
-      ],
+      blocks: [...state.blocks, apiBlockToLocal(apiBlock)].sort(
+        (a, b) => a.order - b.order
+      ),
     })),
 
-  swapBlocks: (firstId, secondId) =>
+  removeBlockLocal: (blockId) =>
+    set((state) => ({
+      blocks: state.blocks.filter((b) => b.id !== blockId),
+    })),
+
+  swapBlocksLocal: (firstId, secondId) =>
     set((state) => {
       const blocks = [...state.blocks];
       const firstIndex = blocks.findIndex((b) => b.id === firstId);
@@ -57,72 +105,70 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
         return { blocks: state.blocks };
       }
 
-      // swap positions in array
-      const tmp = blocks[firstIndex];
-      blocks[firstIndex] = blocks[secondIndex];
-      blocks[secondIndex] = tmp;
+      // Swap order values
+      const firstOrder = blocks[firstIndex].order;
+      const secondOrder = blocks[secondIndex].order;
 
-      // recompute order field based on new index
-      const updated = blocks.map((b, index) => ({
-        ...b,
-        order: index,
-      }));
+      blocks[firstIndex] = { ...blocks[firstIndex], order: secondOrder };
+      blocks[secondIndex] = { ...blocks[secondIndex], order: firstOrder };
 
-      return { blocks: updated };
+      return { blocks: blocks.sort((a, b) => a.order - b.order) };
     }),
 
-  setSlotWidget: (blockId, order, widgetType) =>
-    set((state) => ({
-      blocks: state.blocks.map((block) =>
-        block.id !== blockId
-          ? block
-          : {
-              ...block,
-              widgets: (() => {
-                const existing = block.widgets.find((w) => w.order === order);
-                if (existing) {
-                  return block.widgets.map((w) =>
-                    w.order !== order
-                      ? w
-                      : {
-                          ...w,
-                          type: widgetType,
-                          content: "",
-                        }
-                  );
-                }
-                return [
+  updateBlockOrdersLocal: (blocksOrder) =>
+    set((state) => {
+      const orderMap = new Map(blocksOrder.map((b) => [b.id, b.order]));
+      const updatedBlocks = state.blocks.map((block) => ({
+        ...block,
+        order: orderMap.get(block.id) ?? block.order,
+      }));
+      return { blocks: updatedBlocks.sort((a, b) => a.order - b.order) };
+    }),
+
+  addWidgetLocal: (blockId, widget) =>
+    set((state) => {
+      console.log("addWidgetLocal called:", { blockId, widget });
+      return {
+        blocks: state.blocks.map((block) =>
+          block.id !== blockId
+            ? block
+            : {
+                ...block,
+                widgets: [
                   ...block.widgets,
                   {
-                    id: crypto.randomUUID(),
-                    type: widgetType,
-                    content: "",
-                    order,
+                    id: widget.id,
+                    type: widget.type,
+                    data: widget.data ?? {},
+                    order: widget.order,
                   },
-                ];
-              })(),
-            }
-      ),
+                ].sort((a, b) => a.order - b.order),
+              }
+        ),
+      };
+    }),
+
+  updateWidgetLocal: (widgetId, data) =>
+    set((state) => ({
+      blocks: state.blocks.map((block) => ({
+        ...block,
+        widgets: block.widgets.map((w) =>
+          w.id !== widgetId ? w : { ...w, data }
+        ),
+      })),
     })),
 
-  updateWidgetContent: (blockId, order, content) =>
+  removeWidgetLocal: (blockId, widgetId) =>
     set((state) => ({
       blocks: state.blocks.map((block) =>
         block.id !== blockId
           ? block
           : {
               ...block,
-              widgets: block.widgets.map((w) =>
-                w.order !== order
-                  ? w
-                  : {
-                      ...w,
-                      content,
-                    }
-              ),
+              widgets: block.widgets.filter((w) => w.id !== widgetId),
             }
       ),
     })),
 
-  clearBlocks: () => set({ blocks: [] }),
+  clearBlocks: () => set({ blocks: [], chapterId: null, error: null }),
 }));

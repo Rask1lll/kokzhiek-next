@@ -1,5 +1,4 @@
 import { JSX } from "react/jsx-dev-runtime";
-import { useBlocksStore } from "@/app/store/blocksStore";
 import style from "./LayoutsList.module.css";
 
 type blockType = {
@@ -61,13 +60,11 @@ const blocks: blockType[] = [
   },
 ];
 
-export default function LayoutsList() {
-  const addBlock = useBlocksStore((state) => state.addBlock);
+type LayoutsListProps = {
+  onSelect: (layoutCode: string) => void;
+};
 
-  const handleSelectLayout = (code: string) => {
-    addBlock(code);
-  };
-
+export default function LayoutsList({ onSelect }: LayoutsListProps) {
   return (
     <div className=" bg-gray-100 w-sm rounded-lg p-2 sm:w-xl md:w-2xl lg:w-3xl ">
       <h1 className="lg:text-2xl md:text-xl text-lg text-gray-600 font-bold">
@@ -79,7 +76,7 @@ export default function LayoutsList() {
             <div
               className="flex p-2 rounded-lg ring ring-gray-300 cursor-pointer hover:scale-103 transition-transform duration-100 flex-col items-center"
               key={el.code}
-              onClick={() => handleSelectLayout(el.code)}
+              onClick={() => onSelect(el.code)}
             >
               <div className="w-40 h-40">{el.structure}</div>
               <p className="font-semibold">{el.name}</p>

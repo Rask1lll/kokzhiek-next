@@ -8,12 +8,14 @@ type LayoutProps = {
 const Layout = ({ block }: LayoutProps) => {
   const { layoutCode, widgets } = block;
 
-  const getWidgetOrder = (index: number) => index;
+  // API uses 1-based order, so we add 1 to convert from 0-based index
+  const getWidgetOrder = (index: number) => index + 1;
   const getWidgetByOrder = (order: number) =>
     widgets.find((w) => w.order === order) ?? null;
 
   switch (layoutCode) {
     case "full":
+    case "single":
       return (
         <div className="w-full bg-gray-100 p-4 rounded-md">
           <div className="w-full">
@@ -26,6 +28,7 @@ const Layout = ({ block }: LayoutProps) => {
         </div>
       );
     case "two_equal":
+    case "split":
       return (
         <div className="w-full grid grid-cols-2 gap-4">
           <div className="min-h-[80px]">
@@ -45,6 +48,7 @@ const Layout = ({ block }: LayoutProps) => {
         </div>
       );
     case "left_wide":
+    case "hero":
       return (
         <div className="w-full flex gap-4">
           <div className="min-h-[80px] flex-[1.3]">
@@ -83,6 +87,7 @@ const Layout = ({ block }: LayoutProps) => {
         </div>
       );
     case "three_cols":
+    case "2-column":
       return (
         <div className="w-full grid grid-cols-3 gap-4">
           <div className="min-h-[80px]">
