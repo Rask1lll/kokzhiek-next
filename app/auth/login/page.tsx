@@ -13,10 +13,12 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const router = useRouter();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError("");
 
     const data = {
       email,
@@ -43,11 +45,30 @@ export default function LoginPage() {
         }
       );
       const userRes = await userData.json();
-      localStorage.setItem("token", userRes.data.token);
-      console.log(userRes);
-      router.push("/books");
+
+      if (!userData.ok || userRes.message) {
+        // Обработка ошибок от сервера
+        const errorMessage =
+          userRes.message ||
+          userRes.errors?.email?.[0] ||
+          "Произошла ошибка при входе";
+        setError(errorMessage);
+        setLoading(false);
+        return;
+      }
+
+      if (userRes.data?.token) {
+        localStorage.setItem("token", userRes.data.token);
+        console.log(userRes);
+        router.push("/books");
+      } else {
+        setError("Неверные учетные данные");
+        setLoading(false);
+      }
     } catch (e) {
       console.error(e);
+      setError("Произошла ошибка при подключении к серверу");
+      setLoading(false);
     }
   };
 
@@ -88,10 +109,12 @@ export default function LoginPage() {
             Вход в систему
           </h2>
 
-          {/* Блок ошибки (скрыт по умолчанию) */}
-          {/* <div className="mb-4 p-3 bg-red-300 border border-error-400 text-error-700 rounded-lg text-sm">
-            Ошибка входа
-          </div> */}
+          {/* Блок ошибки */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Email */}

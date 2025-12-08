@@ -11,7 +11,7 @@ type Chapter = {
   title: string;
 };
 
-const testBook = {
+const testBook = { // TODO: remove this
   id: "1",
   title: "Учебник математики 10 класс",
   author: "Иванов И.И.",
