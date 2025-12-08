@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import BookInfoCard from "@/app/components/bookDetailsPage.tsx/BookInfoCard";
+import BookInfoCardSkeleton from "@/app/components/bookDetailsPage.tsx/BookInfoCardSkeleton";
 import ChaptersContainer from "@/app/components/bookDetailsPage.tsx/ChaptersContainer";
 import { useEffect, useState } from "react";
 
@@ -65,16 +66,20 @@ export default function BookPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-6">
       <div className="mx-auto">
-        <BookInfoCard
-          title={bookData.title}
-          author={book.author}
-          subject={book.subject}
-          grade={book.grade}
-          publisher={book.publisher}
-          language={book.language}
-          description={bookData.description}
-          coverUrl={book.coverUrl}
-        />
+        {isLoading ? (
+          <BookInfoCardSkeleton />
+        ) : (
+          <BookInfoCard
+            title={bookData.title}
+            author={book.author}
+            subject={book.subject}
+            grade={book.grade}
+            publisher={book.publisher}
+            language={book.language}
+            description={bookData.description}
+            coverUrl={book.coverUrl}
+          />
+        )}
       </div>
 
       <div className="mt-4">
