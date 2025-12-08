@@ -134,12 +134,18 @@ export async function deleteBlock(blockId: number): Promise<void> {
 export async function createWidget(
   blockId: number,
   type: string,
-  data: ApiWidgetData = {}
+  data: ApiWidgetData = {},
+  order?: number
 ): Promise<ApiResponse<ApiWidget>> {
+  const body: Record<string, unknown> = { type, data };
+  if (order !== undefined) {
+    body.order = order;
+  }
+
   const res = await fetch(`${API_BASE}/api/v1/blocks/${blockId}/widgets`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ type, data }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -164,6 +170,79 @@ export async function updateWidget(
     headers: getAuthHeaders(),
     body: JSON.stringify({ data }),
   });
+  return res.json();
+}
+
+// Upload image for widget (creates widget with image)
+export async function createWidgetWithImage(
+  blockId: number,
+  type: string,
+  file: File,
+  order?: number
+): Promise<ApiResponse<ApiWidget>> {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  const formData = new FormData();
+  formData.append("type", type);
+  formData.append("file", file);
+  if (order !== undefined) {
+    formData.append("order", order.toString());
+  }
+
+  const res = await fetch(`${API_BASE}/api/v1/blocks/${blockId}/widgets`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("createWidgetWithImage failed:", res.status, errorText);
+    return {
+      data: null as unknown as ApiWidget,
+      messages: [`HTTP ${res.status}: ${errorText}`],
+      success: false,
+    };
+  }
+
+  return res.json();
+}
+
+// Update widget with image
+export async function updateWidgetWithImage(
+  widgetId: number,
+  file: File
+): Promise<ApiResponse<ApiWidget>> {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  //   formData.append("data", JSON.stringify({}));
+
+  const res = await fetch(`${API_BASE}/api/v1/widgets/${widgetId}`, {
+    method: "POST", // Usually POST with _method=PUT for file uploads in Laravel
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("updateWidgetWithImage failed:", res.status, errorText);
+    return {
+      data: null as unknown as ApiWidget,
+      messages: [`HTTP ${res.status}: ${errorText}`],
+      success: false,
+    };
+  }
+
   return res.json();
 }
 

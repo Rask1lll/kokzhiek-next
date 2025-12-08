@@ -8,10 +8,12 @@ type LayoutProps = {
 const Layout = ({ block }: LayoutProps) => {
   const { layoutCode, widgets } = block;
 
-  // API uses 1-based order, so we add 1 to convert from 0-based index
-  const getWidgetOrder = (index: number) => index + 1;
-  const getWidgetByOrder = (order: number) =>
-    widgets.find((w) => w.order === order) ?? null;
+  // Order starts from 0: slot 0 = order 0, slot 1 = order 1, etc.
+  const getSlotOrder = (slotIndex: number) => slotIndex;
+  const getWidgetForSlot = (slotIndex: number) => {
+    const order = getSlotOrder(slotIndex);
+    return widgets.find((w) => w.order === order) ?? null;
+  };
 
   switch (layoutCode) {
     case "full":
@@ -21,8 +23,9 @@ const Layout = ({ block }: LayoutProps) => {
           <div className="w-full">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(0)}
-              widget={getWidgetByOrder(0)}
+              order={getSlotOrder(0)}
+              // order={0}
+              widget={getWidgetForSlot(0)}
             />
           </div>
         </div>
@@ -34,15 +37,15 @@ const Layout = ({ block }: LayoutProps) => {
           <div className="min-h-[80px]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(0)}
-              widget={getWidgetByOrder(0)}
+              order={getSlotOrder(0)}
+              widget={getWidgetForSlot(0)}
             />
           </div>
           <div className="min-h-[80px]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(1)}
-              widget={getWidgetByOrder(1)}
+              order={getSlotOrder(1)}
+              widget={getWidgetForSlot(1)}
             />
           </div>
         </div>
@@ -54,15 +57,15 @@ const Layout = ({ block }: LayoutProps) => {
           <div className="min-h-[80px] flex-[1.3]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(0)}
-              widget={getWidgetByOrder(0)}
+              order={getSlotOrder(0)}
+              widget={getWidgetForSlot(0)}
             />
           </div>
           <div className="min-h-[80px] flex-[0.7]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(1)}
-              widget={getWidgetByOrder(1)}
+              order={getSlotOrder(1)}
+              widget={getWidgetForSlot(1)}
             />
           </div>
         </div>
@@ -73,15 +76,15 @@ const Layout = ({ block }: LayoutProps) => {
           <div className="min-h-[80px] flex-[0.7]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(0)}
-              widget={getWidgetByOrder(0)}
+              order={getSlotOrder(0)}
+              widget={getWidgetForSlot(0)}
             />
           </div>
           <div className="min-h-[80px] flex-[1.3]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(1)}
-              widget={getWidgetByOrder(1)}
+              order={getSlotOrder(1)}
+              widget={getWidgetForSlot(1)}
             />
           </div>
         </div>
@@ -93,22 +96,22 @@ const Layout = ({ block }: LayoutProps) => {
           <div className="min-h-[80px]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(0)}
-              widget={getWidgetByOrder(0)}
+              order={getSlotOrder(0)}
+              widget={getWidgetForSlot(0)}
             />
           </div>
           <div className="min-h-[80px]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(1)}
-              widget={getWidgetByOrder(1)}
+              order={getSlotOrder(1)}
+              widget={getWidgetForSlot(1)}
             />
           </div>
           <div className="min-h-[80px]">
             <LayoutPlaceholder
               blockId={block.id}
-              order={getWidgetOrder(2)}
-              widget={getWidgetByOrder(2)}
+              order={getSlotOrder(2)}
+              widget={getWidgetForSlot(2)}
             />
           </div>
         </div>

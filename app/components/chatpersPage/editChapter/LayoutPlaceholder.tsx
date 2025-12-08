@@ -6,6 +6,7 @@ import { BlockWidget } from "@/app/store/blocksStore";
 import {
   createWidget,
   updateWidget,
+  updateWidgetWithImage,
   ApiWidgetData,
 } from "@/app/services/constructorApi";
 import { useBlocksStore } from "@/app/store/blocksStore";
@@ -30,11 +31,9 @@ const debounceTimers = new Map<number, NodeJS.Timeout>();
 
 const LayoutPlaceholder = ({
   blockId,
-  order: _order,
+  order,
   widget,
 }: LayoutPlaceholderProps) => {
-  // _order is kept for prop compatibility but not used directly
-  void _order;
   const { addContent, removeContent } = useModalWindowStore();
   const addWidgetLocal = useBlocksStore((state) => state.addWidgetLocal);
   const updateWidgetLocal = useBlocksStore((state) => state.updateWidgetLocal);
@@ -101,6 +100,32 @@ const LayoutPlaceholder = ({
     [widget, updateWidgetLocal]
   );
 
+  // Handle image file upload
+  const handleImageUpload = useCallback(
+    async (file: File): Promise<string | null> => {
+      if (!widget) return null;
+
+      try {
+        const response = await updateWidgetWithImage(widget.id, file);
+        console.log("Image upload response:", response);
+
+        if (response.success && response.data) {
+          const newUrl = (response.data.data?.url as string) || "";
+          // Update local store with new data
+          updateWidgetLocal(widget.id, response.data.data ?? {});
+          return newUrl;
+        } else {
+          console.error("Failed to upload image:", response.messages);
+          return null;
+        }
+      } catch (err) {
+        console.error("Error uploading image:", err);
+        return null;
+      }
+    },
+    [widget, updateWidgetLocal]
+  );
+
   if (widget) {
     // Extract value from widget data
     const textValue = (widget.data?.text as string) || "";
@@ -114,7 +139,13 @@ const LayoutPlaceholder = ({
       case "quote":
         return <QuoteWidget value={textValue} onChange={handleChange} />;
       case "image":
-        return <ImageWidget value={urlValue} onChange={handleMediaChange} />;
+        return (
+          <ImageWidget
+            value={urlValue}
+            onChange={handleMediaChange}
+            onFileUpload={handleImageUpload}
+          />
+        );
       case "video":
         return <VideoWidget value={urlValue} onChange={handleMediaChange} />;
       case "audio":
@@ -133,8 +164,9 @@ const LayoutPlaceholder = ({
           removeContent();
 
           try {
-            console.log("Creating widget:", { blockId, widgetType });
-            const response = await createWidget(blockId, widgetType, {});
+            console.log("Creating widget:", { blockId, widgetType, order });
+            // Pass the slot order so widget is created in the correct position
+            const response = await createWidget(blockId, widgetType, {}, order);
             console.log("Widget API response:", response);
 
             if (response.success && response.data) {
