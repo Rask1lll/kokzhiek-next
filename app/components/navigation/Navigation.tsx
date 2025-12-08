@@ -1,8 +1,48 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Logo from "./Logo";
 import LanguageSwitcher from "./LanguageSwitcher";
+import UserSkeleton from "./UserSkeleton";
+import UserSkeletonMobile from "./UserSkeletonMobile";
+import { useAuth } from "@/app/hooks/useAuth";
+
+type Role = {
+  id: number;
+  alias: string;
+  name: string;
+  label: string;
+};
+
+type UserData = {
+  data: {
+    id: number;
+    email: string;
+    name: string;
+    role: Role | string;
+  };
+};
 
 export default function Navbar() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/auth/login");
+  };
+
+  const userData = user as unknown as UserData;
+  const userEmail = userData.data.email;
+  const userName = userData.data.name;
+  
+  // Извлекаем роль правильно - может быть объектом или строкой
+  const roleData = userData?.data?.role;
+  const userRole = 
+    typeof roleData === "object" && roleData !== null
+      ? roleData.label || roleData.name || "Пользователь"
+      : roleData || "Пользователь";
   return (
     <header className="bg-white border-b border-gray-300 relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,25 +78,29 @@ export default function Navbar() {
 
           {/* ПРАВАЯ ЧАСТЬ */}
           <div className="flex items-center space-x-4">
-            {/* Блок пользователя (пример авторизованного админа, чистая верстка) */}
-            <div className="relative">
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  {/* Иконка пользователя */}
-                  <span className="w-4 h-4 rounded-full bg-white/70" />
-                </div>
-                <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium text-gray-900">
-                    admin@example.com
-                  </p>
-                  <p className="text-xs text-gray-500 flex items-center gap-1">
-                    {/* Иконка щита */}
-                    <span className="w-3 h-3 rounded-full bg-gray-300" />
-                    Администратор
-                  </p>
-                </div>
-              </button>
-            </div>
+            {/* Блок пользователя */}
+            {loading ? (
+              <UserSkeleton />
+            ) : userEmail ? (
+              <div className="relative">
+                <button className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                  {/* <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-semibold">
+                      {userName}
+                    </span>
+                  </div> */}
+                  <div className="hidden sm:block text-left">
+                    <p className="text-sm font-medium text-gray-900">
+                      {userEmail}
+                    </p>
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <span className="w-3 h-3 rounded-full bg-gray-300" />
+                      {userRole}
+                    </p>
+                  </div>
+                </button>
+              </div>
+            ) : null}
             <LanguageSwitcher />
 
             {/* Вариант кнопки "Войти" вместо юзер-меню (оставляю отдельным блоком верстки) */}
@@ -110,29 +154,43 @@ export default function Navbar() {
           </div>
 
           {/* Инфо о пользователе (мобайл) */}
-          <div className="border-t pt-4">
-            <div className="flex items-center gap-2 px-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                <span className="w-5 h-5 rounded-full bg-white/70" />
+          {loading ? (
+            <UserSkeletonMobile />
+          ) : userEmail ? (
+            <div className="border-t pt-4">
+              <div className="flex items-center gap-2 px-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">
+                    {userName
+                      ? userName
+                          .split(" ")
+                          .map((n: string) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : userEmail[0].toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {userName || userEmail}
+                  </p>
+                  <p className="text-xs text-gray-500 flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full bg-gray-300" />
+                    {userRole}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  admin@example.com
-                </p>
-                <p className="text-xs text-gray-500 flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-gray-300" />
-                  Администратор
-                </p>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full rounded-lg transition-colors"
+                type="button"
+              >
+                <span className="w-4 h-4 rounded-full bg-red-300" />
+                <span>Выйти</span>
+              </button>
             </div>
-            <button
-              className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full rounded-lg"
-              type="button"
-            >
-              <span className="w-4 h-4 rounded-full bg-red-300" />
-              <span>Выйти</span>
-            </button>
-          </div>
+          ) : null}
 
           {/* Переключатель языка (мобайл) */}
           <div className="border-t pt-4 mt-4">
