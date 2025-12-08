@@ -11,7 +11,7 @@ import {
   FiShare2,
 } from "react-icons/fi";
 
-const widgets = [
+export const widgets = [
   {
     type: "heading",
     title: "Заголовок",
@@ -73,6 +73,12 @@ const widgets = [
     icon: <FiCode className="w-5 h-5 text-violet-500" />,
   },
   {
+    type: "formula",
+    title: "Формула",
+    description: "Математическая формула в формате LaTeX",
+    icon: <FiCode className="w-5 h-5 text-emerald-600" />,
+  },
+  {
     type: "divider",
     title: "Разделитель",
     description: "Тонкая линия для разделения смысловых блоков",
@@ -86,7 +92,11 @@ const widgets = [
   },
 ];
 
-export default function WidgetListModal() {
+type WidgetListModalProps = {
+  onSelect?: (type: string) => void;
+};
+
+export default function WidgetListModal({ onSelect }: WidgetListModalProps) {
   return (
     <div className="w-full max-w-xl bg-white rounded-xl p-4 sm:p-6 space-y-4">
       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
@@ -100,7 +110,8 @@ export default function WidgetListModal() {
         {widgets.map((widget) => (
           <div
             key={widget.type}
-            className="flex items-start gap-3 rounded-lg border border-gray-200 px-3 py-2 sm:px-4 sm:py-3 hover:border-blue-400 hover:bg-blue-50/60 cursor-default transition-colors duration-100"
+            onClick={() => onSelect?.(widget.type)}
+            className="flex items-start gap-3 rounded-lg border border-gray-200 px-3 py-2 sm:px-4 sm:py-3 hover:border-blue-400 hover:bg-blue-50/60 cursor-pointer transition-colors duration-100"
           >
             <div className="mt-0.5 shrink-0">{widget.icon}</div>
             <div className="flex flex-col gap-1">

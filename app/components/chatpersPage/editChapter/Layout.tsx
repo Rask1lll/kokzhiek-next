@@ -1,59 +1,110 @@
+import type { ChapterBlock } from "@/app/store/blocksStore";
 import LayoutPlaceholder from "./LayoutPlaceholder";
 
-const Layout = (layoutCode: string) => {
+type LayoutProps = {
+  block: ChapterBlock;
+};
+
+const Layout = ({ block }: LayoutProps) => {
+  const { layoutCode, widgets } = block;
+
+  const getWidgetOrder = (index: number) => index;
+  const getWidgetByOrder = (order: number) =>
+    widgets.find((w) => w.order === order) ?? null;
+
   switch (layoutCode) {
     case "full":
       return (
-        <div className="w-full bg-gray-100 min-h-64 p-4 rounded-md">
-          <div className="w-full h-full">
-            <LayoutPlaceholder />
+        <div className="w-full bg-gray-100 p-4 rounded-md">
+          <div className="w-full">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(0)}
+              widget={getWidgetByOrder(0)}
+            />
           </div>
         </div>
       );
     case "two_equal":
       return (
         <div className="w-full grid grid-cols-2 gap-4">
-          <div className="h-64">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(0)}
+              widget={getWidgetByOrder(0)}
+            />
           </div>
-          <div className="h-64">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(1)}
+              widget={getWidgetByOrder(1)}
+            />
           </div>
         </div>
       );
     case "left_wide":
       return (
         <div className="w-full flex gap-4">
-          <div className="h-64 flex-[1.3]">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px] flex-[1.3]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(0)}
+              widget={getWidgetByOrder(0)}
+            />
           </div>
-          <div className="h-64 flex-[0.7]">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px] flex-[0.7]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(1)}
+              widget={getWidgetByOrder(1)}
+            />
           </div>
         </div>
       );
     case "right_wide":
       return (
         <div className="w-full flex gap-4">
-          <div className="h-64 flex-[0.7]">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px] flex-[0.7]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(0)}
+              widget={getWidgetByOrder(0)}
+            />
           </div>
-          <div className="h-64 flex-[1.3]">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px] flex-[1.3]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(1)}
+              widget={getWidgetByOrder(1)}
+            />
           </div>
         </div>
       );
     case "three_cols":
       return (
         <div className="w-full grid grid-cols-3 gap-4">
-          <div className="h-64">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(0)}
+              widget={getWidgetByOrder(0)}
+            />
           </div>
-          <div className="h-64">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(1)}
+              widget={getWidgetByOrder(1)}
+            />
           </div>
-          <div className="h-64">
-            <LayoutPlaceholder />
+          <div className="min-h-[80px]">
+            <LayoutPlaceholder
+              blockId={block.id}
+              order={getWidgetOrder(2)}
+              widget={getWidgetByOrder(2)}
+            />
           </div>
         </div>
       );

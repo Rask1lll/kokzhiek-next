@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "../components/navigation/Navigation";
 import ModalWindow from "../components/ModalWindow/ModalWindow";
 import ProtectorGuard from "../components/security/ProtectorGuard";
+import ChapterHeader from "../components/chatpersPage/editChapter/Header";
 
 export default function MainLayOut({
   children,
@@ -15,6 +16,7 @@ export default function MainLayOut({
     return (
       <>
         <ModalWindow></ModalWindow>
+        <ChapterHeader />
         {children}
       </>
     );
