@@ -39,7 +39,7 @@ export default function Navbar() {
 
   // Извлекаем роль правильно - может быть объектом или строкой
   const roleData = userData?.data.role;
-  const userRole = 
+  const userRole =
     typeof roleData === "object" && roleData !== null
       ? roleData.label || roleData.name || "Пользователь"
       : roleData || "Пользователь";
@@ -50,7 +50,7 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center space-x-1">
             <Logo />
             <Link
-              href="/"
+              href="/books"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
             >
               <span className="w-4 h-4 rounded-full bg-gray-300" />
@@ -58,7 +58,7 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/library"
+              href="/books"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
             >
               <span className="w-4 h-4 rounded-full bg-gray-300" />
@@ -67,7 +67,7 @@ export default function Navbar() {
 
             {/* Пример ссылки, видимой только для админа (сейчас просто верстка) */}
             <Link
-              href="/admin"
+              href="/books"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
             >
               {/* Иконка Shield */}
