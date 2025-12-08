@@ -173,8 +173,8 @@ export async function updateWidget(
   return res.json();
 }
 
-// Upload image for widget (creates widget with image)
-export async function createWidgetWithImage(
+// Create widget with file (image, video, audio)
+export async function createWidgetWithFile(
   blockId: number,
   type: string,
   file: File,
@@ -201,7 +201,7 @@ export async function createWidgetWithImage(
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("createWidgetWithImage failed:", res.status, errorText);
+    console.error("createWidgetWithFile failed:", res.status, errorText);
     return {
       data: null as unknown as ApiWidget,
       messages: [`HTTP ${res.status}: ${errorText}`],
@@ -212,8 +212,8 @@ export async function createWidgetWithImage(
   return res.json();
 }
 
-// Update widget with image
-export async function updateWidgetWithImage(
+// Update widget with file (image, video, audio)
+export async function updateWidgetWithFile(
   widgetId: number,
   file: File
 ): Promise<ApiResponse<ApiWidget>> {
@@ -222,10 +222,9 @@ export async function updateWidgetWithImage(
 
   const formData = new FormData();
   formData.append("file", file);
-  //   formData.append("data", JSON.stringify({}));
 
   const res = await fetch(`${API_BASE}/api/v1/widgets/${widgetId}`, {
-    method: "POST", // Usually POST with _method=PUT for file uploads in Laravel
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
@@ -235,7 +234,7 @@ export async function updateWidgetWithImage(
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("updateWidgetWithImage failed:", res.status, errorText);
+    console.error("updateWidgetWithFile failed:", res.status, errorText);
     return {
       data: null as unknown as ApiWidget,
       messages: [`HTTP ${res.status}: ${errorText}`],

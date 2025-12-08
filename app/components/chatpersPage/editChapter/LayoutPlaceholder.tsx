@@ -6,7 +6,7 @@ import { BlockWidget } from "@/app/store/blocksStore";
 import {
   createWidget,
   updateWidget,
-  updateWidgetWithImage,
+  updateWidgetWithFile,
   ApiWidgetData,
 } from "@/app/services/constructorApi";
 import { useBlocksStore } from "@/app/store/blocksStore";
@@ -100,14 +100,14 @@ const LayoutPlaceholder = ({
     [widget, updateWidgetLocal]
   );
 
-  // Handle image file upload
-  const handleImageUpload = useCallback(
+  // Handle file upload (for image, video, audio)
+  const handleFileUpload = useCallback(
     async (file: File): Promise<string | null> => {
       if (!widget) return null;
 
       try {
-        const response = await updateWidgetWithImage(widget.id, file);
-        console.log("Image upload response:", response);
+        const response = await updateWidgetWithFile(widget.id, file);
+        console.log("File upload response:", response);
 
         if (response.success && response.data) {
           const newUrl = (response.data.data?.url as string) || "";
@@ -115,11 +115,11 @@ const LayoutPlaceholder = ({
           updateWidgetLocal(widget.id, response.data.data ?? {});
           return newUrl;
         } else {
-          console.error("Failed to upload image:", response.messages);
+          console.error("Failed to upload file:", response.messages);
           return null;
         }
       } catch (err) {
-        console.error("Error uploading image:", err);
+        console.error("Error uploading file:", err);
         return null;
       }
     },
@@ -143,13 +143,25 @@ const LayoutPlaceholder = ({
           <ImageWidget
             value={urlValue}
             onChange={handleMediaChange}
-            onFileUpload={handleImageUpload}
+            onFileUpload={handleFileUpload}
           />
         );
       case "video":
-        return <VideoWidget value={urlValue} onChange={handleMediaChange} />;
+        return (
+          <VideoWidget
+            value={urlValue}
+            onChange={handleMediaChange}
+            onFileUpload={handleFileUpload}
+          />
+        );
       case "audio":
-        return <AudioWidget value={urlValue} onChange={handleMediaChange} />;
+        return (
+          <AudioWidget
+            value={urlValue}
+            onChange={handleMediaChange}
+            onFileUpload={handleFileUpload}
+          />
+        );
       case "formula":
         return <FormulaWidget value={textValue} onChange={handleChange} />;
       default:
