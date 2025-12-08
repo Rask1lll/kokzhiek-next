@@ -22,7 +22,7 @@ export default function CreateBookSection() {
             addContent(<CreateBookModal />);
           }}
           type="button"
-          className="w-[200px] h-[60px] flex items-center justify-center rounded-xl bg-blue-500 text-white font-semibold text-sm md:text-base shadow-md hover:shadow-lg hover:from-indigo-700 hover:to-sky-700 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="w-[180px] h-[45px] flex items-center justify-center rounded-xl bg-blue-500 text-white font-semibold text-sm md:text-base shadow-md hover:shadow-lg hover:from-indigo-700 hover:to-sky-700 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
         >
           <BiPlus className="text-white w-5 h-5" /> Создать книгу
         </button>
