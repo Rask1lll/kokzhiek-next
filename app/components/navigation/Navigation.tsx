@@ -36,7 +36,7 @@ export default function Navbar() {
   const userData = user as unknown as UserData;
   const userEmail = userData?.data.email;
   const userName = userData?.data.name;
-  
+
   // Извлекаем роль правильно - может быть объектом или строкой
   const roleData = userData?.data.role;
   const userRole = 
