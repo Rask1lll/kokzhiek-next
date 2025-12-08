@@ -25,7 +25,7 @@ export default function BookInfoCard({
   coverUrl = "https://placehold.co/600x400@2x.png",
 }: BookInfoCardProps) {
   return (
-    <section className="w-full rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6 flex gap-5">
+    <section className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6 flex gap-5 mx-10">
       {/* Обложка */}
       <div className="relative flex-shrink-0">
         <div className="overflow-hidden rounded-xl bg-gray-100 w-[150px] h-[200px] md:w-[180px] md:h-[240px]">

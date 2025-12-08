@@ -16,7 +16,7 @@ export default function ChaptersContainer({
   chapters,
 }: ChaptersContainerProps) {
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 mx-10">
       <h2 className="text-lg font-semibold text-gray-900">Главы</h2>
       <div className="grid grid-cols-1 gap-4">
         {chapters.map((chapter) => (
