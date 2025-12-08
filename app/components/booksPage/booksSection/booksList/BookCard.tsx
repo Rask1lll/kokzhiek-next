@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { MdDelete } from "react-icons/md";
 
 export default function BookCard({
   bookId,
@@ -39,7 +40,7 @@ export default function BookCard({
         type="button"
         className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hover:bg-red-600"
       >
-        удалить
+        <MdDelete className="w-5 h-5" />
       </button>
     </div>
   );
