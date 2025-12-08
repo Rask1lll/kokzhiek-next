@@ -29,6 +29,7 @@ export default function BookPage() {
   const book = testBook;
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [bookData, setBookData] = useState(testBook);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
@@ -36,21 +37,28 @@ export default function BookPage() {
     getChapters();
 
     async function getChapters() {
-      const token = localStorage.getItem("token");
-      const data = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          method: "GET",
-        }
-      );
-      const res = await data.json();
-      console.log("Book response:", res);
-      setChapters(res.data?.chapters ?? []);
-      setBookData(res.data);
-      console.log(bookData);
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        const data = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            method: "GET",
+          }
+        );
+        const res = await data.json();
+        console.log("Book response:", res);
+        setChapters(res.data?.chapters ?? []);
+        setBookData(res.data);
+        console.log(bookData);
+      } catch (error) {
+        console.error("Error fetching chapters:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }, []);
 
@@ -70,7 +78,7 @@ export default function BookPage() {
       </div>
 
       <div className="mt-4">
-        <ChaptersContainer chapters={chapters} />
+        <ChaptersContainer chapters={chapters} isLoading={isLoading} />
       </div>
     </main>
   );
