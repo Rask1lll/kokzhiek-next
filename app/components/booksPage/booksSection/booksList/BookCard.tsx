@@ -13,7 +13,7 @@ export default function BookCard({
     <div className="relative group">
       <div className="hover:scale-102 duration-100 cursor-pointer">
         <Link
-          href={`/books/book?id=${bookId}`}
+          href={`/books/book?book=${bookId}`}
           className="block bg-white rounded-xl shadow-lg hover:shadow-xl transform transition-all overflow-hidden cursor-pointer"
         >
           <div className="h-80 relative overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">

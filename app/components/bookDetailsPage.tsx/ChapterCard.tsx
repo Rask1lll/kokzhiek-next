@@ -3,14 +3,19 @@ import { FiChevronRight } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 
 type ChapterCardProps = {
-  id: string;
+  chapterId: string;
   title: string;
+  bookid: string;
 };
 
-export default function ChapterCard({ id, title }: ChapterCardProps) {
+export default function ChapterCard({
+  chapterId,
+  title,
+  bookid,
+}: ChapterCardProps) {
   return (
     <Link
-      href={`/books/chapter?id=${id}`}
+      href={`/books/book/chapter?chapter=${chapterId}&book=${bookid}`}
       className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50/60"
     >
       <div className="flex items-center gap-3">

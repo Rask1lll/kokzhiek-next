@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 export default function CreateChapterModalWindow() {
   const [title, setTitle] = useState("");
   const searchParams = useSearchParams();
-  const bookId = searchParams.get("id");
+  const bookId = searchParams.get("book");
 
   const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);

@@ -11,7 +11,7 @@ export default function MainLayOut({
 }) {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/books/chapter")) {
+  if (pathname.startsWith("/books/book/chapter")) {
     return (
       <>
         <ModalWindow></ModalWindow>

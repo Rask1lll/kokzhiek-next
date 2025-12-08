@@ -11,7 +11,8 @@ type Chapter = {
   title: string;
 };
 
-const testBook = { // TODO: remove this
+const testBook = {
+  // TODO: remove this
   id: "1",
   title: "Учебник математики 10 класс",
   author: "Иванов И.И.",
@@ -26,7 +27,7 @@ const testBook = { // TODO: remove this
 
 export default function BookPage() {
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const id = searchParams.get("book");
   const book = testBook;
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [bookData, setBookData] = useState(testBook);
@@ -34,8 +35,6 @@ export default function BookPage() {
 
   useEffect(() => {
     if (!id) return;
-
-    getChapters();
 
     async function getChapters() {
       setIsLoading(true);
@@ -61,7 +60,9 @@ export default function BookPage() {
         setIsLoading(false);
       }
     }
-  }, []);
+
+    getChapters();
+  }, [id]);
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-6">
