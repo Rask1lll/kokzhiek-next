@@ -3,27 +3,35 @@
 import CreateChapterButton from "./CreateChapterButton";
 import ChapterCard from "./ChapterCard";
 import ChapterCardSkeleton from "./ChapterCardSkeleton";
+import { useChaptersStore, Chapter } from "@/app/store/chaptersStore";
+import { deleteChapter } from "@/app/services/constructorApi";
+import { useEffect } from "react";
 
-type Chapter = {
-  id: number | string;
-  title: string;
-  isLoading?: boolean;
+type ChaptersContainerProps = {
+  isLoading: boolean;
+  bookId: string;
 };
 
 export default function ChaptersContainer({
-  chapters,
-  isLoading = false,
+  isLoading: externalLoading,
   bookId,
-}: {
-  chapters: Chapter[];
-  isLoading: boolean;
-  bookId: string;
-}) {
+}: ChaptersContainerProps) {
+  const { chapters, removeChapter } = useChaptersStore();
+
+  const handleDeleteChapter = async (chapterId: string) => {
+    try {
+      await deleteChapter(chapterId);
+      removeChapter(chapterId);
+    } catch (err) {
+      console.error("Failed to delete chapter:", err);
+      throw err;
+    }
+  };
   return (
     <section className="space-y-4 mx-10">
       <h2 className="text-lg font-semibold text-gray-900">Главы</h2>
       <div className="grid grid-cols-1 gap-4">
-        {isLoading ? (
+        {externalLoading ? (
           <>
             <ChapterCardSkeleton />
             <ChapterCardSkeleton />
@@ -38,6 +46,7 @@ export default function ChaptersContainer({
                 chapterId={String(chapter.id)}
                 title={chapter.title}
                 bookid={bookId}
+                onDelete={handleDeleteChapter}
               />
             ))}
             <CreateChapterButton />

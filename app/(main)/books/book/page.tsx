@@ -5,6 +5,7 @@ import BookInfoCard from "@/app/components/bookDetailsPage.tsx/BookInfoCard";
 import BookInfoCardSkeleton from "@/app/components/bookDetailsPage.tsx/BookInfoCardSkeleton";
 import ChaptersContainer from "@/app/components/bookDetailsPage.tsx/ChaptersContainer";
 import { useEffect, useState } from "react";
+import { useChaptersStore } from "@/app/store/chaptersStore";
 
 type Chapter = {
   id: number | string;
@@ -29,9 +30,9 @@ export default function BookPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("book");
   const book = testBook;
-  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [bookData, setBookData] = useState(testBook);
   const [isLoading, setIsLoading] = useState(true);
+  const { setChapters } = useChaptersStore();
 
   useEffect(() => {
     if (!id) return;
@@ -84,11 +85,7 @@ export default function BookPage() {
       </div>
 
       <div className="mt-4">
-        <ChaptersContainer
-          chapters={chapters}
-          bookId={id as string}
-          isLoading={isLoading}
-        />
+        <ChaptersContainer bookId={id as string} isLoading={isLoading} />
       </div>
     </main>
   );

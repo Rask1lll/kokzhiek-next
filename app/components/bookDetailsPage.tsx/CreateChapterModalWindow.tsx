@@ -2,11 +2,15 @@
 
 import { useState, ChangeEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { useChaptersStore } from "@/app/store/chaptersStore";
+import { useModalWindowStore } from "@/app/store/modalWindowStore";
 
 export default function CreateChapterModalWindow() {
   const [title, setTitle] = useState("");
   const searchParams = useSearchParams();
   const bookId = searchParams.get("book");
+  const { addChapter } = useChaptersStore();
+  const { removeContent } = useModalWindowStore();
 
   const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
@@ -49,6 +53,12 @@ export default function CreateChapterModalWindow() {
 
       const resData = await res.json();
       console.log("Create chapter response:", resData);
+      addChapter({
+        id: resData.data.id,
+        title: resData.data.title,
+        order: resData.data.order,
+      });
+      removeContent();
     } catch (error) {
       console.error("Failed to create chapter:", error);
     }
