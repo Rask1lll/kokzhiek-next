@@ -11,7 +11,8 @@ export type BlockWidget = {
   id: number;
   type: string;
   data: ApiWidgetData;
-  order: number;
+  row: number;
+  column: number;
 };
 
 export type ChapterBlock = {
@@ -59,7 +60,8 @@ function apiBlockToLocal(apiBlock: ApiBlock): ChapterBlock {
       id: w.id,
       type: w.type,
       data: w.data ?? {},
-      order: w.order,
+      row: w.row ?? 0,
+      column: w.column ?? 0,
     })),
   };
 }
@@ -138,9 +140,10 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
                     id: widget.id,
                     type: widget.type,
                     data: widget.data ?? {},
-                    order: widget.order,
+                    row: widget.row ?? 0,
+                    column: widget.column ?? 0,
                   },
-                ].sort((a, b) => a.order - b.order),
+                ],
               }
         ),
       };

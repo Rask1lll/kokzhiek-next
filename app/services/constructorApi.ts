@@ -16,7 +16,8 @@ export type ApiWidgetData = Record<string, unknown>;
 export type ApiWidget = {
   id: number;
   type: string;
-  order: number;
+  row: number;
+  column: number;
   data: ApiWidgetData;
 };
 
@@ -150,12 +151,10 @@ export async function createWidget(
   blockId: number,
   type: string,
   data: ApiWidgetData = {},
-  order?: number
+  row: number = 0,
+  column: number = 0
 ): Promise<ApiResponse<ApiWidget>> {
-  const body: Record<string, unknown> = { type, data };
-  if (order !== undefined) {
-    body.order = order;
-  }
+  const body: Record<string, unknown> = { type, data, row, column };
 
   const res = await fetch(`${API_BASE}/api/v1/blocks/${blockId}/widgets`, {
     method: "POST",
@@ -193,7 +192,8 @@ export async function createWidgetWithFile(
   blockId: number,
   type: string,
   file: File,
-  order?: number
+  row: number = 0,
+  column: number = 0
 ): Promise<ApiResponse<ApiWidget>> {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -201,9 +201,8 @@ export async function createWidgetWithFile(
   const formData = new FormData();
   formData.append("type", type);
   formData.append("file", file);
-  if (order !== undefined) {
-    formData.append("order", order.toString());
-  }
+  formData.append("row", row.toString());
+  formData.append("column", column.toString());
 
   const res = await fetch(`${API_BASE}/api/v1/blocks/${blockId}/widgets`, {
     method: "POST",

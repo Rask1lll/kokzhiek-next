@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { BlockWidget } from "@/app/store/blocksStore";
 import {
   createWidget,
   updateWidget,
   updateWidgetWithFile,
+  deleteWidget,
   ApiWidgetData,
 } from "@/app/services/constructorApi";
 import { useBlocksStore } from "@/app/store/blocksStore";
@@ -22,11 +23,13 @@ import VideoWidget from "./widgetBlocks/VideoWidget";
 import AudioWidget from "./widgetBlocks/AudioWidget";
 import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
+import { FiTrash2 } from "react-icons/fi";
 
 type LayoutPlaceholderProps = {
   className?: string;
   blockId: number;
-  order: number;
+  row: number;
+  column: number;
   widget: BlockWidget | null;
 };
 
@@ -36,12 +39,33 @@ const debounceTimers = new Map<number, NodeJS.Timeout>();
 const LayoutPlaceholder = ({
   className,
   blockId,
-  order,
+  row,
+  column,
   widget,
 }: LayoutPlaceholderProps) => {
   const { addContent, removeContent } = useModalWindowStore();
   const addWidgetLocal = useBlocksStore((state) => state.addWidgetLocal);
   const updateWidgetLocal = useBlocksStore((state) => state.updateWidgetLocal);
+  const removeWidgetLocal = useBlocksStore((state) => state.removeWidgetLocal);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Handle widget deletion
+  const handleDelete = useCallback(async () => {
+    if (!widget || isDeleting) return;
+
+    if (!confirm("Удалить этот виджет?")) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteWidget(widget.id);
+      removeWidgetLocal(blockId, widget.id);
+    } catch (err) {
+      console.error("Error deleting widget:", err);
+      alert("Ошибка при удалении виджета");
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [widget, blockId, isDeleting, removeWidgetLocal]);
 
   // Handle widget content change with debounced API call
   const handleChange = useCallback(
@@ -136,49 +160,93 @@ const LayoutPlaceholder = ({
     const textValue = (widget.data?.text as string) || "";
     const urlValue = (widget.data?.url as string) || "";
 
+    let widgetContent: React.ReactNode = null;
+
     switch (widget.type) {
       case "heading":
-        return <HeadingWidget value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <HeadingWidget value={textValue} onChange={handleChange} />
+        );
+        break;
       case "subheading":
-        return <SubheadingWidget value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <SubheadingWidget value={textValue} onChange={handleChange} />
+        );
+        break;
       case "text":
-        return <TextWidget value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <TextWidget value={textValue} onChange={handleChange} />
+        );
+        break;
       case "quote":
-        return <QuoteWidget value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <QuoteWidget value={textValue} onChange={handleChange} />
+        );
+        break;
       case "list":
-        return <ListWidget value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <ListWidget value={textValue} onChange={handleChange} />
+        );
+        break;
       case "image":
-        return (
+        widgetContent = (
           <ImageWidget
             value={urlValue}
             onChange={handleMediaChange}
             onFileUpload={handleFileUpload}
           />
         );
+        break;
       case "video":
-        return (
+        widgetContent = (
           <VideoWidget
             value={urlValue}
             onChange={handleMediaChange}
             onFileUpload={handleFileUpload}
           />
         );
+        break;
       case "audio":
-        return (
+        widgetContent = (
           <AudioWidget
             value={urlValue}
             onChange={handleMediaChange}
             onFileUpload={handleFileUpload}
           />
         );
-
+        break;
       case "formula":
-        return <FormulaWidget value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <FormulaWidget value={textValue} onChange={handleChange} />
+        );
+        break;
       case "divider":
-        return <DividerWidget value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <DividerWidget value={textValue} onChange={handleChange} />
+        );
+        break;
       default:
-        return <GenericWidget type={widget.type} />;
+        widgetContent = <GenericWidget type={widget.type} />;
     }
+
+    // Wrap widget with container that has delete button
+    return (
+      <div className="group relative w-full h-full">
+        {widgetContent}
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed z-10"
+          title="Удалить виджет"
+        >
+          {isDeleting ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <FiTrash2 className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+    );
   }
 
   const handleOpen = () => {
@@ -188,9 +256,20 @@ const LayoutPlaceholder = ({
           removeContent();
 
           try {
-            console.log("Creating widget:", { blockId, widgetType, order });
-            // Pass the slot order so widget is created in the correct position
-            const response = await createWidget(blockId, widgetType, {}, order);
+            console.log("Creating widget:", {
+              blockId,
+              widgetType,
+              row,
+              column,
+            });
+            // Pass row and column so widget is created in the correct position
+            const response = await createWidget(
+              blockId,
+              widgetType,
+              {},
+              row,
+              column
+            );
             console.log("Widget API response:", response);
 
             if (response.success && response.data) {
