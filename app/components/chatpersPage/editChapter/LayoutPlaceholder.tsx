@@ -12,13 +12,16 @@ import {
 import { useBlocksStore } from "@/app/store/blocksStore";
 import WidgetListModal from "./WidgetListModal";
 import HeadingWidget from "./widgetBlocks/HeadingWidget";
+import SubheadingWidget from "./widgetBlocks/SubheadingWidget";
 import TextWidget from "./widgetBlocks/TextWidget";
 import QuoteWidget from "./widgetBlocks/QuoteWidget";
+import ListWidget from "./widgetBlocks/ListWidget";
 import GenericWidget from "./widgetBlocks/GenericWidget";
 import ImageWidget from "./widgetBlocks/ImageWidget";
 import VideoWidget from "./widgetBlocks/VideoWidget";
 import AudioWidget from "./widgetBlocks/AudioWidget";
 import FormulaWidget from "./widgetBlocks/FormulaWidget";
+import DividerWidget from "./widgetBlocks/DividerWidget";
 
 type LayoutPlaceholderProps = {
   blockId: number;
@@ -134,10 +137,14 @@ const LayoutPlaceholder = ({
     switch (widget.type) {
       case "heading":
         return <HeadingWidget value={textValue} onChange={handleChange} />;
+      case "subheading":
+        return <SubheadingWidget value={textValue} onChange={handleChange} />;
       case "text":
         return <TextWidget value={textValue} onChange={handleChange} />;
       case "quote":
         return <QuoteWidget value={textValue} onChange={handleChange} />;
+      case "list":
+        return <ListWidget value={textValue} onChange={handleChange} />;
       case "image":
         return (
           <ImageWidget
@@ -162,8 +169,11 @@ const LayoutPlaceholder = ({
             onFileUpload={handleFileUpload}
           />
         );
+
       case "formula":
         return <FormulaWidget value={textValue} onChange={handleChange} />;
+      case "divider":
+        return <DividerWidget value={textValue} onChange={handleChange} />;
       default:
         return <GenericWidget type={widget.type} />;
     }
