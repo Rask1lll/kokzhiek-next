@@ -38,7 +38,7 @@ export default function RegisterPage() {
     );
     setLoading(false);
     const res = await userData.json();
-    localStorage.setItem("token", res.token);
+    localStorage.setItem("token", res.data.token);
     redirect("/books");
   };
 
