@@ -102,7 +102,8 @@ export default function ChapterPageClient() {
 
   return (
     <div className="min-h-screen w-screen mt-20 flex flex-col items-center py-10">
-      <div className="w-5/6 space-y-6">
+      {/* <div className="w-5/6 space-y-6"> */}
+      <div className="w-5/6 space-y-1">
         {blocks.map((block) => (
           <div
             key={block.id}
@@ -110,7 +111,8 @@ export default function ChapterPageClient() {
             onDragStart={(e) => handleDragStart(block.id, e)}
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(block.id)}
-            className="bg-white flex gap-2 rounded-lg shadow-sm border border-gray-200 p-4 cursor-move group"
+            // className="bg-white flex gap-2 rounded-lg border border-gray-200 p-4 cursor-move group"
+            className="bg-white flex gap-2 rounded-lg border p-1 cursor-move group"
           >
             <Layout block={block} />
             <div className="flex flex-col justify-between items-center gap-1">
