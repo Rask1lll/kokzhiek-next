@@ -19,12 +19,12 @@ const Layout = ({ block }: LayoutProps) => {
     case "full":
     case "single":
       return (
-        <div className="w-full bg-gray-100 p-4 rounded-md">
+        <div className="w-full bg-gray-100 rounded-md">
           <div className="w-full">
             <LayoutPlaceholder
+              className={"min-h-[80px] p-2"}
               blockId={block.id}
               order={getSlotOrder(0)}
-              // order={0}
               widget={getWidgetForSlot(0)}
             />
           </div>

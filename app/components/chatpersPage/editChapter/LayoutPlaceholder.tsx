@@ -24,6 +24,7 @@ import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
 
 type LayoutPlaceholderProps = {
+  className?: string;
   blockId: number;
   order: number;
   widget: BlockWidget | null;
@@ -33,6 +34,7 @@ type LayoutPlaceholderProps = {
 const debounceTimers = new Map<number, NodeJS.Timeout>();
 
 const LayoutPlaceholder = ({
+  className,
   blockId,
   order,
   widget,
@@ -213,7 +215,7 @@ const LayoutPlaceholder = ({
   return (
     <div
       onClick={handleOpen}
-      className="w-full h-full flex hover:bg-blue-50 cursor-pointer transition-colors duration-100 items-center justify-center border-2 border-dashed border-gray-300 rounded-md bg-gray-50"
+      className={`w-full h-full flex hover:bg-blue-50 cursor-pointer transition-colors duration-100 items-center justify-center border-2 border-dashed border-gray-300 rounded-md bg-gray-50 ${className}`}
     >
       <span className="text-3xl text-gray-400 font-bold">+</span>
     </div>
