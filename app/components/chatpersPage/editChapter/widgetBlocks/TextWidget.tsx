@@ -15,7 +15,8 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
 
   return (
     <textarea
-      className="w-full min-h-[80px] bg-gray-50 border-none outline-none resize-none overflow-hidden text-gray-800 placeholder:text-gray-400"
+      className="w-full min-h-[80px] border-none outline-none resize-none overflow-hidden text-gray-800 placeholder:text-gray-400"
+      // className="w-full min-h-[80px] bg-gray-50 border-none outline-none resize-none overflow-hidden text-gray-800 placeholder:text-gray-400"
       placeholder="Введите текст"
       value={value}
       onChange={handleInput}
