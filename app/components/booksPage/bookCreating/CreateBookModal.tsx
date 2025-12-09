@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, ChangeEvent } from "react";
+import { useModalWindowStore } from "@/app/store/modalWindowStore";
+import { useBooksStore } from "@/app/store/booksStore";
 
 const SUBJECT_ID_MAP: Record<string, number> = {
   Математика: 1,
@@ -25,6 +27,8 @@ export default function CreateBookModal() {
   const [difficulty, setDifficulty] = useState("Начальный");
   const [isbn, setIsbn] = useState("");
   const [, setCoverFile] = useState<File | null>(null);
+  const { removeContent } = useModalWindowStore();
+  const { refreshBooks } = useBooksStore();
 
   const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -78,6 +82,10 @@ export default function CreateBookModal() {
 
       const resData = await res.json();
       console.log("Create book data:", resData);
+      
+      // Закрываем модалку и обновляем список книг
+      removeContent();
+      await refreshBooks();
     } catch (error) {
       console.error(error);
     }
