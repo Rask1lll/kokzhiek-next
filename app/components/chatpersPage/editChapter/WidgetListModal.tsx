@@ -49,12 +49,6 @@ export const widgets = [
     icon: <FiImage className="w-5 h-5 text-pink-500" />,
   },
   {
-    type: "gallery",
-    title: "Галерея",
-    description: "Несколько изображений в одном блоке",
-    icon: <FiGrid className="w-5 h-5 text-fuchsia-500" />,
-  },
-  {
     type: "video",
     title: "Видео",
     description: "Встроенный видеоролик",
@@ -67,12 +61,6 @@ export const widgets = [
     icon: <FiMusic className="w-5 h-5 text-teal-500" />,
   },
   {
-    type: "code",
-    title: "Код",
-    description: "Блок с форматированием для программного кода",
-    icon: <FiCode className="w-5 h-5 text-violet-500" />,
-  },
-  {
     type: "formula",
     title: "Формула",
     description: "Математическая формула в формате LaTeX",
@@ -83,12 +71,6 @@ export const widgets = [
     title: "Разделитель",
     description: "Тонкая линия для разделения смысловых блоков",
     icon: <FiMinus className="w-5 h-5 text-gray-400" />,
-  },
-  {
-    type: "embed",
-    title: "Встраивание",
-    description: "Встраивание внешнего контента (карта, пост, и т.п.)",
-    icon: <FiShare2 className="w-5 h-5 text-cyan-500" />,
   },
 ];
 

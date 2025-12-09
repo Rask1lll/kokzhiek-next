@@ -89,32 +89,6 @@ const blocks: blockType[] = [
     code: "four_cols",
   },
 
-  // 2 rows
-  {
-    name: "2 ряда",
-    structure: (
-      <div className="w-full h-full grid grid-rows-2 gap-2 p-2">
-        <div className="bg-blue-200 rounded-md w-full"></div>
-        <div className="bg-green-200 rounded-md w-full"></div>
-      </div>
-    ),
-    code: "two_rows",
-  },
-
-  // Grid 2x2
-  {
-    name: "Сетка 2×2",
-    structure: (
-      <div className="w-full h-full grid grid-cols-2 grid-rows-2 gap-2 p-2">
-        <div className="bg-blue-200 rounded-md"></div>
-        <div className="bg-green-200 rounded-md"></div>
-        <div className="bg-yellow-200 rounded-md"></div>
-        <div className="bg-pink-200 rounded-md"></div>
-      </div>
-    ),
-    code: "grid_2x2",
-  },
-
   // Sidebar layouts
   {
     name: "Сайдбар слева",
@@ -135,34 +109,6 @@ const blocks: blockType[] = [
       </div>
     ),
     code: "sidebar_right",
-  },
-
-  // Complex layouts
-  {
-    name: "Главная + 2 снизу",
-    structure: (
-      <div className="w-full h-full flex flex-col gap-2 p-2">
-        <div className="bg-blue-200 rounded-md flex-2"></div>
-        <div className="flex gap-2 flex-1">
-          <div className="bg-green-200 rounded-md flex-1"></div>
-          <div className="bg-yellow-200 rounded-md flex-1"></div>
-        </div>
-      </div>
-    ),
-    code: "main_two_bottom",
-  },
-  {
-    name: "2 сверху + главная",
-    structure: (
-      <div className="w-full h-full flex flex-col gap-2 p-2">
-        <div className="flex gap-2 flex-1">
-          <div className="bg-green-200 rounded-md flex-1"></div>
-          <div className="bg-yellow-200 rounded-md flex-1"></div>
-        </div>
-        <div className="bg-blue-200 rounded-md flex-2"></div>
-      </div>
-    ),
-    code: "two_top_main",
   },
 ];
 
