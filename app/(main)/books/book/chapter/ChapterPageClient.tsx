@@ -112,7 +112,7 @@ export default function ChapterPageClient() {
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(block.id)}
             // className="bg-white flex gap-2 rounded-lg border border-gray-200 p-4 cursor-move group"
-            className="bg-white flex gap-2 rounded-lg border p-1 cursor-move group"
+            className="bg-white flex gap-2 rounded-lg p-1 cursor-move group"
           >
             <Layout block={block} />
             <div className="flex flex-col justify-between items-center gap-1">
