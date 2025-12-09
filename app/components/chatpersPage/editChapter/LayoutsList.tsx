@@ -8,6 +8,7 @@ type blockType = {
 };
 
 const blocks: blockType[] = [
+  // Single column
   {
     name: "Полная страница",
     structure: (
@@ -17,10 +18,12 @@ const blocks: blockType[] = [
     ),
     code: "full",
   },
+
+  // 2 columns
   {
-    name: "2 колонки 50 / 50",
+    name: "2 колонки 50/50",
     structure: (
-      <div className="w-full h-full grid grid-cols-2 gap-2">
+      <div className="w-full h-full grid grid-cols-2 gap-2 p-2">
         <div className="bg-blue-200 rounded-md h-full"></div>
         <div className="bg-green-200 rounded-md h-full"></div>
       </div>
@@ -30,9 +33,9 @@ const blocks: blockType[] = [
   {
     name: "2 колонки (левая шире)",
     structure: (
-      <div className="w-full h-full flex gap-2 ">
-        <div className="bg-purple-200 rounded-md h-full w-[130%]"></div>
-        <div className="bg-orange-200 rounded-md h-full w-[70%]"></div>
+      <div className="w-full h-full flex gap-2 p-2">
+        <div className="bg-purple-200 rounded-md h-full flex-2"></div>
+        <div className="bg-orange-200 rounded-md h-full flex-1"></div>
       </div>
     ),
     code: "left_wide",
@@ -40,23 +43,126 @@ const blocks: blockType[] = [
   {
     name: "2 колонки (правая шире)",
     structure: (
-      <div className="w-full h-full flex gap-2 ">
-        <div className="bg-orange-200 rounded-md h-full w-[70%]"></div>
-        <div className="bg-purple-200 rounded-md h-full w-[130%]"></div>
+      <div className="w-full h-full flex gap-2 p-2">
+        <div className="bg-orange-200 rounded-md h-full flex-1"></div>
+        <div className="bg-purple-200 rounded-md h-full flex-2"></div>
       </div>
     ),
     code: "right_wide",
   },
+
+  // 3 columns
   {
     name: "3 колонки",
     structure: (
-      <div className="w-full h-full grid grid-cols-3 gap-2">
+      <div className="w-full h-full grid grid-cols-3 gap-2 p-2">
         <div className="bg-blue-200 rounded-md h-full"></div>
         <div className="bg-green-200 rounded-md h-full"></div>
         <div className="bg-yellow-200 rounded-md h-full"></div>
       </div>
     ),
     code: "three_cols",
+  },
+  {
+    name: "3 колонки (центр шире)",
+    structure: (
+      <div className="w-full h-full flex gap-2 p-2">
+        <div className="bg-blue-200 rounded-md h-full flex-1"></div>
+        <div className="bg-green-200 rounded-md h-full flex-2"></div>
+        <div className="bg-yellow-200 rounded-md h-full flex-1"></div>
+      </div>
+    ),
+    code: "three_center_wide",
+  },
+
+  // 4 columns
+  {
+    name: "4 колонки",
+    structure: (
+      <div className="w-full h-full grid grid-cols-4 gap-2 p-2">
+        <div className="bg-blue-200 rounded-md h-full"></div>
+        <div className="bg-green-200 rounded-md h-full"></div>
+        <div className="bg-yellow-200 rounded-md h-full"></div>
+        <div className="bg-pink-200 rounded-md h-full"></div>
+      </div>
+    ),
+    code: "four_cols",
+  },
+
+  // 2 rows
+  {
+    name: "2 ряда",
+    structure: (
+      <div className="w-full h-full grid grid-rows-2 gap-2 p-2">
+        <div className="bg-blue-200 rounded-md w-full"></div>
+        <div className="bg-green-200 rounded-md w-full"></div>
+      </div>
+    ),
+    code: "two_rows",
+  },
+
+  // Grid 2x2
+  {
+    name: "Сетка 2×2",
+    structure: (
+      <div className="w-full h-full grid grid-cols-2 grid-rows-2 gap-2 p-2">
+        <div className="bg-blue-200 rounded-md"></div>
+        <div className="bg-green-200 rounded-md"></div>
+        <div className="bg-yellow-200 rounded-md"></div>
+        <div className="bg-pink-200 rounded-md"></div>
+      </div>
+    ),
+    code: "grid_2x2",
+  },
+
+  // Sidebar layouts
+  {
+    name: "Сайдбар слева",
+    structure: (
+      <div className="w-full h-full flex gap-2 p-2">
+        <div className="bg-purple-200 rounded-md h-full w-1/4"></div>
+        <div className="bg-orange-200 rounded-md h-full flex-1"></div>
+      </div>
+    ),
+    code: "sidebar_left",
+  },
+  {
+    name: "Сайдбар справа",
+    structure: (
+      <div className="w-full h-full flex gap-2 p-2">
+        <div className="bg-orange-200 rounded-md h-full flex-1"></div>
+        <div className="bg-purple-200 rounded-md h-full w-1/4"></div>
+      </div>
+    ),
+    code: "sidebar_right",
+  },
+
+  // Complex layouts
+  {
+    name: "Главная + 2 снизу",
+    structure: (
+      <div className="w-full h-full flex flex-col gap-2 p-2">
+        <div className="bg-blue-200 rounded-md flex-2"></div>
+        <div className="flex gap-2 flex-1">
+          <div className="bg-green-200 rounded-md flex-1"></div>
+          <div className="bg-yellow-200 rounded-md flex-1"></div>
+        </div>
+      </div>
+    ),
+    code: "main_two_bottom",
+  },
+  {
+    name: "2 сверху + главная",
+    structure: (
+      <div className="w-full h-full flex flex-col gap-2 p-2">
+        <div className="flex gap-2 flex-1">
+          <div className="bg-green-200 rounded-md flex-1"></div>
+          <div className="bg-yellow-200 rounded-md flex-1"></div>
+        </div>
+        <div className="bg-blue-200 rounded-md flex-2"></div>
+      </div>
+    ),
+    code: "two_top_main",
   },
 ];
 
@@ -66,20 +172,22 @@ type LayoutsListProps = {
 
 export default function LayoutsList({ onSelect }: LayoutsListProps) {
   return (
-    <div className=" bg-gray-100 w-sm rounded-lg p-2 sm:w-xl md:w-2xl lg:w-3xl ">
-      <h1 className="lg:text-2xl md:text-xl text-lg text-gray-600 font-bold">
+    <div className="bg-gray-100 w-sm rounded-lg p-4 sm:w-xl md:w-2xl lg:w-4xl max-h-[80vh] overflow-y-auto">
+      <h1 className="lg:text-2xl md:text-xl text-lg text-gray-600 font-bold mb-4">
         Выберите тип блока
       </h1>
-      <div className={`p-5 gap-3 grid ${style.grid_template_columns}`}>
+      <div className={`gap-3 grid ${style.grid_template_columns}`}>
         {blocks.map((el) => {
           return (
             <div
-              className="flex p-2 rounded-lg ring ring-gray-300 cursor-pointer hover:scale-103 transition-transform duration-100 flex-col items-center"
+              className="flex p-2 rounded-lg ring ring-gray-300 cursor-pointer hover:scale-103 hover:ring-blue-400 transition-all duration-100 flex-col items-center bg-white"
               key={el.code}
               onClick={() => onSelect(el.code)}
             >
-              <div className="w-40 h-40">{el.structure}</div>
-              <p className="font-semibold">{el.name}</p>
+              <div className="w-32 h-32 sm:w-36 sm:h-36">{el.structure}</div>
+              <p className="font-semibold text-sm text-center mt-1">
+                {el.name}
+              </p>
             </div>
           );
         })}

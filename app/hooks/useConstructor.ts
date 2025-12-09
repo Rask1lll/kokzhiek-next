@@ -10,7 +10,6 @@ import {
   createWidget,
   updateWidget,
   deleteWidget,
-  layoutTypeMap,
   ApiWidgetData,
 } from "@/app/services/constructorApi";
 
@@ -76,8 +75,8 @@ export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
       }
 
       try {
-        const backendLayoutType = layoutTypeMap[frontendLayoutCode] || "single";
-        const response = await createBlock(storeChapterId, backendLayoutType);
+        // Send layout code directly - backend accepts any string
+        const response = await createBlock(storeChapterId, frontendLayoutCode);
 
         if (response.success) {
           // Add block with empty widgets array

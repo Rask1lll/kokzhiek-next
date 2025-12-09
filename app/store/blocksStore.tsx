@@ -5,7 +5,6 @@ import {
   ApiBlock,
   ApiWidget,
   ApiWidgetData,
-  reverseLayoutTypeMap,
 } from "@/app/services/constructorApi";
 
 export type BlockWidget = {
@@ -50,17 +49,16 @@ type BlocksStore = {
   clearBlocks: () => void;
 };
 
-// Convert API block to local format
+// Convert API block to local format - use layout_type directly
 function apiBlockToLocal(apiBlock: ApiBlock): ChapterBlock {
   return {
     id: apiBlock.id,
-    layoutCode:
-      reverseLayoutTypeMap[apiBlock.layout_type] || apiBlock.layout_type,
+    layoutCode: apiBlock.layout_type, // Use directly without mapping
     order: apiBlock.order,
-    widgets: apiBlock.widgets.map((w) => ({
+    widgets: (apiBlock.widgets || []).map((w) => ({
       id: w.id,
       type: w.type,
-      data: w.data,
+      data: w.data ?? {},
       order: w.order,
     })),
   };
