@@ -3,12 +3,10 @@ import {
   FiUnderline,
   FiAlignLeft,
   FiImage,
-  FiGrid,
   FiVideo,
   FiMusic,
   FiCode,
   FiMinus,
-  FiShare2,
 } from "react-icons/fi";
 
 export const widgets = [

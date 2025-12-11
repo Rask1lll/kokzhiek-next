@@ -42,25 +42,25 @@ export default function ChapterCard({
 
   return (
     <div className="relative group">
-    <Link
-      href={`/books/book/chapter?chapter=${chapterId}&book=${bookid}`}
+      <Link
+        href={`/books/book/chapter?chapter=${chapterId}&book=${bookid}`}
         className={`flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50/60 ${
           isDeleting ? "opacity-50 pointer-events-none" : ""
         }`}
-    >
-      <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
-          <MdMenuBook />
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
+            <MdMenuBook />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-900 line-clamp-2">
+              {title}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-medium text-gray-900 line-clamp-2">
-            {title}
-          </p>
-        </div>
-      </div>
 
-      <FiChevronRight className="h-4 w-4 text-gray-400" />
-    </Link>
+        <FiChevronRight className="h-4 w-4 text-gray-400" />
+      </Link>
 
       {/* Delete button */}
       {onDelete && (

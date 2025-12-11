@@ -3,13 +3,6 @@
 import { useCallback, useState } from "react";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { BlockWidget } from "@/app/store/blocksStore";
-import {
-  createWidget,
-  updateWidget,
-  updateWidgetWithFile,
-  deleteWidget,
-  ApiWidgetData,
-} from "@/app/services/constructorApi";
 import { useBlocksStore } from "@/app/store/blocksStore";
 import WidgetListModal from "./WidgetListModal";
 import HeadingWidget from "./widgetBlocks/HeadingWidget";
@@ -24,6 +17,13 @@ import AudioWidget from "./widgetBlocks/AudioWidget";
 import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
 import { FiTrash2 } from "react-icons/fi";
+import { WidgetData } from "@/app/types/widget";
+import {
+  createWidget,
+  deleteWidget,
+  updateWidget,
+  updateWidgetWithFile,
+} from "@/app/services/constructor/widgetApi";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -67,12 +67,11 @@ const LayoutPlaceholder = ({
     }
   }, [widget, blockId, isDeleting, removeWidgetLocal]);
 
-  // Handle widget content change with debounced API call
   const handleChange = useCallback(
     (value: string) => {
       if (!widget) return;
 
-      const newData: ApiWidgetData = { ...widget.data, text: value };
+      const newData: WidgetData = { ...widget.data, text: value };
 
       // Optimistic local update
       updateWidgetLocal(widget.id, newData);
@@ -103,7 +102,7 @@ const LayoutPlaceholder = ({
     (url: string) => {
       if (!widget) return;
 
-      const newData: ApiWidgetData = { ...widget.data, url };
+      const newData: WidgetData = { ...widget.data, url };
 
       // Optimistic local update
       updateWidgetLocal(widget.id, newData);

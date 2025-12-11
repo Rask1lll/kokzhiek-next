@@ -1,16 +1,13 @@
 "use client";
 
 import { create } from "zustand";
-import {
-  ApiBlock,
-  ApiWidget,
-  ApiWidgetData,
-} from "@/app/services/constructorApi";
+import { Block } from "../types/block";
+import { Widget, WidgetData } from "../types/widget";
 
 export type BlockWidget = {
   id: number;
   type: string;
-  data: ApiWidgetData;
+  data: WidgetData;
   row: number;
   column: number;
 };
@@ -30,12 +27,12 @@ type BlocksStore = {
 
   // State setters
   setChapterId: (chapterId: number | null) => void;
-  setBlocks: (apiBlocks: ApiBlock[]) => void;
+  setBlocks: (Blocks: Block[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
   // Local mutations (will be synced to API by components)
-  addBlockLocal: (block: ApiBlock) => void;
+  addBlockLocal: (block: Block) => void;
   removeBlockLocal: (blockId: number) => void;
   swapBlocksLocal: (firstId: number, secondId: number) => void;
   updateBlockOrdersLocal: (
@@ -43,20 +40,20 @@ type BlocksStore = {
   ) => void;
 
   // Widget operations
-  addWidgetLocal: (blockId: number, widget: ApiWidget) => void;
-  updateWidgetLocal: (widgetId: number, data: ApiWidgetData) => void;
+  addWidgetLocal: (blockId: number, widget: Widget) => void;
+  updateWidgetLocal: (widgetId: number, data: WidgetData) => void;
   removeWidgetLocal: (blockId: number, widgetId: number) => void;
 
   clearBlocks: () => void;
 };
 
 // Convert API block to local format - use layout_type directly
-function apiBlockToLocal(apiBlock: ApiBlock): ChapterBlock {
+function BlockToLocal(Block: Block): ChapterBlock {
   return {
-    id: apiBlock.id,
-    layoutCode: apiBlock.layout_type, // Use directly without mapping
-    order: apiBlock.order,
-    widgets: (apiBlock.widgets || []).map((w) => ({
+    id: Block.id,
+    layoutCode: Block.layout_type, // Use directly without mapping
+    order: Block.order,
+    widgets: (Block.widgets || []).map((w) => ({
       id: w.id,
       type: w.type,
       data: w.data ?? {},
@@ -74,18 +71,18 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
 
   setChapterId: (chapterId) => set({ chapterId }),
 
-  setBlocks: (apiBlocks) =>
+  setBlocks: (Blocks) =>
     set({
-      blocks: apiBlocks.map(apiBlockToLocal).sort((a, b) => a.order - b.order),
+      blocks: Blocks.map(BlockToLocal).sort((a, b) => a.order - b.order),
     }),
 
   setLoading: (isLoading) => set({ isLoading }),
 
   setError: (error) => set({ error }),
 
-  addBlockLocal: (apiBlock) =>
+  addBlockLocal: (Block) =>
     set((state) => ({
-      blocks: [...state.blocks, apiBlockToLocal(apiBlock)].sort(
+      blocks: [...state.blocks, BlockToLocal(Block)].sort(
         (a, b) => a.order - b.order
       ),
     })),

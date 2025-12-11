@@ -3,9 +3,8 @@
 import CreateChapterButton from "./CreateChapterButton";
 import ChapterCard from "./ChapterCard";
 import ChapterCardSkeleton from "./ChapterCardSkeleton";
-import { useChaptersStore, Chapter } from "@/app/store/chaptersStore";
-import { deleteChapter } from "@/app/services/constructorApi";
-import { useEffect } from "react";
+import { useChaptersStore } from "@/app/store/chaptersStore";
+import { deleteChapter } from "@/app/services/chaptersApi";
 
 type ChaptersContainerProps = {
   isLoading: boolean;

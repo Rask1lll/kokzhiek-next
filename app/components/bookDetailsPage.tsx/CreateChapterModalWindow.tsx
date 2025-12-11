@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useChaptersStore } from "@/app/store/chaptersStore";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
@@ -11,10 +11,6 @@ export default function CreateChapterModalWindow() {
   const bookId = searchParams.get("book");
   const { addChapter } = useChaptersStore();
   const { removeContent } = useModalWindowStore();
-
-  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.target.value);
-  };
 
   const handleCreateChapter = async () => {
     if (!bookId) {
@@ -72,7 +68,9 @@ export default function CreateChapterModalWindow() {
           placeholder="Название главы"
           className="w-full ring-1 p-2 rounded-md"
           value={title}
-          onChange={handleTitleChange}
+          onChange={(event) => {
+            setTitle(event.target.value);
+          }}
         />
       </div>
       <div className="w-full flex justify-end mt-3 px-4">

@@ -2,16 +2,18 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { useBlocksStore } from "@/app/store/blocksStore";
+import { WidgetData } from "../types/widget";
+import { getChapterState } from "../services/constructor/constructorApi";
 import {
-  getChapterState,
   createBlock,
-  updateBlocksOrder,
   deleteBlock,
+  updateBlocksOrder,
+} from "../services/constructor/blocksApi";
+import {
   createWidget,
-  updateWidget,
   deleteWidget,
-  ApiWidgetData,
-} from "@/app/services/constructorApi";
+  updateWidget,
+} from "../services/constructor/widgetApi";
 
 type UseConstructorOptions = {
   bookId: string | null;
@@ -139,7 +141,7 @@ export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
     async (
       blockId: number,
       widgetType: string,
-      initialData: ApiWidgetData = {}
+      initialData: WidgetData = {}
     ) => {
       try {
         const response = await createWidget(blockId, widgetType, initialData);
@@ -161,7 +163,7 @@ export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
 
   // Update widget with debounce
   const handleUpdateWidget = useCallback(
-    (widgetId: number, data: ApiWidgetData) => {
+    (widgetId: number, data: WidgetData) => {
       // Optimistic local update
       updateWidgetLocal(widgetId, data);
 
