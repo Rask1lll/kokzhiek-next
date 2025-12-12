@@ -1,15 +1,9 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useCallback } from "react";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
-import { useBooksStore } from "@/app/store/booksStore";
-
-const SUBJECT_ID_MAP: Record<string, number> = {
-  Математика: 1,
-  Физика: 2,
-  История: 3,
-  Информатика: 4,
-};
+import { CreateBookPayload } from "@/app/types/CreateBookPayload";
+import { useBooks } from "@/app/hooks/useBooks";
 
 const LANGUAGE_CODE_MAP: Record<string, "kk" | "ru" | "en"> = {
   "Қазақ тілі": "kk",
@@ -27,35 +21,23 @@ export default function CreateBookModal() {
   const [difficulty, setDifficulty] = useState("Начальный");
   const [isbn, setIsbn] = useState("");
   const [, setCoverFile] = useState<File | null>(null);
+  const { createBook } = useBooks();
   const { removeContent } = useModalWindowStore();
-  const { refreshBooks } = useBooksStore();
 
   const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     setCoverFile(file);
   };
-
-  const handleCreateBook = async () => {
-    if (!title.trim()) {
-      console.error("Название книги обязательно");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token is missing");
-      return;
-    }
-
+  function handleCreateBook() {
     const languageCode = LANGUAGE_CODE_MAP[language] ?? "kk";
 
     const gradeId = grade ? Number(grade) : undefined;
 
-    const payload = {
+    const payload: CreateBookPayload = {
       title: title.trim(),
       description: description.trim() || undefined,
-      language: languageCode,
-      grade_id: gradeId,
+      language: languageCode || undefined,
+      grade_id: gradeId || undefined,
       isbn: isbn.trim() || undefined,
       settings: {
         author: author.trim() || undefined,
@@ -63,33 +45,9 @@ export default function CreateBookModal() {
       },
     };
 
-    const data = JSON.stringify(payload);
-
-    console.log(data);
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books`,
-        {
-          headers: {
-            "Content-type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          method: "POST",
-          body: data,
-        }
-      );
-
-      const resData = await res.json();
-      console.log("Create book data:", resData);
-      
-      // Закрываем модалку и обновляем список книг
-      removeContent();
-      await refreshBooks();
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    createBook(payload);
+    removeContent();
+  }
 
   return (
     <div className="bg-white rounded-xl w-full max-w-3xl max-h-[70vh] flex flex-col overflow-hidden shadow-2xl">

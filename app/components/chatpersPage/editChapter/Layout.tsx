@@ -1,11 +1,11 @@
-import type { ChapterBlock, BlockWidget } from "@/app/store/blocksStore";
+import { Widget } from "@/app/types/widget";
 import LayoutPlaceholder from "./LayoutPlaceholder";
+import { Block } from "@/app/types/block";
 
 type LayoutProps = {
-  block: ChapterBlock;
+  block: Block;
 };
 
-// Get number of columns based on layout code
 function getColumnsCount(layoutCode: string): number {
   switch (layoutCode) {
     case "full":
@@ -27,8 +27,6 @@ function getColumnsCount(layoutCode: string): number {
       return 3;
     case "four_cols":
       return 4;
-    case "grid_2x2":
-      return 2;
     default:
       return 1;
   }
@@ -55,10 +53,10 @@ function getColumnClasses(layoutCode: string, columnIndex: number): string {
 
 // Group widgets by column and sort by row
 function groupWidgetsByColumn(
-  widgets: BlockWidget[],
+  widgets: Widget[],
   columnsCount: number
-): Map<number, BlockWidget[]> {
-  const grouped = new Map<number, BlockWidget[]>();
+): Map<number, Widget[]> {
+  const grouped = new Map<number, Widget[]>();
 
   // Initialize all columns
   for (let i = 0; i < columnsCount; i++) {
@@ -87,7 +85,7 @@ function groupWidgetsByColumn(
 }
 
 // Get the next available row for a column
-function getNextRow(columnWidgets: BlockWidget[]): number {
+function getNextRow(columnWidgets: Widget[]): number {
   if (columnWidgets.length === 0) return 0;
   return Math.max(...columnWidgets.map((w) => w.row)) + 1;
 }
@@ -96,7 +94,7 @@ function getNextRow(columnWidgets: BlockWidget[]): number {
 type ColumnProps = {
   blockId: number;
   columnIndex: number;
-  widgets: BlockWidget[];
+  widgets: Widget[];
   className?: string;
 };
 
@@ -130,8 +128,8 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
 };
 
 const Layout = ({ block }: LayoutProps) => {
-  const { layoutCode, widgets, id } = block;
-  const columnsCount = getColumnsCount(layoutCode);
+  const { layout_type, widgets, id } = block;
+  const columnsCount = getColumnsCount(layout_type);
   const groupedWidgets = groupWidgetsByColumn(widgets, columnsCount);
 
   // Single column layout
@@ -149,12 +147,11 @@ const Layout = ({ block }: LayoutProps) => {
     );
   }
 
-  // Multi-column layout
   return (
     <div className="w-full flex gap-4">
       {Array.from({ length: columnsCount }).map((_, colIndex) => {
         const columnWidgets = groupedWidgets.get(colIndex) || [];
-        const columnClass = getColumnClasses(layoutCode, colIndex);
+        const columnClass = getColumnClasses(layout_type, colIndex);
 
         return (
           <div

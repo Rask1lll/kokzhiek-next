@@ -7,22 +7,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import UserSkeleton from "./UserSkeleton";
 import UserSkeletonMobile from "./UserSkeletonMobile";
 import { useAuth } from "@/app/hooks/useAuth";
-
-type Role = {
-  id: number;
-  alias: string;
-  name: string;
-  label: string;
-};
-
-type UserData = {
-  data: {
-    id: number;
-    email: string;
-    name: string;
-    role: Role | string;
-  };
-};
+import { UserData } from "@/app/types/user";
 
 export default function Navbar() {
   const { user, loading } = useAuth();
@@ -34,11 +19,11 @@ export default function Navbar() {
   };
 
   const userData = user as unknown as UserData;
-  const userEmail = userData?.data.email;
-  const userName = userData?.data.name;
+  const userEmail = userData?.email;
+  const userName = userData?.name;
 
   // Извлекаем роль правильно - может быть объектом или строкой
-  const roleData = userData?.data.role;
+  const roleData = userData?.role;
   const userRole =
     typeof roleData === "object" && roleData !== null
       ? roleData.label || roleData.name || "Пользователь"

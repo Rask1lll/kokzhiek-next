@@ -4,13 +4,15 @@ import BookCard from "./BookCard";
 import BookCardSkeleton from "./BookCardSkeleton";
 import { useBooksStore } from "@/app/store/booksStore";
 import style from "./BooksList.module.css";
+import { useBooks } from "@/app/hooks/useBooks";
 
 export default function BooksList() {
-  const { books, isLoading, refreshBooks } = useBooksStore();
+  const { books } = useBooksStore();
+  const { getBooks, isLoading } = useBooks();
 
   useEffect(() => {
-    refreshBooks();
-  }, [refreshBooks]);
+    getBooks();
+  }, [getBooks]);
 
   return (
     <div className={`w-full ${style.booksGrid} px-14`}>
@@ -29,7 +31,9 @@ export default function BooksList() {
         </>
       ) : (
         books.map((el) => {
-          return <BookCard bookId={String(el.id)} name={el.title} key={el.id} />;
+          return (
+            <BookCard bookId={String(el.id)} name={el.title} key={el.id} />
+          );
         })
       )}
     </div>

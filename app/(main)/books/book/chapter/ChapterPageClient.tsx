@@ -8,6 +8,7 @@ import LayoutsList from "@/app/components/chatpersPage/editChapter/LayoutsList";
 import Layout from "@/app/components/chatpersPage/editChapter/Layout";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { useConstructor } from "@/app/hooks/useConstructor";
+import { useBlocks } from "@/app/hooks/useBlocks";
 
 export function ChapterPageSkeleton() {
   return (
@@ -32,8 +33,8 @@ export default function ChapterPageClient() {
   const chapterId = searchParams.get("chapter");
 
   const { addContent, removeContent } = useModalWindowStore();
-  const { blocks, isLoading, error, swapBlocks, createBlock, deleteBlock } =
-    useConstructor({ bookId, chapterId });
+  const { blocks, isLoading, error } = useConstructor({ bookId, chapterId });
+  const { create: createBlock, remove: deleteBlock, swap: swapBlocks } = useBlocks();
 
   const [draggedId, setDraggedId] = useState<number | null>(null);
 

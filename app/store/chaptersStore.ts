@@ -1,12 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-
-export type Chapter = {
-  id: number | string;
-  title: string;
-  order?: number;
-};
+import { Chapter } from "../types/chapter";
 
 type ChaptersStore = {
   chapters: Chapter[];
@@ -22,7 +17,10 @@ type ChaptersStore = {
 
   // Mutations
   addChapter: (chapter: Chapter) => void;
-  updateChapter: (chapterId: string | number, updates: Partial<Chapter>) => void;
+  updateChapter: (
+    chapterId: string | number,
+    updates: Partial<Chapter>
+  ) => void;
   removeChapter: (chapterId: string | number) => void;
 
   // Clear
@@ -67,4 +65,3 @@ export const useChaptersStore = create<ChaptersStore>((set) => ({
 
   clearChapters: () => set({ chapters: [], bookId: null, error: null }),
 }));
-

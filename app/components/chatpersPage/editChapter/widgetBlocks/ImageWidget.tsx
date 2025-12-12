@@ -23,11 +23,10 @@ export default function ImageWidget({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Открываем модалку обрезки вместо прямой загрузки
     setSelectedFile(file);
     setShowCrop(true);
-    
-    // Сбрасываем input, чтобы можно было выбрать тот же файл снова
+
+    console.log("test");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -35,7 +34,7 @@ export default function ImageWidget({
 
   const handleCropComplete = async (croppedFile: File) => {
     setShowCrop(false);
-    
+
     if (onFileUpload) {
       setIsUploading(true);
       try {

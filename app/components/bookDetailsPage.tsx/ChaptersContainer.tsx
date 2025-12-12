@@ -4,7 +4,8 @@ import CreateChapterButton from "./CreateChapterButton";
 import ChapterCard from "./ChapterCard";
 import ChapterCardSkeleton from "./ChapterCardSkeleton";
 import { useChaptersStore } from "@/app/store/chaptersStore";
-import { deleteChapter } from "@/app/services/chaptersApi";
+import { useBooks } from "@/app/hooks/useBooks";
+import { useChapters } from "@/app/hooks/useChapters";
 
 type ChaptersContainerProps = {
   isLoading: boolean;
@@ -15,12 +16,12 @@ export default function ChaptersContainer({
   isLoading: externalLoading,
   bookId,
 }: ChaptersContainerProps) {
-  const { chapters, removeChapter } = useChaptersStore();
+  const { chapters } = useChaptersStore();
+  const { deleteChapter } = useChapters(bookId);
 
   const handleDeleteChapter = async (chapterId: string) => {
     try {
       await deleteChapter(chapterId);
-      removeChapter(chapterId);
     } catch (err) {
       console.error("Failed to delete chapter:", err);
       throw err;

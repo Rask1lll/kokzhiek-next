@@ -2,8 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
-import { BlockWidget } from "@/app/store/blocksStore";
-import { useBlocksStore } from "@/app/store/blocksStore";
+import { useWidgets } from "@/app/hooks/useWidgets";
 import WidgetListModal from "./WidgetListModal";
 import HeadingWidget from "./widgetBlocks/HeadingWidget";
 import SubheadingWidget from "./widgetBlocks/SubheadingWidget";
@@ -17,24 +16,15 @@ import AudioWidget from "./widgetBlocks/AudioWidget";
 import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
 import { FiTrash2 } from "react-icons/fi";
-import { WidgetData } from "@/app/types/widget";
-import {
-  createWidget,
-  deleteWidget,
-  updateWidget,
-  updateWidgetWithFile,
-} from "@/app/services/constructor/widgetApi";
+import { Widget } from "@/app/types/widget";
 
 type LayoutPlaceholderProps = {
   className?: string;
   blockId: number;
   row: number;
   column: number;
-  widget: BlockWidget | null;
+  widget: Widget | null;
 };
-
-// Debounce map for widget updates
-const debounceTimers = new Map<number, NodeJS.Timeout>();
 
 const LayoutPlaceholder = ({
   className,
@@ -44,118 +34,57 @@ const LayoutPlaceholder = ({
   widget,
 }: LayoutPlaceholderProps) => {
   const { addContent, removeContent } = useModalWindowStore();
-  const addWidgetLocal = useBlocksStore((state) => state.addWidgetLocal);
-  const updateWidgetLocal = useBlocksStore((state) => state.updateWidgetLocal);
-  const removeWidgetLocal = useBlocksStore((state) => state.removeWidgetLocal);
+  const {
+    create: createWidget,
+    update: updateWidget,
+    uploadFile,
+    remove: removeWidget,
+  } = useWidgets();
+
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Handle widget deletion
   const handleDelete = useCallback(async () => {
     if (!widget || isDeleting) return;
-
     if (!confirm("Удалить этот виджет?")) return;
 
     setIsDeleting(true);
-    try {
-      await deleteWidget(widget.id);
-      removeWidgetLocal(blockId, widget.id);
-    } catch (err) {
-      console.error("Error deleting widget:", err);
+    const success = await removeWidget(blockId, widget.id);
+    if (!success) {
       alert("Ошибка при удалении виджета");
-    } finally {
-      setIsDeleting(false);
     }
-  }, [widget, blockId, isDeleting, removeWidgetLocal]);
+    setIsDeleting(false);
+  }, [widget, blockId, isDeleting, removeWidget]);
 
   const handleChange = useCallback(
     (value: string) => {
       if (!widget) return;
-
-      const newData: WidgetData = { ...widget.data, text: value };
-
-      // Optimistic local update
-      updateWidgetLocal(widget.id, newData);
-
-      // Clear existing timer for this widget
-      const existingTimer = debounceTimers.get(widget.id);
-      if (existingTimer) {
-        clearTimeout(existingTimer);
-      }
-
-      // Set new debounced API call
-      const timer = setTimeout(async () => {
-        try {
-          await updateWidget(widget.id, newData);
-          debounceTimers.delete(widget.id);
-        } catch (err) {
-          console.error("Error updating widget:", err);
-        }
-      }, 500);
-
-      debounceTimers.set(widget.id, timer);
+      updateWidget(widget.id, { ...widget.data, text: value });
     },
-    [widget, updateWidgetLocal]
+    [widget, updateWidget]
   );
 
-  // Handle media URL change (for image, video, audio)
   const handleMediaChange = useCallback(
     (url: string) => {
       if (!widget) return;
-
-      const newData: WidgetData = { ...widget.data, url };
-
-      // Optimistic local update
-      updateWidgetLocal(widget.id, newData);
-
-      // Clear existing timer for this widget
-      const existingTimer = debounceTimers.get(widget.id);
-      if (existingTimer) {
-        clearTimeout(existingTimer);
-      }
-
-      // Set new debounced API call
-      const timer = setTimeout(async () => {
-        try {
-          await updateWidget(widget.id, newData);
-          debounceTimers.delete(widget.id);
-        } catch (err) {
-          console.error("Error updating widget:", err);
-        }
-      }, 500);
-
-      debounceTimers.set(widget.id, timer);
+      updateWidget(widget.id, { ...widget.data, url });
     },
-    [widget, updateWidgetLocal]
+    [widget, updateWidget]
   );
 
-  // Handle file upload (for image, video, audio)
   const handleFileUpload = useCallback(
     async (file: File): Promise<string | null> => {
       if (!widget) return null;
 
-      try {
-        const response = await updateWidgetWithFile(widget.id, file);
-        console.log("File upload response:", response);
-
-        if (response.success && response.data) {
-          const newUrl = (response.data.data?.url as string) || "";
-          // Update local store with new data
-          updateWidgetLocal(widget.id, response.data.data ?? {});
-          return newUrl;
-        } else {
-          console.error("Failed to upload file:", response.messages);
-          return null;
-        }
-      } catch (err) {
-        console.error("Error uploading file:", err);
-        return null;
+      const result = await uploadFile(widget?.id, file);
+      if (result) {
+        return (result.data?.url as string) || "";
       }
+      return null;
     },
-    [widget, updateWidgetLocal]
+    [widget, uploadFile]
   );
 
   if (widget) {
-    // Extract value from widget data
     const textValue = (widget.data?.text as string) || "";
     const urlValue = (widget.data?.url as string) || "";
 
@@ -228,7 +157,6 @@ const LayoutPlaceholder = ({
         widgetContent = <GenericWidget type={widget.type} />;
     }
 
-    // Wrap widget with container that has delete button
     return (
       <div className="group relative w-full h-full">
         {widgetContent}
@@ -253,38 +181,7 @@ const LayoutPlaceholder = ({
       <WidgetListModal
         onSelect={async (widgetType) => {
           removeContent();
-
-          try {
-            console.log("Creating widget:", {
-              blockId,
-              widgetType,
-              row,
-              column,
-            });
-            // Pass row and column so widget is created in the correct position
-            const response = await createWidget(
-              blockId,
-              widgetType,
-              {},
-              row,
-              column
-            );
-            console.log("Widget API response:", response);
-
-            if (response.success && response.data) {
-              // Ensure data field exists, default to empty object
-              const widgetData = {
-                ...response.data,
-                data: response.data.data ?? {},
-              };
-              console.log("Adding widget to store:", widgetData);
-              addWidgetLocal(blockId, widgetData);
-            } else {
-              console.error("Failed to create widget:", response.messages);
-            }
-          } catch (err) {
-            console.error("Error creating widget:", err);
-          }
+          await createWidget(blockId, widgetType, {}, row, column);
         }}
       />
     );

@@ -1,24 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAuthHeaders } from "../libs/auth";
+import { handleGetMe } from "../services/authorization/authApi";
+import { UserData } from "../types/user";
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/me`, {
-      headers: getAuthHeaders(),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setUser(data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    handleGetMe().then((res) => {
+      if (res) {
+        setUser(res.data);
+      }
+      setLoading(false);
+    });
   }, []);
 
   return { user, loading };
