@@ -17,6 +17,9 @@ import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
 import { FiTrash2 } from "react-icons/fi";
 import { Widget } from "@/app/types/widget";
+import MultipleChoice from "./taskBlocks/MultipleChoice";
+import SingleChoice from "./taskBlocks/SingleChoice";
+import DropDown from "./taskBlocks/DropDown";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -90,6 +93,8 @@ const LayoutPlaceholder = ({
 
     let widgetContent: React.ReactNode = null;
 
+    console.log(textValue);
+
     switch (widget.type) {
       case "heading":
         widgetContent = (
@@ -153,6 +158,20 @@ const LayoutPlaceholder = ({
           <DividerWidget value={textValue} onChange={handleChange} />
         );
         break;
+      case "multiple_choice":
+        widgetContent = (
+          <MultipleChoice value={textValue} onChange={handleChange} />
+        );
+        break;
+      case "single_choice":
+        widgetContent = (
+          <SingleChoice value={textValue} onChange={handleChange} />
+        );
+        break;
+      case "dropdown":
+        widgetContent = <DropDown value={textValue} onChange={handleChange} />;
+        break;
+
       default:
         widgetContent = <GenericWidget type={widget.type} />;
     }

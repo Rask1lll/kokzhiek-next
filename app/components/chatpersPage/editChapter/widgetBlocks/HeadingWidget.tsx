@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 
 type HeadingWidgetProps = {
   value: string; // JSON: { level: 1-6, text: "..." }

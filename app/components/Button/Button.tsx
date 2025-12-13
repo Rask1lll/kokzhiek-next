@@ -8,7 +8,7 @@ type ButtonProps = {
   isActive?: boolean;
   onClick: (value: string) => void;
   content: string;
-  value: string;
+  value?: string;
 };
 
 const colorStyles: Record<ButtonColor, { active: string; inactive: string }> = {
@@ -61,7 +61,7 @@ export default function Button({
         ${isActive ? colorStyles[color].active : colorStyles[color].inactive}
       `}
       onClick={() => {
-        onClick(value);
+        onClick(value || "");
       }}
     >
       {content}

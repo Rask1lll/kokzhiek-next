@@ -1,6 +1,5 @@
 "use client";
 
-import { AiFillHighlight } from "react-icons/ai";
 import {
   FiCheckSquare,
   FiCircle,
@@ -14,10 +13,6 @@ import {
   FiLayers,
   FiList,
   FiHash,
-  FiType,
-  FiHelpCircle,
-  FiBookOpen,
-  FiPrinter,
 } from "react-icons/fi";
 
 export const tasks = [
