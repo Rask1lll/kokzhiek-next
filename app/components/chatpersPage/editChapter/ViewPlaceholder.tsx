@@ -20,6 +20,7 @@ import SingleChoiceView from "./taskViews/SingleChoiceView";
 import DropDownView from "./taskViews/DropDownView";
 import FillBlankView from "./taskViews/FillBlankView";
 import CrosswordView from "./taskViews/CrosswordView";
+import MatchPairsView from "./taskViews/MatchPairsView";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -98,10 +99,15 @@ export default function ViewPlaceholder({
         <CrosswordView value={textValue} onChange={handleAnswerChange} />
       );
       break;
+    case "match_pairs":
+      content = (
+        <MatchPairsView value={textValue} onChange={handleAnswerChange} />
+      );
+      break;
 
     default:
       content = (
-        <div className="p-4 bg-gray-100 rounded-lg text-gray-500 text-center">
+        <div className="p-4 bg-gray-100 w-full rounded-lg text-gray-500 text-center">
           Неизвестный тип виджета: {widget.type}
         </div>
       );

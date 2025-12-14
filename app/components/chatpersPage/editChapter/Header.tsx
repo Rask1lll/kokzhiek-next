@@ -10,7 +10,7 @@ export default function ChapterHeader() {
   const chapter = param.get("chapter");
   const isEdit = param.get("edit");
   return (
-    <div className="w-full z-50 py-5 bg-gray-100 border-b border-gray-400 flex items-center justify-center fixed top-0 left-0">
+    <div className="w-full z-10 py-5 bg-gray-100 border-b border-gray-400 flex items-center justify-center fixed top-0 left-0">
       <div className="w-5/6 flex justify-between">
         <Link
           className="p-2 gap-3 text-gray-700 font-semibold bg-blue-200 items-center flex rounded-lg"

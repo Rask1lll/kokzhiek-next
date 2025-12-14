@@ -118,15 +118,6 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
         {widgets.map((widget) => (
           <ViewPlaceholder key={widget.id} widget={widget} />
         ))}
-
-        {/* Add new widget button / empty placeholder */}
-        <LayoutPlaceholder
-          className="min-h-[60px]"
-          blockId={blockId}
-          row={nextRow}
-          column={columnIndex}
-          widget={null}
-        />
       </div>
     );
   }

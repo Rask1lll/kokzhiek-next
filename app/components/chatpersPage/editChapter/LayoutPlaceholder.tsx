@@ -22,6 +22,7 @@ import SingleChoice from "./taskBlocks/SingleChoice";
 import DropDown from "./taskBlocks/DropDown";
 import FillBlank from "./taskBlocks/FillBlank";
 import Crossword from "./taskBlocks/Crossword";
+import MatchPairs from "./taskBlocks/MatchPairs";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -178,6 +179,11 @@ const LayoutPlaceholder = ({
         break;
       case "crossword":
         widgetContent = <Crossword value={textValue} onChange={handleChange} />;
+        break;
+      case "match_pairs":
+        widgetContent = (
+          <MatchPairs value={textValue} onChange={handleChange} />
+        );
         break;
 
       default:

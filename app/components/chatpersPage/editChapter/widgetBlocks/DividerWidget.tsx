@@ -72,7 +72,7 @@ export default function DividerWidget({ value, onChange }: DividerWidgetProps) {
     >
       {/* Toolbar */}
       <div
-        className={`flex items-center justify-center gap-4 mb-3 p-2 bg-gray-50 rounded-lg border border-gray-200 transition-opacity ${
+        className={`flex items-center lg:flex-col justify-center gap-4 mb-3 p-2 bg-gray-50 rounded-lg border border-gray-200 transition-opacity ${
           isToolbarVisible ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
@@ -117,7 +117,7 @@ export default function DividerWidget({ value, onChange }: DividerWidgetProps) {
 
       {/* Divider line */}
       <hr
-        className={`w-full border-gray-400 ${
+        className={`w-full max-w-[100%] border-gray-400 ${
           thicknessClasses[data.thickness]
         } ${borderStyleClass}`}
       />
