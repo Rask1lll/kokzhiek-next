@@ -16,7 +16,6 @@ type DropdownItem = {
 };
 
 type DropDownData = {
-  // Text with placeholders like: "Самая большая страна {{0}} и она {{1}} лидером"
   text: string;
   dropdowns: DropdownItem[];
 };
@@ -30,10 +29,6 @@ function parseData(value: string): DropDownData | undefined {
   } catch {
     return;
   }
-}
-
-function generateId(): string {
-  return Math.random().toString(36).substring(2, 9);
 }
 
 export default function DropDown({ value, onChange }: DropDownProps) {
@@ -52,7 +47,7 @@ export default function DropDown({ value, onChange }: DropDownProps) {
   // Insert dropdown placeholder at cursor position in text
   const insertDropdown = () => {
     const newDropdown: DropdownItem = {
-      id: generateId(),
+      id: String(data.dropdowns.length),
       options: ["Вариант 1", "Вариант 2"],
       correctIndex: 0,
     };

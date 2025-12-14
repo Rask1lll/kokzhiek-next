@@ -20,6 +20,8 @@ import { Widget } from "@/app/types/widget";
 import MultipleChoice from "./taskBlocks/MultipleChoice";
 import SingleChoice from "./taskBlocks/SingleChoice";
 import DropDown from "./taskBlocks/DropDown";
+import FillBlank from "./taskBlocks/FillBlank";
+import Crossword from "./taskBlocks/Crossword";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -170,6 +172,12 @@ const LayoutPlaceholder = ({
         break;
       case "dropdown":
         widgetContent = <DropDown value={textValue} onChange={handleChange} />;
+        break;
+      case "fill_blank":
+        widgetContent = <FillBlank value={textValue} onChange={handleChange} />;
+        break;
+      case "crossword":
+        widgetContent = <Crossword value={textValue} onChange={handleChange} />;
         break;
 
       default:
