@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useBlocksStore } from "@/app/store/blocksStore";
 import { getChapterState } from "@/app/services/constructor/constructorApi";
 
@@ -11,11 +11,13 @@ type UseConstructorOptions = {
 
 export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
   const { blocks, setBlocks, setChapterId, clearBlocks } = useBlocksStore();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetch = useCallback(async () => {
     if (!bookId || !chapterId) return;
 
     try {
+      setIsLoading(true);
       const response = await getChapterState(bookId, chapterId);
 
       if (response.success) {
@@ -26,6 +28,8 @@ export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
       }
     } catch (err) {
       console.error("Error fetching constructor state:", err);
+    } finally {
+      setIsLoading(false);
     }
   }, [bookId, chapterId, setBlocks, setChapterId]);
 
@@ -44,5 +48,6 @@ export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
   return {
     blocks,
     refetch: fetch,
+    isLoading,
   };
 }

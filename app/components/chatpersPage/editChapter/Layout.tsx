@@ -1,6 +1,8 @@
 import { Widget } from "@/app/types/widget";
 import LayoutPlaceholder from "./LayoutPlaceholder";
 import { Block } from "@/app/types/block";
+import { useSearchParams } from "next/navigation";
+import ViewPlaceholder from "./ViewPlaceholder";
 
 type LayoutProps = {
   block: Block;
@@ -37,17 +39,23 @@ function getColumnClasses(layoutCode: string, columnIndex: number): string {
   switch (layoutCode) {
     case "left_wide":
     case "hero":
-      return columnIndex === 0 ? "flex-2" : "flex-1";
+      return columnIndex === 0 ? "w-[70%] flex-none" : "w-[30%] flex-none";
+
     case "right_wide":
-      return columnIndex === 0 ? "flex-1" : "flex-2";
+      return columnIndex === 0 ? "w-[30%] flex-none" : "w-[70%] flex-none";
+
     case "sidebar_left":
-      return columnIndex === 0 ? "w-1/4" : "flex-1";
+      return columnIndex === 0 ? "w-[25%] flex-none" : "w-[75%] flex-none";
+
     case "sidebar_right":
-      return columnIndex === 0 ? "flex-1" : "w-1/4";
+      return columnIndex === 0 ? "w-[75%] flex-none" : "w-[25%] flex-none";
+
     case "three_center_wide":
-      return columnIndex === 1 ? "flex-2" : "flex-1";
+      if (columnIndex === 1) return "w-[50%] flex-none";
+      return "w-[25%] flex-none";
+
     default:
-      return "flex-1";
+      return "w-full";
   }
 }
 
@@ -100,6 +108,28 @@ type ColumnProps = {
 
 const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
   const nextRow = getNextRow(widgets);
+  const params = useSearchParams();
+  const isEdit = params.get("edit");
+
+  if (!isEdit) {
+    return (
+      <div className={`flex flex-col gap-2 ${className || ""}`}>
+        {/* Render existing widgets */}
+        {widgets.map((widget) => (
+          <ViewPlaceholder key={widget.id} widget={widget} />
+        ))}
+
+        {/* Add new widget button / empty placeholder */}
+        <LayoutPlaceholder
+          className="min-h-[60px]"
+          blockId={blockId}
+          row={nextRow}
+          column={columnIndex}
+          widget={null}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col gap-2 ${className || ""}`}>

@@ -100,7 +100,6 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
 
   const addQuestion = () => {
     const index = data.questions.length;
-    const keyLetter = data.keyword[index] || "";
 
     const newQuestion: QuestionItem = {
       id: String(index),

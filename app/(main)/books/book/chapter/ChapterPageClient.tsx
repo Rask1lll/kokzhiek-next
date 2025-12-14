@@ -33,8 +33,12 @@ export default function ChapterPageClient() {
   const chapterId = searchParams.get("chapter");
 
   const { addContent, removeContent } = useModalWindowStore();
-  const { blocks, isLoading, error } = useConstructor({ bookId, chapterId });
-  const { create: createBlock, remove: deleteBlock, swap: swapBlocks } = useBlocks();
+  const { blocks, isLoading } = useConstructor({ bookId, chapterId });
+  const {
+    create: createBlock,
+    remove: deleteBlock,
+    swap: swapBlocks,
+  } = useBlocks();
 
   const [draggedId, setDraggedId] = useState<number | null>(null);
 
@@ -83,22 +87,6 @@ export default function ChapterPageClient() {
 
   if (isLoading) {
     return <ChapterPageSkeleton />;
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen w-screen mt-20 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 text-lg mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            Попробовать снова
-          </button>
-        </div>
-      </div>
-    );
   }
 
   return (
