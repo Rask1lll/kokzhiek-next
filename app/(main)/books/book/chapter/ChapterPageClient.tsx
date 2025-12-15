@@ -92,7 +92,7 @@ export default function ChapterPageClient() {
   return (
     <div className="min-h-screen w-screen mt-20 flex flex-col items-center py-10">
       {/* <div className="w-5/6 space-y-6"> */}
-      <div className="w-5/6 space-y-1">
+      <div className="w-5/6 md:w-[95%] space-y-1">
         {blocks.map((block) => (
           <div
             key={block.id}

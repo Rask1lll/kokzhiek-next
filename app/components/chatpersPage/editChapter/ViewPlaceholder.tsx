@@ -21,6 +21,7 @@ import DropDownView from "./taskViews/DropDownView";
 import FillBlankView from "./taskViews/FillBlankView";
 import CrosswordView from "./taskViews/CrosswordView";
 import MatchPairsView from "./taskViews/MatchPairsView";
+import SearchWord from "./taskBlocks/SearchWord";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -103,6 +104,9 @@ export default function ViewPlaceholder({
       content = (
         <MatchPairsView value={textValue} onChange={handleAnswerChange} />
       );
+      break;
+    case "word_search":
+      content = <SearchWord value={textValue} onChange={handleAnswerChange} />;
       break;
 
     default:

@@ -119,4 +119,3 @@ export default function CrosswordView({ value, onChange }: CrosswordViewProps) {
     </div>
   );
 }
-
