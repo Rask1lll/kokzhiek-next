@@ -30,13 +30,13 @@ function CreateCell(
         onChange={(e) => {
           onChange(id, e.target.value);
         }}
-        className="w-full text-center uppercase text-2xl h-full ring"
+        className="w-full text-center uppercase text-2xl h-full ring ring-gray-300 rounded-lg py-0.5"
       />
     </div>
   );
 }
 
-function createMatrix(grid: Cell[], size: number): Cell[] {
+function generateCells(grid: Cell[], size: number): Cell[] {
   const temp = [];
   for (let index = 0; index < size * size; index++) {
     const element = grid[index];
@@ -55,11 +55,11 @@ export default function SearchWord({ value, onChange }: Props) {
 
     return {
       size: parsed.size,
-      Cells: createMatrix(parsed.Cells, parsed.size),
+      Cells: generateCells(parsed.Cells, parsed.size),
     };
   });
 
-  const gridStype = (size: number) => {
+  const gridType = (size: number) => {
     switch (size) {
       case 3:
         return "grid-cols-3";
@@ -92,7 +92,7 @@ export default function SearchWord({ value, onChange }: Props) {
     setValidatedData((prev) => {
       const updated = {
         size: size,
-        Cells: createMatrix(prev.Cells, size),
+        Cells: generateCells(prev.Cells, size),
       };
 
       return updated;
@@ -102,7 +102,7 @@ export default function SearchWord({ value, onChange }: Props) {
     onChange(
       JSON.stringify({
         size: size,
-        Cells: createMatrix(validatedData.Cells, size),
+        Cells: generateCells(validatedData.Cells, size),
       })
     );
     console.log("salem");
@@ -117,11 +117,13 @@ export default function SearchWord({ value, onChange }: Props) {
   return (
     <div className="w-full flex flex-col gap-2 h-auto">
       <div className="flex gap-2">
-        <label htmlFor="grid_number">Размер сетки:</label>
+        <label htmlFor="grid_number" className="font-semibold text-gray-500">
+          Размер сетки:
+        </label>
         <input
           type="number"
           name="grid_number"
-          className="w-10 ring decoration-0"
+          className="w-10 ring rounded-md text-center text-xl decoration-0"
           max={10}
           min={2}
           value={validatedData.size}
@@ -142,7 +144,7 @@ export default function SearchWord({ value, onChange }: Props) {
           }}
         />
       </div>
-      <div className={`grid  gap-1 ${gridStype(validatedData.size)}`}>
+      <div className={`grid  gap-1 ${gridType(validatedData.size)}`}>
         {validatedData.Cells.map((el) => {
           return (
             <div key={el.id}>{CreateCell(el.symbol, el.id, updateInput)}</div>
