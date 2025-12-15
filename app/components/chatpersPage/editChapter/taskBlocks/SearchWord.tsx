@@ -98,7 +98,6 @@ export default function SearchWord({ value, onChange }: Props) {
       return updated;
     });
 
-    console.log("alem");
     onChange(
       JSON.stringify({
         size: size,
