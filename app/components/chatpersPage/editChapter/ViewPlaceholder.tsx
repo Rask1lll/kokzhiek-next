@@ -21,8 +21,8 @@ import DropDownView from "./taskViews/DropDownView";
 import FillBlankView from "./taskViews/FillBlankView";
 import CrosswordView from "./taskViews/CrosswordView";
 import MatchPairsView from "./taskViews/MatchPairsView";
-import SearchWord from "./taskBlocks/SearchWord";
 import SearchWordView from "./taskViews/SearchWordView";
+import ConceptMapView from "./taskViews/ConceptMapView";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -108,6 +108,9 @@ export default function ViewPlaceholder({
       break;
     case "word_search":
       content = <SearchWordView value={textValue} />;
+      break;
+    case "concept_map":
+      content = <ConceptMapView value={textValue} />;
       break;
 
     default:
