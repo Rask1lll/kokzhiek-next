@@ -70,7 +70,6 @@ function ArrowsLayer({ arrows }: { arrows: Arrow[] }) {
   );
 }
 
-// Table отвечает только за отображение и пробрасывает изменения наружу
 function Table({
   matrix,
   onCellChange,
@@ -176,9 +175,7 @@ export default function ConceptMap({ value, onChange }: Props) {
         row.map((cell) => (cell.id === id ? { ...cell, text } : cell))
       );
 
-      const next = { ...prev, Cells: cells };
-      onChange(JSON.stringify(next));
-      return next;
+      return { ...prev, Cells: cells };
     });
   }
 
