@@ -1,0 +1,319 @@
+import Button from "@/app/components/Button/Button";
+import { parseData } from "@/app/libs/parseData";
+import { useEffect, useMemo, useState } from "react";
+import { BiArrowFromLeft } from "react-icons/bi";
+import { BsArrowBarRight } from "react-icons/bs";
+import Xarrow, { Xwrapper } from "react-xarrows";
+type Props = {
+  value: string;
+  onChange: (s: string) => void;
+};
+
+type ConceptMap = {
+  tableSize: {
+    width: number;
+    height: number;
+  };
+  arrows: Arrow[];
+  Cells: Cell[][];
+};
+type Arrow = {
+  id: string;
+  from: string;
+  to: string;
+};
+type Cell = {
+  id: string;
+  text: string;
+};
+
+function createMatrix(
+  width: number,
+  height: number,
+  prevTable: Cell[][]
+): Cell[][] {
+  const result: Cell[][] = [];
+
+  for (let i = 0; i < height; i++) {
+    const row: Cell[] = [];
+
+    for (let j = 0; j < width; j++) {
+      const prevCell = prevTable?.[i]?.[j];
+
+      row.push({
+        id: `${i}${j}`,
+        text: prevCell?.text ?? "",
+      });
+    }
+
+    result.push(row);
+  }
+
+  return result;
+}
+
+function ArrowsLayer({ arrows }: { arrows: Arrow[] }) {
+  return (
+    <>
+      {arrows
+        .filter((a) => a.from && a.to)
+        .map((a) => (
+          <Xarrow
+            key={a.id}
+            start={a.from}
+            end={a.to}
+            strokeWidth={2}
+            headSize={6}
+          />
+        ))}
+    </>
+  );
+}
+
+// Table отвечает только за отображение и пробрасывает изменения наружу
+function Table({
+  matrix,
+  onCellChange,
+}: {
+  matrix: Cell[][];
+  onCellChange?: (id: string, text: string) => void;
+}) {
+  return (
+    <div className="w-full flex flex-col gap-10">
+      {matrix.map((row, i) => {
+        return (
+          <div key={i} className="flex w-full justify-around">
+            {row.map((el) => {
+              return (
+                <div
+                  key={el.id}
+                  id={el.id}
+                  className="min-w-10 relative ring-2 ring-slate-300 rounded-md"
+                >
+                  <span className="absolute -top-5 left-0 opacity-50 text-sm">
+                    {el.id}
+                  </span>
+                  <textarea
+                    defaultValue={el.text}
+                    className="p-0.5 resize-none outline-0"
+                    onChange={(e) => onCellChange?.(el.id, e.target.value)}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Arrows({
+  arrows,
+  addArrow,
+  editArrow,
+}: {
+  arrows: Arrow[];
+  addArrow: () => void;
+  editArrow: (a: Arrow) => void;
+}) {
+  return (
+    <div>
+      <h3 className="font-medium text-xl mb-2">Стрелки сежду ячейками</h3>
+      <button
+        color="green"
+        className="bg-green-300 cursor-pointer rounded-lg p-2 py-1"
+        onClick={addArrow}
+      >
+        Добавить стрелку +
+      </button>
+      <div className="flex flex-col gap-2 mt-4 justify-center">
+        {arrows.map((el) => {
+          return (
+            <div key={el.id} className="flex items-center gap-1">
+              <input
+                type="text"
+                defaultValue={el.from}
+                className="w-20 ring rounded ring-slate-400"
+                maxLength={2}
+                onChange={(e) => {
+                  editArrow({ id: el.id, from: e.target.value, to: el.to });
+                }}
+              />
+              <BsArrowBarRight />
+              <input
+                type="text"
+                defaultValue={el.to}
+                className="w-20 ring rounded ring-slate-400"
+                maxLength={2}
+                onChange={(e) => {
+                  console.log(e.target.value);
+                  editArrow({ id: el.id, from: el.from, to: e.target.value });
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default function ConceptMap({ value, onChange }: Props) {
+  const [table, setTable] = useState<ConceptMap>(() => {
+    return (
+      parseData(value) ?? {
+        tableSize: { width: 2, height: 2 },
+        Cells: [],
+        arrows: [],
+      }
+    );
+  });
+
+  function handleCellChange(id: string, text: string) {
+    setTable((prev) => {
+      const cells = prev.Cells.map((row) =>
+        row.map((cell) => (cell.id === id ? { ...cell, text } : cell))
+      );
+
+      const next = { ...prev, Cells: cells };
+      onChange(JSON.stringify(next));
+      return next;
+    });
+  }
+
+  function addArrow() {
+    setTable((prev) => ({
+      ...prev,
+      arrows: [
+        ...prev.arrows,
+        { id: String(table.arrows.length), to: "", from: "" },
+      ],
+    }));
+
+    onChange(
+      JSON.stringify({
+        ...table,
+        arrows: [
+          ...table.arrows,
+          { id: String(table.arrows.length), to: "", from: "" },
+        ],
+      })
+    );
+  }
+
+  function editArrow(arrow: Arrow) {
+    console.log(arrow);
+    const edited = table.arrows.map((el) => {
+      return el.id === arrow.id
+        ? { id: String(arrow.id), to: arrow.to, from: arrow.from }
+        : el;
+    });
+    setTable((prev) => ({
+      ...prev,
+      arrows: edited,
+    }));
+    console.log(table);
+    onChange(
+      JSON.stringify({
+        ...table,
+        arrows: edited,
+      })
+    );
+  }
+
+  const tableMatrix = useMemo(() => {
+    return createMatrix(
+      table.tableSize.width,
+      table.tableSize.height,
+      table.Cells
+    );
+  }, [table.tableSize.width, table.tableSize.height, table.Cells]);
+
+  return (
+    <div className="w-full max-w-full">
+      <div className="flex items-center justify-between">
+        <span className="text-lg text-stone-700 font-semibold">
+          Размеры таблицы
+        </span>
+        <div className="flex gap-12">
+          <div className="flex gap-2 items-center">
+            <label htmlFor="tableWidth">Ширина:</label>
+            <input
+              id="tableWidth"
+              name="tableWidth"
+              type="number"
+              className="w-10 text-center border rounded-lg border-gray-500"
+              value={table.tableSize.width}
+              onChange={(e) => {
+                let value = Number(e.target.value);
+                if (value > 9 || value < 2) value = value > 9 ? 9 : 2;
+
+                setTable((prev) => {
+                  const nextCells = createMatrix(
+                    value,
+                    prev.tableSize.height,
+                    prev.Cells
+                  );
+
+                  const next = {
+                    ...prev,
+                    tableSize: { width: value, height: prev.tableSize.height },
+                    Cells: nextCells,
+                  };
+
+                  onChange(JSON.stringify(next));
+                  return next;
+                });
+              }}
+            />
+          </div>
+          <div className="flex gap-2 items-center">
+            <label htmlFor="tableWidth">Ширина:</label>
+            <input
+              id="tableWidth"
+              name="tableWidth"
+              type="number"
+              className="w-10 text-center border rounded-lg border-gray-500"
+              value={table.tableSize.height}
+              onChange={(e) => {
+                let value = Number(e.target.value);
+                if (value > 9 || value < 2) value = value > 9 ? 9 : 2;
+
+                setTable((prev) => {
+                  const nextCells = createMatrix(
+                    prev.tableSize.width,
+                    value,
+                    prev.Cells
+                  );
+
+                  const next = {
+                    ...prev,
+                    tableSize: { width: prev.tableSize.width, height: value },
+                    Cells: nextCells,
+                  };
+
+                  onChange(JSON.stringify(next));
+                  return next;
+                });
+              }}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="mt-10">
+        <Xwrapper>
+          <Table matrix={tableMatrix} onCellChange={handleCellChange} />
+          <ArrowsLayer arrows={table.arrows} />
+        </Xwrapper>
+      </div>
+      <div className="mt-10">
+        <Arrows
+          arrows={table.arrows}
+          addArrow={addArrow}
+          editArrow={editArrow}
+        />
+      </div>
+    </div>
+  );
+}

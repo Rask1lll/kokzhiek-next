@@ -24,6 +24,7 @@ import FillBlank from "./taskBlocks/FillBlank";
 import Crossword from "./taskBlocks/Crossword";
 import MatchPairs from "./taskBlocks/MatchPairs";
 import SearchWord from "./taskBlocks/SearchWord";
+import ConceptMap from "./taskBlocks/ConceptMap";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -189,6 +190,11 @@ const LayoutPlaceholder = ({
       case "word_search":
         widgetContent = (
           <SearchWord value={textValue} onChange={handleChange} />
+        );
+        break;
+      case "concept_map":
+        widgetContent = (
+          <ConceptMap value={textValue} onChange={handleChange} />
         );
         break;
 
