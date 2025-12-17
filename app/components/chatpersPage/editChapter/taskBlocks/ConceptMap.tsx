@@ -1,7 +1,5 @@
-import Button from "@/app/components/Button/Button";
 import { parseData } from "@/app/libs/parseData";
-import { useEffect, useMemo, useState } from "react";
-import { BiArrowFromLeft } from "react-icons/bi";
+import { JSX, useEffect, useMemo, useState } from "react";
 import { BsArrowBarRight } from "react-icons/bs";
 import Xarrow, { Xwrapper } from "react-xarrows";
 type Props = {
@@ -16,6 +14,7 @@ type ConceptMap = {
   };
   arrows: Arrow[];
   Cells: Cell[][];
+  color: string;
 };
 type Arrow = {
   id: string;
@@ -52,7 +51,7 @@ function createMatrix(
   return result;
 }
 
-function ArrowsLayer({ arrows }: { arrows: Arrow[] }) {
+function ArrowsLayer({ arrows, color }: { arrows: Arrow[]; color: string }) {
   return (
     <>
       {arrows
@@ -62,8 +61,10 @@ function ArrowsLayer({ arrows }: { arrows: Arrow[] }) {
             key={a.id}
             start={a.from}
             end={a.to}
+            path="straight"
             strokeWidth={2}
             headSize={6}
+            color={color ?? "red"}
           />
         ))}
     </>
@@ -169,6 +170,11 @@ export default function ConceptMap({ value, onChange }: Props) {
     );
   });
 
+  const [colorChoose, setColorChoose] = useState<boolean>(false);
+  const [colorDiv, setColorDiv] = useState<JSX.Element>(
+    <div className=" bg-red-500 w-5 h-5"></div>
+  );
+
   function handleCellChange(id: string, text: string) {
     setTable((prev) => {
       const cells = prev.Cells.map((row) =>
@@ -223,13 +229,13 @@ export default function ConceptMap({ value, onChange }: Props) {
     );
   }
 
-  const tableMatrix = useMemo(() => {
-    return createMatrix(
-      table.tableSize.width,
-      table.tableSize.height,
-      table.Cells
-    );
-  }, [table.tableSize.width, table.tableSize.height, table.Cells]);
+  // const tableMatrix = useMemo(() => {
+  //   return createMatrix(
+  //     table.tableSize.width,
+  //     table.tableSize.height,
+  //     table.Cells
+  //   );
+  // }, [table.tableSize.width, table.tableSize.height, table.Cells]);
 
   return (
     <div className="w-full max-w-full">
@@ -237,7 +243,7 @@ export default function ConceptMap({ value, onChange }: Props) {
         <span className="text-lg text-stone-700 font-semibold">
           Размеры таблицы
         </span>
-        <div className="flex gap-12">
+        <div className="flex gap-12 mr-20">
           <div className="flex gap-2 items-center">
             <label htmlFor="tableWidth">Ширина:</label>
             <input
@@ -300,12 +306,48 @@ export default function ConceptMap({ value, onChange }: Props) {
               }}
             />
           </div>
+          <div className="px-2 flex gap-2 items-center">
+            {!colorChoose ? (
+              <p
+                className={`bg-${table.color} bg-green-300 font-bold cursor-pointer p-1.5 rounded-lg text-gray-500 hover:text-white transition-colors duration-300`}
+                onClick={() => {
+                  setColorChoose(!colorChoose);
+                }}
+              >
+                Выбрать цвет
+              </p>
+            ) : (
+              <>
+                <div
+                  className="bg-red-500  w-7 h-7 cursor-pointer rounded-full"
+                  onClick={() => {
+                    setTable((prev) => ({ ...prev, color: "red" }));
+                    setColorChoose(!colorChoose);
+                  }}
+                ></div>
+                <div
+                  className="bg-green-500 w-7 h-7 cursor-pointer rounded-full"
+                  onClick={() => {
+                    setTable((prev) => ({ ...prev, color: "green" }));
+                    setColorChoose(!colorChoose);
+                  }}
+                ></div>
+                <div
+                  className="bg-blue-500 w-7 h-7 cursor-pointer rounded-full"
+                  onClick={() => {
+                    setTable((prev) => ({ ...prev, color: "blue" }));
+                    setColorChoose(!colorChoose);
+                  }}
+                ></div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className="mt-10">
         <Xwrapper>
-          <Table matrix={tableMatrix} onCellChange={handleCellChange} />
-          <ArrowsLayer arrows={table.arrows} />
+          <Table matrix={table.Cells} onCellChange={handleCellChange} />
+          <ArrowsLayer arrows={table.arrows} color={table.color} />
         </Xwrapper>
       </div>
       <div className="mt-10">

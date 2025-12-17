@@ -65,6 +65,8 @@ function ArrowsLayerView({ arrows }: { arrows: Arrow[] }) {
             end={a.to}
             strokeWidth={2}
             headSize={6}
+            path="straight"
+            color="red"
           />
         ))}
     </>

@@ -4,6 +4,7 @@ import Button from "@/app/components/Button/Button";
 import { parseData } from "@/app/libs/parseData";
 import { useMemo, useState } from "react";
 import { FiX, FiPlus } from "react-icons/fi";
+import style from "./Sort.module.css";
 
 type Props = {
   value: string;
@@ -155,22 +156,22 @@ export default function Sort({ value, onChange }: Props) {
 
       {/* Columns grid */}
       {data.columns.length > 0 && (
-        <div className={`grid gap-4 ${getGridCols(data.columns.length)}`}>
+        <div className={`grid w-full gap-4 ${style.sortGrid}`}>
           {data.columns.map((column) => (
             <div
               key={column.id}
-              className="p-4 bg-white rounded-lg border-2 border-slate-200 space-y-3"
+              className="p-4 w-full bg-white rounded-lg border-2 border-slate-200 space-y-3"
             >
               {/* Column header */}
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center w-full justify-between gap-2">
                 <input
                   type="text"
                   value={column.question}
                   onChange={(e) =>
                     updateColumnQuestion(column.id, e.target.value)
                   }
-                  placeholder="Название столбца..."
-                  className="flex-1 px-3 py-2 text-sm font-medium bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Название "
+                  className="flex-1 px-3 py-2 w-full text-sm font-medium bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -196,8 +197,8 @@ export default function Sort({ value, onChange }: Props) {
                       onChange={(e) =>
                         updateCardText(column.id, card.id, e.target.value)
                       }
-                      placeholder="Текст карточки..."
-                      className="flex-1 px-2 py-1 text-sm bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Текст..."
+                      className="flex-1 px-2 py-1 w-full text-sm bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
                       type="button"
