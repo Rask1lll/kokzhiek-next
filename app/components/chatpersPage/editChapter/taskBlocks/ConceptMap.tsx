@@ -179,6 +179,10 @@ export default function ConceptMap({ value, onChange }: Props) {
     });
   }
 
+  useEffect(() => {
+    onChange(JSON.stringify(table));
+  }, [table]);
+
   function addArrow() {
     setTable((prev) => ({
       ...prev,
