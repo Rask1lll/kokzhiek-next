@@ -40,12 +40,12 @@ export const tasks = [
     description: "Ввод текста в пропущенное место",
     icon: <FiEdit3 className="w-5 h-5 text-sky-500" />,
   },
-  {
-    type: "elements_on_image",
-    title: "Элементы на изображении",
-    description: "Размещение интерактивных элементов поверх изображения",
-    icon: <FiImage className="w-5 h-5 text-pink-500" />,
-  },
+  // {
+  //   type: "elements_on_image",
+  //   title: "Элементы на изображении",
+  //   description: "Размещение интерактивных элементов поверх изображения",
+  //   icon: <FiImage className="w-5 h-5 text-pink-500" />,
+  // },
   {
     type: "match_pairs",
     title: "Соедините пары",
@@ -64,12 +64,12 @@ export const tasks = [
     description: "Перетаскивание вариантов ответов в правильные точки",
     icon: <FiMove className="w-5 h-5 text-orange-500" />,
   },
-  {
-    type: "drag_to_image",
-    title: "Перетащить на изображение",
-    description: "Перетаскивание кружков с номерами на изображение",
-    icon: <FiTarget className="w-5 h-5 text-red-500" />,
-  },
+  // {
+  //   type: "drag_to_image",
+  //   title: "Перетащить на изображение",
+  //   description: "Перетаскивание кружков с номерами на изображение",
+  //   icon: <FiTarget className="w-5 h-5 text-red-500" />,
+  // },
   {
     type: "sort",
     title: "Сортировать",

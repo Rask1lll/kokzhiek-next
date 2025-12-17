@@ -24,6 +24,7 @@ import MatchPairsView from "./taskViews/MatchPairsView";
 import SearchWordView from "./taskViews/SearchWordView";
 import ConceptMapView from "./taskViews/ConceptMapView";
 import SortView from "./taskViews/SortView";
+import OrderView from "./taskViews/OrderView";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -115,6 +116,9 @@ export default function ViewPlaceholder({
       break;
     case "sort":
       content = <SortView value={textValue} onChange={handleAnswerChange} />;
+      break;
+    case "order":
+      content = <OrderView value={textValue} onChange={handleAnswerChange} />;
       break;
 
     default:

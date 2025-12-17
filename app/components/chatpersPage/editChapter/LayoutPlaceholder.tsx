@@ -26,6 +26,7 @@ import MatchPairs from "./taskBlocks/MatchPairs";
 import SearchWord from "./taskBlocks/SearchWord";
 import ConceptMap from "./taskBlocks/ConceptMap";
 import Sort from "./taskBlocks/Sort";
+import Order from "./taskBlocks/Order";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -200,6 +201,9 @@ const LayoutPlaceholder = ({
         break;
       case "sort":
         widgetContent = <Sort value={textValue} onChange={handleChange} />;
+        break;
+      case "order":
+        widgetContent = <Order value={textValue} onChange={handleChange} />;
         break;
       default:
         widgetContent = <GenericWidget type={widget.type} />;
