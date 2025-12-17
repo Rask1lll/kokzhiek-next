@@ -23,6 +23,7 @@ import CrosswordView from "./taskViews/CrosswordView";
 import MatchPairsView from "./taskViews/MatchPairsView";
 import SearchWordView from "./taskViews/SearchWordView";
 import ConceptMapView from "./taskViews/ConceptMapView";
+import SortView from "./taskViews/SortView";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -111,6 +112,9 @@ export default function ViewPlaceholder({
       break;
     case "concept_map":
       content = <ConceptMapView value={textValue} />;
+      break;
+    case "sort":
+      content = <SortView value={textValue} onChange={handleAnswerChange} />;
       break;
 
     default:

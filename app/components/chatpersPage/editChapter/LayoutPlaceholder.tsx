@@ -25,6 +25,7 @@ import Crossword from "./taskBlocks/Crossword";
 import MatchPairs from "./taskBlocks/MatchPairs";
 import SearchWord from "./taskBlocks/SearchWord";
 import ConceptMap from "./taskBlocks/ConceptMap";
+import Sort from "./taskBlocks/Sort";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -197,7 +198,9 @@ const LayoutPlaceholder = ({
           <ConceptMap value={textValue} onChange={handleChange} />
         );
         break;
-
+      case "sort":
+        widgetContent = <Sort value={textValue} onChange={handleChange} />;
+        break;
       default:
         widgetContent = <GenericWidget type={widget.type} />;
     }
