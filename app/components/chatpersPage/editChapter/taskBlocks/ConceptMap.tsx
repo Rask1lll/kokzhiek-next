@@ -10,6 +10,12 @@ type Props = {
   onChange: (s: string) => void;
 };
 
+const Colors = {
+  red: "bg-red-500",
+  blue: "bg-blue-500",
+  green: "bg-green-500",
+};
+
 type ConceptMap = {
   tableSize: {
     width: number;
@@ -17,7 +23,7 @@ type ConceptMap = {
   };
   arrows: Arrow[];
   Cells: Cell[][];
-  color: string;
+  color: "green" | "red" | "blue";
 };
 type Arrow = {
   id: string;
@@ -235,14 +241,12 @@ export default function ConceptMap({ value, onChange }: Props) {
         tableSize: { width: 2, height: 2 },
         Cells: [],
         arrows: [],
+        color: "redc",
       }
     );
   });
 
   const [colorChoose, setColorChoose] = useState<boolean>(false);
-  const [colorDiv, setColorDiv] = useState<JSX.Element>(
-    <div className=" bg-red-500 w-5 h-5"></div>
-  );
 
   function handleCellChange(id: string, text: string) {
     setTable((prev) => {
@@ -311,6 +315,7 @@ export default function ConceptMap({ value, onChange }: Props) {
       })
     );
   }
+  console.log(table.color);
 
   // const tableMatrix = useMemo(() => {
   //   return createMatrix(
@@ -391,14 +396,14 @@ export default function ConceptMap({ value, onChange }: Props) {
           </div>
           <div className="px-2 flex gap-2 items-center">
             {!colorChoose ? (
-              <p
-                className={`bg-${table.color} bg-green-300 font-bold cursor-pointer p-1.5 rounded-lg text-gray-500 hover:text-white transition-colors duration-300`}
+              <div
+                className={`${
+                  Colors[table.color]
+                }  font-bold cursor-pointer w-5 h-5 rounded-full text-gray-500 hover:text-white transition-colors duration-300`}
                 onClick={() => {
                   setColorChoose(!colorChoose);
                 }}
-              >
-                Выбрать цвет
-              </p>
+              ></div>
             ) : (
               <>
                 <div
