@@ -1,6 +1,6 @@
 import { parseData } from "@/app/libs/parseData";
 import { JSX, useEffect, useMemo, useRef, useState } from "react";
-import { BiSolidRightArrow } from "react-icons/bi";
+import { BiSolidRightArrow, BiTrash } from "react-icons/bi";
 import { BsArrowBarRight } from "react-icons/bs";
 import { TbArrowBarToRight } from "react-icons/tb";
 import Xarrow, { Xwrapper } from "react-xarrows";
@@ -131,12 +131,13 @@ function Arrows({
   const [drafts, setDrafts] = useState<
     Record<string, { from: string; to: string }>
   >({});
+  const [errors, setErrors] = useState<string[]>();
   return (
     <div>
       <h3 className="font-medium text-xl mb-2">Стрелки сежду ячейками</h3>
       <button
         color="green"
-        className="bg-green-300 cursor-pointer rounded-lg p-2 py-1"
+        className="bg-green-300 opacity-80 cursor-pointer rounded-lg p-2 py-1"
         onClick={addArrow}
       >
         Добавить стрелку +
@@ -174,12 +175,6 @@ function Arrows({
                   className="w-20 ring rounded ring-slate-400"
                   maxLength={2}
                   onChange={(e) => {
-                    // editArrow({
-                    //   id: el.id,
-                    //   from: el.from,
-                    //   to: e.target.value,
-                    // });
-
                     const value = e.target.value;
 
                     setDrafts((prev) => ({
@@ -191,7 +186,23 @@ function Arrows({
                     }));
 
                     if (doesCellExist(value, cells)) {
+                      setTimeout(() => {
+                        setErrors((prev) => {
+                          const res = prev?.slice(
+                            prev.indexOf(el.id),
+                            prev.indexOf(el.id)
+                          );
+                          return res;
+                        });
+                      }, 1000);
                       editArrow({ id: el.id, from: el.from, to: value });
+                    } else {
+                      console.log("huuuuu");
+                      setTimeout(() => {
+                        setErrors((prev) => {
+                          return prev ? [...prev, el.id] : [el.id];
+                        });
+                      }, 1000);
                     }
                   }}
                 />
@@ -200,17 +211,15 @@ function Arrows({
                   onClick={() => removeArrow(el.id)}
                   title="Удалить стрелку"
                 >
-                  ✕
+                  <BiTrash className="text-red-500" />
                 </button>
               </div>
 
-              {drafts[el.id] &&
-                (!doesCellExist(drafts[el.id].from, cells) ||
-                  !doesCellExist(drafts[el.id].to, cells)) && (
-                  <div className="text-red-500 text-sm mt-1">
-                    Неприменимый id элемента
-                  </div>
-                )}
+              {errors?.includes(el.id) && (
+                <div className="text-red-400 text-sm mt-1">
+                  Неприменимый id элемента
+                </div>
+              )}
             </div>
           );
         })}
