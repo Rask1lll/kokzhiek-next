@@ -1,7 +1,10 @@
 import { parseData } from "@/app/libs/parseData";
-import { JSX, useEffect, useMemo, useState } from "react";
+import { JSX, useEffect, useMemo, useRef, useState } from "react";
+import { BiSolidRightArrow } from "react-icons/bi";
 import { BsArrowBarRight } from "react-icons/bs";
+import { TbArrowBarToRight } from "react-icons/tb";
 import Xarrow, { Xwrapper } from "react-xarrows";
+import { arrayBuffer } from "stream/consumers";
 type Props = {
   value: string;
   onChange: (s: string) => void;
@@ -108,15 +111,26 @@ function Table({
   );
 }
 
+function doesCellExist(id: string, cells: Cell[][]): boolean {
+  return cells.some((row) => row.some((cell) => cell.id === id));
+}
+
 function Arrows({
   arrows,
   addArrow,
   editArrow,
+  removeArrow,
+  cells,
 }: {
   arrows: Arrow[];
   addArrow: () => void;
   editArrow: (a: Arrow) => void;
+  removeArrow: (id: string) => void;
+  cells: Cell[][];
 }) {
+  const [drafts, setDrafts] = useState<
+    Record<string, { from: string; to: string }>
+  >({});
   return (
     <div>
       <h3 className="font-medium text-xl mb-2">Стрелки сежду ячейками</h3>
@@ -130,27 +144,73 @@ function Arrows({
       <div className="flex flex-col gap-2 mt-4 justify-center">
         {arrows.map((el) => {
           return (
-            <div key={el.id} className="flex items-center gap-1">
-              <input
-                type="text"
-                defaultValue={el.from}
-                className="w-20 ring rounded ring-slate-400"
-                maxLength={2}
-                onChange={(e) => {
-                  editArrow({ id: el.id, from: e.target.value, to: el.to });
-                }}
-              />
-              <BsArrowBarRight />
-              <input
-                type="text"
-                defaultValue={el.to}
-                className="w-20 ring rounded ring-slate-400"
-                maxLength={2}
-                onChange={(e) => {
-                  console.log(e.target.value);
-                  editArrow({ id: el.id, from: el.from, to: e.target.value });
-                }}
-              />
+            <div key={el.id}>
+              <div className="flex items-center gap-1">
+                <input
+                  type="text"
+                  value={drafts[el.id]?.from ?? el.from}
+                  className="w-20 ring rounded ring-slate-400"
+                  maxLength={2}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    setDrafts((prev) => ({
+                      ...prev,
+                      [el.id]: {
+                        from: value,
+                        to: prev[el.id]?.to ?? el.to,
+                      },
+                    }));
+
+                    if (doesCellExist(value, cells)) {
+                      editArrow({ id: el.id, from: value, to: el.to });
+                    }
+                  }}
+                />
+                <BsArrowBarRight />
+                <input
+                  type="text"
+                  value={drafts[el.id]?.to ?? el.to}
+                  className="w-20 ring rounded ring-slate-400"
+                  maxLength={2}
+                  onChange={(e) => {
+                    // editArrow({
+                    //   id: el.id,
+                    //   from: el.from,
+                    //   to: e.target.value,
+                    // });
+
+                    const value = e.target.value;
+
+                    setDrafts((prev) => ({
+                      ...prev,
+                      [el.id]: {
+                        from: prev[el.id]?.from ?? el.from,
+                        to: value,
+                      },
+                    }));
+
+                    if (doesCellExist(value, cells)) {
+                      editArrow({ id: el.id, from: el.from, to: value });
+                    }
+                  }}
+                />
+                <button
+                  className="ml-2 text-red-500 hover:text-red-700 font-bold"
+                  onClick={() => removeArrow(el.id)}
+                  title="Удалить стрелку"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {drafts[el.id] &&
+                (!doesCellExist(drafts[el.id].from, cells) ||
+                  !doesCellExist(drafts[el.id].to, cells)) && (
+                  <div className="text-red-500 text-sm mt-1">
+                    Неприменимый id элемента
+                  </div>
+                )}
             </div>
           );
         })}
@@ -207,6 +267,20 @@ export default function ConceptMap({ value, onChange }: Props) {
         ],
       })
     );
+  }
+
+  function removeArrow(id: string) {
+    setTable((prev) => {
+      const filtered = prev.arrows.filter((a) => a.id !== id);
+
+      const next = {
+        ...prev,
+        arrows: filtered,
+      };
+
+      onChange(JSON.stringify(next));
+      return next;
+    });
   }
 
   function editArrow(arrow: Arrow) {
@@ -355,6 +429,8 @@ export default function ConceptMap({ value, onChange }: Props) {
           arrows={table.arrows}
           addArrow={addArrow}
           editArrow={editArrow}
+          removeArrow={removeArrow}
+          cells={table.Cells}
         />
       </div>
     </div>
