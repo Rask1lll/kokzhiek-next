@@ -17,6 +17,7 @@ type Option = {
 
 type MultipleChoiceData = {
   options: Option[];
+  question: string;
 };
 
 function parseData(value: string): MultipleChoiceData | undefined {
@@ -36,10 +37,11 @@ export default function MultipleChoice({
   onChange,
 }: MultipleChoiceProps) {
   const validateData = useMemo(() => parseData(value), [value]);
-  let data;
+  let data: MultipleChoiceData;
   if (!validateData) {
     data = {
       options: [],
+      question: "",
     };
   } else {
     data = validateData;
@@ -91,11 +93,24 @@ export default function MultipleChoice({
     updateData({ ...data, options: newOptions });
   };
 
+  function updateQuestion(text: string) {
+    updateData({ ...data, question: text });
+  }
+
   return (
     <div className="w-full space-y-4">
       {/* Settings bar */}
-      <div className="flex flex-wrap items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        {/* Image position */}
+      <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <input
+          type="text"
+          placeholder="Вопрос к заданию "
+          className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:"
+          value={data.question}
+          onChange={(e) => {
+            updateQuestion(e.target.value);
+          }}
+        />
       </div>
 
       {/* Options list */}

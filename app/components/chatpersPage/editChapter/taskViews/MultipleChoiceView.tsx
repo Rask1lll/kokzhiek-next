@@ -15,6 +15,7 @@ type Option = {
 
 type MultipleChoiceData = {
   options: Option[];
+  question: string;
 };
 
 type UserAnswer = {
@@ -30,7 +31,7 @@ function parseData(value: string): MultipleChoiceData {
   } catch {
     // Invalid JSON
   }
-  return { options: [] };
+  return { options: [], question: "" };
 }
 
 export default function MultipleChoiceView({
@@ -59,6 +60,7 @@ export default function MultipleChoiceView({
 
   return (
     <div className="space-y-2">
+      <div className="text-lg pl-2">{data.question}</div>
       {data.options.map((option) => (
         <label
           key={option.id}
@@ -80,4 +82,3 @@ export default function MultipleChoiceView({
     </div>
   );
 }
-

@@ -15,6 +15,7 @@ type Option = {
 
 type SingleChoiceData = {
   options: Option[];
+  question: string;
 };
 
 type UserAnswer = {
@@ -30,7 +31,7 @@ function parseData(value: string): SingleChoiceData {
   } catch {
     // Invalid JSON
   }
-  return { options: [] };
+  return { options: [], question: "" };
 }
 
 export default function SingleChoiceView({
@@ -55,6 +56,7 @@ export default function SingleChoiceView({
 
   return (
     <div className="space-y-2">
+      <div className="text-lg pl-2">{data.question}</div>
       {data.options.map((option) => (
         <label
           key={option.id}
@@ -77,4 +79,3 @@ export default function SingleChoiceView({
     </div>
   );
 }
-

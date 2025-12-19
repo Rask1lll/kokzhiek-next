@@ -1,10 +1,8 @@
 import { parseData } from "@/app/libs/parseData";
-import { JSX, useEffect, useMemo, useRef, useState } from "react";
-import { BiSolidRightArrow, BiTrash } from "react-icons/bi";
+import { useEffect, useState } from "react";
+import { BiTrash } from "react-icons/bi";
 import { BsArrowBarRight } from "react-icons/bs";
-import { TbArrowBarToRight } from "react-icons/tb";
 import Xarrow, { Xwrapper } from "react-xarrows";
-import { arrayBuffer } from "stream/consumers";
 type Props = {
   value: string;
   onChange: (s: string) => void;
@@ -140,7 +138,7 @@ function Arrows({
   const [errors, setErrors] = useState<string[]>();
   return (
     <div>
-      <h3 className="font-medium text-xl mb-2">Стрелки сежду ячейками</h3>
+      <h3 className="font-medium text-xl mb-2">Стрелки между ячейками</h3>
       <button
         color="green"
         className="bg-green-300 opacity-80 cursor-pointer rounded-lg p-2 py-1"
