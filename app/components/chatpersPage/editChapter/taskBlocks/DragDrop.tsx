@@ -56,6 +56,13 @@ export default function DragDrop({ value, onChange }: Props) {
     });
     setData({ ...data, cells: result });
   }
+
+  function deleteCell(id: string) {
+    const result = data.cells.filter((el) => {
+      return el.id !== id && { ...el, answer: value };
+    });
+    setData({ ...data, cells: result });
+  }
   return (
     <div className="w-full">
       <div className="flex justify-between my-2 pr-3">
@@ -119,7 +126,12 @@ export default function DragDrop({ value, onChange }: Props) {
                       upDateCell(el.id, e.target.value);
                     }}
                   />
-                  <div className=" flex items-center justify-center cursor-pointer">
+                  <div
+                    onClick={() => {
+                      deleteCell(el.id);
+                    }}
+                    className="flex items-center justify-center cursor-pointer"
+                  >
                     <BiTrash className="w-6 h-6 text-red-400" />
                   </div>
                 </div>
