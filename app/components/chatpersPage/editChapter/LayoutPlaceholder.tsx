@@ -27,6 +27,7 @@ import SearchWord from "./taskBlocks/SearchWord";
 import ConceptMap from "./taskBlocks/ConceptMap";
 import Sort from "./taskBlocks/Sort";
 import Order from "./taskBlocks/Order";
+import DragDrop from "./taskBlocks/DragDrop";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -204,6 +205,9 @@ const LayoutPlaceholder = ({
         break;
       case "order":
         widgetContent = <Order value={textValue} onChange={handleChange} />;
+        break;
+      case "drag_drop":
+        widgetContent = <DragDrop value={textValue} onChange={handleChange} />;
         break;
       default:
         widgetContent = <GenericWidget type={widget.type} />;

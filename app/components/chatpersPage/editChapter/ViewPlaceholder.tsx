@@ -25,6 +25,7 @@ import SearchWordView from "./taskViews/SearchWordView";
 import ConceptMapView from "./taskViews/ConceptMapView";
 import SortView from "./taskViews/SortView";
 import OrderView from "./taskViews/OrderView";
+import DragDrop from "./taskBlocks/DragDrop";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -120,7 +121,8 @@ export default function ViewPlaceholder({
     case "order":
       content = <OrderView value={textValue} onChange={handleAnswerChange} />;
       break;
-
+    case "drag_drop":
+      content = <DragDrop value={textValue} onChange={handleAnswerChange} />;
     default:
       content = (
         <div className="p-4 bg-gray-100 w-full rounded-lg text-gray-500 text-center">
