@@ -2,7 +2,7 @@
 
 import Button from "@/app/components/Button/Button";
 import { useMemo } from "react";
-import { FiPlus, FiX, FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { FiX, FiChevronUp, FiChevronDown } from "react-icons/fi";
 
 type MultipleChoiceProps = {
   value: string;

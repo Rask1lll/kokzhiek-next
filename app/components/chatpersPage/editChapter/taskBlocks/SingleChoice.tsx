@@ -128,9 +128,19 @@ export default function SingleChoice({ value, onChange }: MultipleChoiceProps) {
               <input
                 type="radio"
                 checked={option.isCorrect}
-                onChange={(e) =>
-                  updateOption(option.id, { isCorrect: e.target.checked })
-                }
+                onClick={() => {
+                  const optionId = option.id;
+                  const tempOption = data.options.find((el) => {
+                    return el.id === optionId;
+                  });
+                  console.log(tempOption);
+                  for (let index = 0; index < data.options.length; index++) {
+                    data.options[index].isCorrect = false;
+                  }
+                  tempOption?.isCorrect
+                    ? updateOption(option.id, { isCorrect: false })
+                    : updateOption(option.id, { isCorrect: true });
+                }}
                 className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
             </label>
