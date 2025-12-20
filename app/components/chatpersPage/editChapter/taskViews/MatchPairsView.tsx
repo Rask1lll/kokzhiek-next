@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CgArrowRight } from "react-icons/cg";
 
 type MatchPairsViewProps = {
@@ -41,11 +41,11 @@ function parseData(value: string): MatchPairsData {
   return { pairs: [], shuffleInOpiq: true };
 }
 
-// Fisher-Yates shuffle algorithm with seed
-function shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.ceil(seed * array.length);
+    const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
@@ -58,18 +58,16 @@ export default function MatchPairsView({
   const data = useMemo(() => parseData(value), [value]);
   const [matches, setMatches] = useState<Record<string, string>>({});
   const [draggedAnswerId, setDraggedAnswerId] = useState<string | null>(null);
-  const [shuffleSeed] = useState<number>(() => Math.random());
-  console.log(data);
 
-  // Shuffle answers using seed
+  // Shuffle answers once when data changes
   const shuffledAnswers = useMemo(() => {
     const answers = data.pairs.map((pair) => ({
       id: pair.id,
       text: pair.answer.text,
       imageUrl: pair.answer.imageUrl,
     }));
-    return shuffleArrayWithSeed(answers, shuffleSeed);
-  }, [data.pairs, shuffleSeed]);
+    return shuffleArray(answers);
+  }, [data.pairs]);
 
   const handleDragStart = (answerId: string) => {
     setDraggedAnswerId(answerId);
