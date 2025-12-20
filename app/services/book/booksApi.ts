@@ -3,6 +3,11 @@ import { Book } from "../../types/book";
 import { ConstructorResponse } from "../../types/constructorResponse";
 import { CreateBookPayload } from "../../types/CreateBookPayload";
 import { UpdateBookPayload } from "../../types/UpdateBookPayload";
+import { ValidationErrorResponse } from "../../types/validationError";
+
+export type ApiResult<T> =
+  | { success: true; data: T }
+  | { success: false; errors: Record<string, string[]>; message: string };
 
 export async function handleCreateBook(
   payload: CreateBookPayload
@@ -56,7 +61,7 @@ export async function handleDeleteBook(id: number): Promise<void> {
 export async function handleUpdateBook(
   id: number,
   payload: UpdateBookPayload
-): Promise<ConstructorResponse<Book> | undefined> {
+): Promise<ApiResult<Book>> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
@@ -66,9 +71,25 @@ export async function handleUpdateBook(
         body: JSON.stringify(payload),
       }
     );
-    return res.json();
+    const json = await res.json();
+
+    if (!res.ok) {
+      const errorResponse = json as ValidationErrorResponse;
+      return {
+        success: false,
+        errors: errorResponse.errors || {},
+        message: errorResponse.message || "Ошибка при обновлении книги",
+      };
+    }
+
+    return { success: true, data: json.data };
   } catch (error) {
     console.error("Error updating book:", error);
+    return {
+      success: false,
+      errors: {},
+      message: "Ошибка сети при обновлении книги",
+    };
   }
 }
 

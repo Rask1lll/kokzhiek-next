@@ -28,6 +28,8 @@ export default function EditBookPageClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -79,7 +81,10 @@ export default function EditBookPageClient() {
   const handleSave = async () => {
     if (!bookId) return;
 
+    setErrors({});
+    setGeneralError(null);
     setIsSaving(true);
+
     const payload: UpdateBookPayload = {
       title: title.trim(),
       description: description.trim() || undefined,
@@ -98,10 +103,15 @@ export default function EditBookPageClient() {
     const result = await editBook(Number(bookId), payload);
     setIsSaving(false);
 
-    if (result) {
+    if (result.success) {
       router.push(`/books/book?book=${bookId}`);
+    } else {
+      setErrors(result.errors);
+      setGeneralError(result.message);
     }
   };
+
+  const getFieldError = (field: string) => errors[field]?.[0];
 
   if (isLoading) {
     return (
@@ -144,6 +154,12 @@ export default function EditBookPageClient() {
           </div>
 
           <div className="px-8 py-6 space-y-6">
+            {generalError && (
+              <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+                <p className="text-sm text-red-600">{generalError}</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block mb-2 text-sm font-medium text-gray-700">
@@ -152,10 +168,19 @@ export default function EditBookPageClient() {
                 <input
                   type="text"
                   placeholder="Введите название книги"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    getFieldError("title")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
+                {getFieldError("title") && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError("title")}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -270,10 +295,19 @@ export default function EditBookPageClient() {
                 <input
                   type="text"
                   placeholder="978-0-123456-78-9"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    getFieldError("isbn")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   value={isbn}
                   onChange={(e) => setIsbn(e.target.value)}
                 />
+                {getFieldError("isbn") && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError("isbn")}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -283,12 +317,21 @@ export default function EditBookPageClient() {
                 <input
                   type="number"
                   placeholder="2025"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    getFieldError("year")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   value={year || ""}
                   onChange={(e) =>
                     setYear(e.target.value ? Number(e.target.value) : undefined)
                   }
                 />
+                {getFieldError("year") && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError("year")}
+                  </p>
+                )}
               </div>
             </div>
 

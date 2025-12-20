@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import {
+  ApiResult,
   handleCreateBook,
   handleDeleteBook,
   handleGetBook,
@@ -61,13 +62,15 @@ export function useBooks() {
     return resData.data;
   };
 
-  const editBook = async (bookId: number, payload: UpdateBookPayload) => {
-    const resData = await handleUpdateBook(bookId, payload);
-    if (!resData || !resData.success) {
-      return null;
+  const editBook = async (
+    bookId: number,
+    payload: UpdateBookPayload
+  ): Promise<ApiResult<Book>> => {
+    const result = await handleUpdateBook(bookId, payload);
+    if (result.success) {
+      updateBook(bookId, result.data);
     }
-    updateBook(bookId, resData.data);
-    return resData.data;
+    return result;
   };
 
   return { createBook, deleteBook, editBook, getBook, getBooks, isLoading };
