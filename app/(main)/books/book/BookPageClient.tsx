@@ -6,18 +6,12 @@ import BookInfoCardSkeleton from "@/app/components/bookDetailsPage.tsx/BookInfoC
 import ChaptersContainer from "@/app/components/bookDetailsPage.tsx/ChaptersContainer";
 import { useEffect, useState } from "react";
 import { useChaptersStore } from "@/app/store/chaptersStore";
+import { Book } from "@/app/types/book";
 
-const testBook = {
-  id: "1",
-  title: "Учебник математики 10 класс",
-  author: "Иванов И.И.",
-  subject: "Математика",
-  grade: "10 класс",
-  publisher: "Көкжиек-Горизонт",
-  language: "Қазақ тілі",
-  description:
-    "Современный учебник по математике для 10 класса с примерами, задачами и практическими заданиями.",
-  coverUrl: "https://placehold.co/600x400@2x.png",
+const LANGUAGE_MAP: Record<string, string> = {
+  kk: "Қазақ тілі",
+  ru: "Русский",
+  en: "English",
 };
 
 export function BookPageSkeleton() {
@@ -33,19 +27,18 @@ export function BookPageSkeleton() {
 export default function BookPageClient() {
   const searchParams = useSearchParams();
   const id = searchParams.get("book");
-  const book = testBook;
-  const [bookData, setBookData] = useState(testBook);
+  const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { setChapters } = useChaptersStore();
 
   useEffect(() => {
     if (!id) return;
 
-    async function getChapters() {
+    async function fetchBook() {
       setIsLoading(true);
       try {
         const token = localStorage.getItem("token");
-        const data = await fetch(
+        const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
           {
             headers: {
@@ -54,35 +47,33 @@ export default function BookPageClient() {
             method: "GET",
           }
         );
-        const res = await data.json();
-        console.log("Book response:", res);
+        const res = await response.json();
         setChapters(res.data?.chapters ?? []);
-        setBookData(res.data);
+        setBook(res.data);
       } catch (error) {
-        console.error("Error fetching chapters:", error);
+        console.error("Error fetching book:", error);
       } finally {
         setIsLoading(false);
       }
     }
 
-    getChapters();
+    fetchBook();
   }, [id, setChapters]);
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-6">
       <div className="mx-auto">
-        {isLoading ? (
+        {isLoading || !book ? (
           <BookInfoCardSkeleton />
         ) : (
           <BookInfoCard
-            title={bookData.title}
-            author={book.author}
-            subject={book.subject}
-            grade={book.grade}
-            publisher={book.publisher}
-            language={book.language}
-            description={bookData.description}
-            coverUrl={book.coverUrl}
+            title={book.title}
+            author={book.settings?.author}
+            subject={book.subject?.name_ru}
+            grade={book.grade?.label}
+            language={LANGUAGE_MAP[book.language] ?? book.language}
+            description={book.description}
+            coverUrl={book.cover_image_url}
           />
         )}
       </div>

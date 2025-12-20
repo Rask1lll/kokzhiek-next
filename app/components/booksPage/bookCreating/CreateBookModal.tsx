@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, ChangeEvent, useCallback } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { CreateBookPayload } from "@/app/types/CreateBookPayload";
 import { useBooks } from "@/app/hooks/useBooks";
+import { Subject } from "@/app/types/subject";
+import { fetchSubjects } from "@/app/services/subjectsApi";
 
 const LANGUAGE_CODE_MAP: Record<string, "kk" | "ru" | "en"> = {
   "Қазақ тілі": "kk",
@@ -14,15 +16,34 @@ const LANGUAGE_CODE_MAP: Record<string, "kk" | "ru" | "en"> = {
 export default function CreateBookModal() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
-  const [subject, setSubject] = useState("Математика");
+  const [subjectId, setSubjectId] = useState<number | null>(null);
   const [grade, setGrade] = useState("1");
   const [language, setLanguage] = useState("Қазақ тілі");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("Начальный");
   const [isbn, setIsbn] = useState("");
   const [, setCoverFile] = useState<File | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
   const { createBook } = useBooks();
   const { removeContent } = useModalWindowStore();
+
+  useEffect(() => {
+    async function loadSubjects() {
+      setSubjectsLoading(true);
+
+      const response = await fetchSubjects();
+      if (response?.data) {
+        setSubjects(response.data);
+        if (response.data.length > 0) {
+          setSubjectId(response.data[0].id);
+        }
+      }
+
+      setSubjectsLoading(false);
+    }
+    loadSubjects();
+  }, []);
 
   const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -38,6 +59,7 @@ export default function CreateBookModal() {
       description: description.trim() || undefined,
       language: languageCode || undefined,
       grade_id: gradeId || undefined,
+      subject_id: subjectId ?? undefined,
       isbn: isbn.trim() || undefined,
       settings: {
         author: author.trim() || undefined,
@@ -138,13 +160,21 @@ export default function CreateBookModal() {
             </label>
             <select
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              value={subjectId ?? ""}
+              onChange={(e) => setSubjectId(Number(e.target.value))}
+              disabled={subjectsLoading}
             >
-              <option value="Математика">Математика</option>
-              <option value="Физика">Физика</option>
-              <option value="История">История</option>
-              <option value="Информатика">Информатика</option>
+              {subjectsLoading ? (
+                <option value="">Загрузка...</option>
+              ) : subjects.length === 0 ? (
+                <option value="">Нет предметов</option>
+              ) : (
+                subjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name_ru}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 

@@ -5,9 +5,9 @@ import { FiEdit2 } from "react-icons/fi";
 
 type BookInfoCardProps = {
   title: string;
-  author: string;
-  subject: string;
-  grade: string;
+  author?: string;
+  subject?: string;
+  grade?: string;
   publisher?: string;
   language?: string;
   description?: string;
@@ -46,7 +46,9 @@ export default function BookInfoCard({
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
               {title}
             </h1>
-            <p className="mt-1 text-sm text-gray-600">Автор: {author}</p>
+            {author && (
+              <p className="mt-1 text-sm text-gray-600">Автор: {author}</p>
+            )}
           </div>
 
           <button
@@ -60,22 +62,26 @@ export default function BookInfoCard({
 
         {/* Метаданные */}
         <div className="flex flex-wrap gap-2 text-xs md:text-sm">
-          <span className="inline-flex items-center rounded-full bg-indigo-50 text-indigo-700 px-3 py-1">
-            Класс: {grade}
-          </span>
-          <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-3 py-1">
-            Предмет: {subject}
-          </span>
-          {publisher ? (
+          {grade && (
+            <span className="inline-flex items-center rounded-full bg-indigo-50 text-indigo-700 px-3 py-1">
+              Класс: {grade}
+            </span>
+          )}
+          {subject && (
+            <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-3 py-1">
+              Предмет: {subject}
+            </span>
+          )}
+          {publisher && (
             <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-3 py-1">
               Издательство: {publisher}
             </span>
-          ) : null}
-          {language ? (
+          )}
+          {language && (
             <span className="inline-flex items-center rounded-full bg-purple-50 text-purple-700 px-3 py-1">
               Язык: {language}
             </span>
-          ) : null}
+          )}
         </div>
 
         {description ? (

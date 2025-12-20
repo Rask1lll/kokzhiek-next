@@ -15,31 +15,62 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     setLoading(true);
+    setError(null);
+    setFieldErrors({});
     event.preventDefault();
 
-    const userData = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/register`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          name: firstName,
-          email,
-          password,
-          password_confirmation: confirmPassword,
-        }),
+    try {
+      const userData = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/register`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            name: firstName,
+            email,
+            password,
+            password_confirmation: confirmPassword,
+          }),
+        }
+      );
+
+      const res = await userData.json();
+
+      if (!userData.ok) {
+        if (res.errors) {
+          setFieldErrors(res.errors);
+        }
+        if (res.message) {
+          setError(res.message);
+        } else {
+          setError("Произошла ошибка при регистрации");
+        }
+        setLoading(false);
+        return;
       }
-    );
-    setLoading(false);
-    const res = await userData.json();
-    localStorage.setItem("token", res.data.token);
-    redirect("/books");
+
+      localStorage.setItem("token", res.data.token);
+      redirect("/books");
+    } catch {
+      setError("Ошибка сети. Попробуйте позже.");
+      setLoading(false);
+    }
+  };
+
+  const getInputClassName = (fieldName: string, hasRightPadding = false) => {
+    const hasError = fieldErrors[fieldName];
+    const baseClass = `w-full px-4 py-3 ${hasRightPadding ? "pr-12" : ""} border rounded-xl focus:ring-2 focus:border-transparent transition-all outline-none`;
+    return hasError
+      ? `${baseClass} border-red-500 focus:ring-red-500 bg-red-50`
+      : `${baseClass} border-gray-300 focus:ring-indigo-500`;
   };
 
   return (
@@ -73,6 +104,12 @@ export default function RegisterPage() {
           </h2>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -81,10 +118,15 @@ export default function RegisterPage() {
                 <input
                   type="text"
                   placeholder="Введите имя"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-sm"
+                  className={`${getInputClassName("name")} text-sm`}
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                 />
+                {fieldErrors.name && (
+                  <p className="mt-1.5 text-xs text-red-600">
+                    {fieldErrors.name[0]}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -108,10 +150,15 @@ export default function RegisterPage() {
               <input
                 type="email"
                 placeholder="example@domain.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                className={getInputClassName("email")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {fieldErrors.email && (
+                <p className="mt-1.5 text-xs text-red-600">
+                  {fieldErrors.email[0]}
+                </p>
+              )}
             </div>
 
             {/* Пароль */}
@@ -123,7 +170,7 @@ export default function RegisterPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Минимум 8 символов"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                  className={getInputClassName("password", true)}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -153,9 +200,15 @@ export default function RegisterPage() {
                   </svg>
                 </button>
               </div>
-              <p className="mt-1.5 text-xs text-gray-500">
-                Используйте буквы, цифры и специальные символы
-              </p>
+              {fieldErrors.password ? (
+                <p className="mt-1.5 text-xs text-red-600">
+                  {fieldErrors.password[0]}
+                </p>
+              ) : (
+                <p className="mt-1.5 text-xs text-gray-500">
+                  Используйте буквы, цифры и специальные символы
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -165,7 +218,7 @@ export default function RegisterPage() {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Повторите пароль"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                  className={getInputClassName("password_confirmation", true)}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
@@ -195,6 +248,11 @@ export default function RegisterPage() {
                   </svg>
                 </button>
               </div>
+              {fieldErrors.password_confirmation && (
+                <p className="mt-1.5 text-xs text-red-600">
+                  {fieldErrors.password_confirmation[0]}
+                </p>
+              )}
             </div>
 
             {/* Ключ регистрации */}
