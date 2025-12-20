@@ -2,7 +2,7 @@
 
 import Button from "@/app/components/Button/Button";
 import { useMemo } from "react";
-import { FiX, FiChevronUp, FiChevronDown, FiImage } from "react-icons/fi";
+import { FiX, FiChevronUp, FiChevronDown, FiImage, FiRefreshCw } from "react-icons/fi";
 
 type MatchPairsProps = {
   value: string;
@@ -127,7 +127,8 @@ export default function MatchPairs({ value, onChange }: MatchPairsProps) {
           </span>
           <div className="flex gap-2">
             <Button
-              content="🔄 Перемешать"
+              content="Перемешать"
+              icon={<FiRefreshCw className="w-3.5 h-3.5" />}
               color="slate"
               size="sm"
               onClick={shuffleAnswers}

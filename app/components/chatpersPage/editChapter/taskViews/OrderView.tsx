@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { parseData } from "@/app/libs/parseData";
-import { FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { FiChevronUp, FiChevronDown, FiRefreshCw } from "react-icons/fi";
 
 type OrderViewProps = {
   value: string;
@@ -119,7 +119,8 @@ export default function OrderView({ value, onChange }: OrderViewProps) {
           onClick={reshuffle}
           className="px-3 py-1 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
         >
-          🔄 Перемешать
+          <FiRefreshCw className="w-4 h-4 inline mr-1" />
+          Перемешать
         </button>
       </div>
 

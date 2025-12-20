@@ -1,5 +1,7 @@
 "use client";
 
+import { ReactNode } from "react";
+
 type ButtonColor = "indigo" | "blue" | "green" | "red" | "orange" | "slate";
 
 type ButtonProps = {
@@ -9,6 +11,7 @@ type ButtonProps = {
   onClick: (value: string) => void;
   content: string;
   value?: string;
+  icon?: ReactNode;
 };
 
 const colorStyles: Record<ButtonColor, { active: string; inactive: string }> = {
@@ -52,11 +55,12 @@ export default function Button({
   onClick,
   content,
   value,
+  icon,
 }: ButtonProps) {
   return (
     <button
       className={`
-        rounded-lg font-medium transition-colors
+        rounded-lg font-medium transition-colors inline-flex items-center gap-1
         ${sizeStyles[size]}
         ${isActive ? colorStyles[color].active : colorStyles[color].inactive}
       `}
@@ -64,6 +68,7 @@ export default function Button({
         onClick(value || "");
       }}
     >
+      {icon}
       {content}
     </button>
   );
