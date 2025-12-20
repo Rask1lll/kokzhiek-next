@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import {
   ApiResult,
+  GetBooksParams,
   handleCreateBook,
   handleDeleteBook,
   handleGetBook,
@@ -16,10 +17,10 @@ import { UpdateBookPayload } from "../types/UpdateBookPayload";
 export function useBooks() {
   const { addBook, updateBook, setBooks, setIsLoading, isLoading } = useBooksStore();
 
-  const getBooks = useCallback(async () => {
+  const getBooks = useCallback(async (params?: GetBooksParams) => {
     setIsLoading(true);
     const resData: ConstructorResponse<Book[]> | undefined =
-      await handleGetBooks();
+      await handleGetBooks(params);
     if (!resData || !resData.success) {
       setIsLoading(false);
       return;

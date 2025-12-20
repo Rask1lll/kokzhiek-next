@@ -31,16 +31,28 @@ export async function handleCreateBook(
   }
 }
 
-export async function handleGetBooks(): Promise<
-  ConstructorResponse<Book[]> | undefined
-> {
+export type GetBooksParams = {
+  sort_by?: "recent" | "title";
+  sort_order?: "asc" | "desc";
+};
+
+export async function handleGetBooks(
+  params?: GetBooksParams
+): Promise<ConstructorResponse<Book[]> | undefined> {
   try {
-    const data = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books`,
-      {
-        headers: getAuthHeaders(),
-      }
+    const url = new URL(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books`
     );
+    if (params?.sort_by) {
+      url.searchParams.set("sort_by", params.sort_by);
+    }
+    if (params?.sort_order) {
+      url.searchParams.set("sort_order", params.sort_order);
+    }
+
+    const data = await fetch(url.toString(), {
+      headers: getAuthHeaders(),
+    });
     return data.json();
   } catch (error) {
     console.error("Error fetching books:", error);

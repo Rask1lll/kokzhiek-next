@@ -14,20 +14,31 @@ const FILTERS = [
 ] as const;
 
 const SORT_OPTIONS = [
-  { id: "recent", label: "Недавние" },
-  { id: "title", label: "По названию" },
-  { id: "progress", label: "По прогрессу" },
+  { id: "recent-desc", label: "Сначала новые" },
+  { id: "recent-asc", label: "Сначала старые" },
+  { id: "title-asc", label: "По названию (А-Я)" },
+  { id: "title-desc", label: "По названию (Я-А)" },
 ] as const;
 
 type FilterId = (typeof FILTERS)[number]["id"];
 type SortId = (typeof SORT_OPTIONS)[number]["id"];
 
+export type SortBy = "recent" | "title";
+export type SortOrder = "asc" | "desc";
+
 export type BooksFilterState = {
   search: string;
   filter: FilterId;
   sort: SortId;
+  sortBy: SortBy;
+  sortOrder: SortOrder;
   viewMode: ViewMode;
 };
+
+function parseSortOption(sortId: SortId): { sortBy: SortBy; sortOrder: SortOrder } {
+  const [sortBy, sortOrder] = sortId.split("-") as [SortBy, SortOrder];
+  return { sortBy, sortOrder };
+}
 
 type BooksFilterBarProps = {
   onChange?: (state: BooksFilterState) => void;
@@ -36,16 +47,21 @@ type BooksFilterBarProps = {
 export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
-  const [sortBy, setSortBy] = useState<SortId>("recent");
+  const [sortOption, setSortOption] = useState<SortId>("recent-desc");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const emitChange = (next: Partial<BooksFilterState>) => {
     if (!onChange) return;
 
+    const currentSort = next.sort ?? sortOption;
+    const { sortBy, sortOrder } = parseSortOption(currentSort);
+
     const fullState: BooksFilterState = {
       search,
       filter: activeFilter,
-      sort: sortBy,
+      sort: currentSort,
+      sortBy,
+      sortOrder,
       viewMode,
       ...next,
     };
@@ -66,7 +82,7 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
 
   const handleSortChange = (id: string) => {
     const typedId = id as SortId;
-    setSortBy(typedId);
+    setSortOption(typedId);
     emitChange({ sort: typedId });
   };
 
@@ -90,7 +106,7 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
           <div className="flex items-center justify-between gap-3 md:justify-end">
             <BooksSortSelect
               options={SORT_OPTIONS}
-                value={sortBy}
+              value={sortOption}
               onChange={handleSortChange}
             />
 
