@@ -8,7 +8,7 @@ import { useBooks } from "@/app/hooks/useBooks";
 
 export default function BooksList() {
   const { books } = useBooksStore();
-  const { getBooks, isLoading } = useBooks();
+  const { deleteBook, getBooks, isLoading } = useBooks();
 
   useEffect(() => {
     getBooks();
@@ -23,16 +23,16 @@ export default function BooksList() {
           <BookCardSkeleton />
           <BookCardSkeleton />
           <BookCardSkeleton />
-          {/* <BookCardSkeleton />
-          <BookCardSkeleton />
-          <BookCardSkeleton />
-          <BookCardSkeleton />
-          <BookCardSkeleton /> */}
         </>
       ) : (
         books.map((el) => {
           return (
-            <BookCard bookId={String(el.id)} name={el.title} key={el.id} />
+            <BookCard
+              bookId={el.id}
+              name={el.title}
+              key={el.id}
+              onDelete={deleteBook}
+            />
           );
         })
       )}

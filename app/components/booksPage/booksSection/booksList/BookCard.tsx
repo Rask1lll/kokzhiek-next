@@ -2,13 +2,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { MdDelete } from "react-icons/md";
 
-export default function BookCard({
-  bookId,
-  name,
-}: {
-  bookId: string;
+type BookCardProps = {
+  bookId: number;
   name: string;
-}) {
+  onDelete: (bookId: number, bookTitle: string) => void;
+};
+
+export default function BookCard({ bookId, name, onDelete }: BookCardProps) {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete(bookId, name);
+  };
+
   return (
     <div className="relative group">
       <div className="hover:scale-102 duration-100 cursor-pointer">
@@ -39,6 +45,7 @@ export default function BookCard({
 
         <button
           type="button"
+          onClick={handleDelete}
           className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hover:bg-red-600 cursor-pointer"
         >
           <MdDelete className="w-5 h-5" />

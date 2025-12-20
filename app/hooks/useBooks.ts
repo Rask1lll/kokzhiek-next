@@ -1,12 +1,17 @@
 import { useCallback } from "react";
-import { handleCreateBook, handleGetBooks } from "../services/book/booksApi";
+import {
+  handleCreateBook,
+  handleDeleteBook,
+  handleGetBooks,
+} from "../services/book/booksApi";
 import { useBooksStore } from "../store/booksStore";
 import { Book } from "../types/book";
 import { ConstructorResponse } from "../types/constructorResponse";
 import { CreateBookPayload } from "../types/CreateBookPayload";
 
 export function useBooks() {
-  const { addBook, setBooks, setIsLoading, isLoading } = useBooksStore();
+  const { addBook, removeBook, setBooks, setIsLoading, isLoading } =
+    useBooksStore();
 
   const getBooks = useCallback(async () => {
     setIsLoading(true);
@@ -34,5 +39,19 @@ export function useBooks() {
     return resData;
   };
 
-  return { createBook, getBooks, isLoading };
+  const deleteBook = async (bookId: number, bookTitle: string) => {
+    const confirmed = window.confirm(
+      `Вы уверены, что хотите удалить книгу "${bookTitle}"?`
+    );
+    if (!confirmed) return false;
+
+    const resData = await handleDeleteBook(bookId);
+    if (!resData || !resData.success) {
+      return false;
+    }
+    removeBook(bookId);
+    return true;
+  };
+
+  return { createBook, deleteBook, getBooks, isLoading };
 }
