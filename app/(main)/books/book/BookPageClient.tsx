@@ -1,12 +1,13 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import BookInfoCard from "@/app/components/bookDetailsPage.tsx/BookInfoCard";
 import BookInfoCardSkeleton from "@/app/components/bookDetailsPage.tsx/BookInfoCardSkeleton";
 import ChaptersContainer from "@/app/components/bookDetailsPage.tsx/ChaptersContainer";
 import { useEffect, useState } from "react";
 import { useChaptersStore } from "@/app/store/chaptersStore";
 import { Book } from "@/app/types/book";
+import { handleDeleteBook } from "@/app/services/book/booksApi";
 
 const LANGUAGE_MAP: Record<string, string> = {
   kk: "Қазақ тілі",
@@ -26,10 +27,23 @@ export function BookPageSkeleton() {
 
 export default function BookPageClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = searchParams.get("book");
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { setChapters } = useChaptersStore();
+
+  const onDeleteBook = async () => {
+    if (!book) return;
+
+    const confirmed = window.confirm(
+      `Вы уверены, что хотите удалить книгу "${book.title}"?`
+    );
+    if (!confirmed) return;
+
+    router.push("/books");
+    await handleDeleteBook(book.id);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -74,6 +88,7 @@ export default function BookPageClient() {
             language={LANGUAGE_MAP[book.language] ?? book.language}
             description={book.description}
             coverUrl={book.cover_image_url}
+            onDelete={onDeleteBook}
           />
         )}
       </div>

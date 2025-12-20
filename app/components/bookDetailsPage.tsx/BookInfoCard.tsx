@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FiEdit2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 
 type BookInfoCardProps = {
   title: string;
@@ -12,6 +12,7 @@ type BookInfoCardProps = {
   language?: string;
   description?: string;
   coverUrl?: string;
+  onDelete?: () => void;
 };
 
 export default function BookInfoCard({
@@ -23,6 +24,7 @@ export default function BookInfoCard({
   language,
   description,
   coverUrl = "https://placehold.co/600x400@2x.png",
+  onDelete,
 }: BookInfoCardProps) {
   return (
     <section className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6 flex gap-5 mx-10">
@@ -51,13 +53,25 @@ export default function BookInfoCard({
             )}
           </div>
 
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors"
-          >
-            <FiEdit2 className="h-4 w-4" />
-            <span>Редактировать</span>
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors"
+            >
+              <FiEdit2 className="h-4 w-4" />
+              <span>Редактировать</span>
+            </button>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={onDelete}
+                className="inline-flex items-center gap-2 rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:border-red-400 transition-colors"
+              >
+                <FiTrash2 className="h-4 w-4" />
+                <span>Удалить</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Метаданные */}
