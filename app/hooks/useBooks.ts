@@ -45,10 +45,8 @@ export function useBooks() {
     if (!confirmed) return false;
 
     const resData = await handleDeleteBook(bookId);
-    console.log("GGGGGGGGGDeleting book with ID:", resData);
-   
     await getBooks();
-    // updateBook();
+
     return true;
   };
 
