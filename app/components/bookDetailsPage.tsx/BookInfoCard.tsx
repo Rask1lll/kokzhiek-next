@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 
 type BookInfoCardProps = {
+  bookId: number | string;
   title: string;
   author?: string;
   subject?: string;
@@ -18,6 +20,7 @@ type BookInfoCardProps = {
 const PLACEHOLDER_COVER = "https://placehold.co/600x400@2x.png";
 
 export default function BookInfoCard({
+  bookId,
   title,
   author,
   subject,
@@ -56,13 +59,13 @@ export default function BookInfoCard({
           </div>
 
           <div className="flex gap-2">
-            <button
-              type="button"
+            <Link
+              href={`/books/book/edit?book=${bookId}`}
               className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors"
             >
               <FiEdit2 className="h-4 w-4" />
               <span>Редактировать</span>
-            </button>
+            </Link>
             {onDelete && (
               <button
                 type="button"

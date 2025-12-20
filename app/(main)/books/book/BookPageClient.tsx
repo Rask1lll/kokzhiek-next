@@ -81,6 +81,7 @@ export default function BookPageClient() {
           <BookInfoCardSkeleton />
         ) : (
           <BookInfoCard
+            bookId={book.id}
             title={book.title}
             author={book.settings?.author}
             subject={book.subject?.name_ru}

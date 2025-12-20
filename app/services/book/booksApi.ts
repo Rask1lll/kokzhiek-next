@@ -2,6 +2,7 @@ import { getAuthHeaders } from "../../libs/auth";
 import { Book } from "../../types/book";
 import { ConstructorResponse } from "../../types/constructorResponse";
 import { CreateBookPayload } from "../../types/CreateBookPayload";
+import { UpdateBookPayload } from "../../types/UpdateBookPayload";
 
 export async function handleCreateBook(
   payload: CreateBookPayload
@@ -41,18 +42,48 @@ export async function handleGetBooks(): Promise<
   }
 }
 
-export async function handleDeleteBook(
-  id: number
-){
+export async function handleDeleteBook(id: number): Promise<void> {
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`, {
+      headers: getAuthHeaders(),
+      method: "DELETE",
+    });
+  } catch (error) {
+    console.error("Error deleting book:", error);
+  }
+}
+
+export async function handleUpdateBook(
+  id: number,
+  payload: UpdateBookPayload
+): Promise<ConstructorResponse<Book> | undefined> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
       {
         headers: getAuthHeaders(),
-        method: "DELETE",
+        method: "PUT",
+        body: JSON.stringify(payload),
       }
     );
+    return res.json();
   } catch (error) {
-    console.error("Error deleting book:", error);
+    console.error("Error updating book:", error);
+  }
+}
+
+export async function handleGetBook(
+  id: number
+): Promise<ConstructorResponse<Book> | undefined> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching book:", error);
   }
 }
