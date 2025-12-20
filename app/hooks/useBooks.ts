@@ -10,8 +10,7 @@ import { ConstructorResponse } from "../types/constructorResponse";
 import { CreateBookPayload } from "../types/CreateBookPayload";
 
 export function useBooks() {
-  const { addBook, removeBook, setBooks, setIsLoading, isLoading } =
-    useBooksStore();
+  const { addBook, updateBook, setBooks, setIsLoading, isLoading } = useBooksStore();
 
   const getBooks = useCallback(async () => {
     setIsLoading(true);
@@ -46,10 +45,10 @@ export function useBooks() {
     if (!confirmed) return false;
 
     const resData = await handleDeleteBook(bookId);
-    if (!resData || !resData.success) {
-      return false;
-    }
-    removeBook(bookId);
+    console.log("GGGGGGGGGDeleting book with ID:", resData);
+   
+    await getBooks();
+    // updateBook();
     return true;
   };
 

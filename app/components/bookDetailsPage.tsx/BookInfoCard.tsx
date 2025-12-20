@@ -15,6 +15,8 @@ type BookInfoCardProps = {
   onDelete?: () => void;
 };
 
+const PLACEHOLDER_COVER = "https://placehold.co/600x400@2x.png";
+
 export default function BookInfoCard({
   title,
   author,
@@ -23,7 +25,7 @@ export default function BookInfoCard({
   publisher,
   language,
   description,
-  coverUrl = "https://placehold.co/600x400@2x.png",
+  coverUrl,
   onDelete,
 }: BookInfoCardProps) {
   return (
@@ -32,7 +34,7 @@ export default function BookInfoCard({
       <div className="relative shrink-0">
         <div className="overflow-hidden rounded-xl bg-gray-100 w-[150px] h-[200px] md:w-[180px] md:h-[240px]">
           <Image
-            src={coverUrl}
+            src={coverUrl || PLACEHOLDER_COVER}
             alt={title}
             width={200}
             height={280}

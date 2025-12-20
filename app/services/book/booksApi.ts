@@ -43,7 +43,7 @@ export async function handleGetBooks(): Promise<
 
 export async function handleDeleteBook(
   id: number
-): Promise<ConstructorResponse<null> | undefined> {
+){
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
@@ -52,7 +52,6 @@ export async function handleDeleteBook(
         method: "DELETE",
       }
     );
-    return res.json();
   } catch (error) {
     console.error("Error deleting book:", error);
   }
