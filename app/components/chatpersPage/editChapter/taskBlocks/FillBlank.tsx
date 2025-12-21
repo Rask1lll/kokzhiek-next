@@ -44,18 +44,12 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
     if (questionsArray.length > 0) {
       const firstQuestion = questionsArray[0];
       // Ensure data structure is correct
-      const normalizedQuestion = {
-        ...firstQuestion,
-        data:
-          firstQuestion.data &&
-          typeof firstQuestion.data === "object" &&
-          "blanks" in firstQuestion.data
-            ? firstQuestion.data
-            : { blanks: [] },
-      };
+      if (!firstQuestion.data || !Array.isArray(firstQuestion.data.blanks)) {
+        firstQuestion.data = { blanks: [] };
+      }
       hasInitializedRef.current = true;
       setIsInitialLoading(false);
-      setCurrentQuestion(normalizedQuestion);
+      setCurrentQuestion(firstQuestion);
       return;
     }
 
@@ -119,10 +113,10 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
       // Update local state immediately
       setCurrentQuestion((prev) => {
         if (!prev) return null;
+        // Preserve data structure when updating body
         return {
           ...prev,
           body,
-          // Preserve data structure
           data: prev.data || { blanks: [] },
         };
       });
@@ -137,7 +131,11 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
       const currentData = currentQuestion.data || { blanks: [] };
       debounceTimerRef.current = setTimeout(async () => {
         if (!questionId) return;
-        await update(questionId, { body, data: currentData });
+        // Preserve data structure when updating
+        await update(questionId, {
+          body,
+          data: currentData,
+        });
       }, 500);
     },
     [currentQuestion, update]
@@ -146,7 +144,11 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
   const insertBlank = useCallback(async () => {
     if (!currentQuestion?.id) return;
 
-    const blanks = (currentQuestion.data?.blanks as string[]) || [];
+    // Ensure data.blanks exists and is an array
+    const currentData = currentQuestion.data || {};
+    const blanks = (
+      Array.isArray(currentData.blanks) ? currentData.blanks : []
+    ) as string[];
     const blankId = `blank${blanks.length}`;
     const placeholder = `{{${blankId}}}`;
     const newBody = (currentQuestion.body || "") + placeholder;
@@ -158,7 +160,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
       return {
         ...prev,
         body: newBody,
-        data: { blanks: newBlanks },
+        data: { ...prev.data, blanks: newBlanks },
       };
     });
 
@@ -185,7 +187,8 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
           opt.match_id === blankId ? { ...opt, body: answer } : opt
         );
       } else {
-        // Create new option if it doesn't exist (only if answer is not empty)
+        // Create new option if it doesn't exist
+        // Only create if answer is not empty
         if (answer.trim()) {
           newOptions = [
             ...(currentQuestion.options || []),
@@ -200,7 +203,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
           ];
         } else {
           // Don't create option if answer is empty
-          newOptions = currentQuestion.options || [];
+          return;
         }
       }
 
