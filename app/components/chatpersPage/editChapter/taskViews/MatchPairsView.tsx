@@ -124,124 +124,120 @@ export default function MatchPairsView({
       <div className="text-sm text-slate-600 text-center">
         Перетащите варианты ответа в соответствующие ячейки
       </div>
-      <div className="flex">
-        {/* Answers on left - shuffled */}
-        <div className="space-y-3 w-1/2">
-          <h3 className="text-sm font-medium text-slate-700 mb-2">
-            Варианты ответа:
-          </h3>
-          <div className="space-y-2">
-            {shuffledAnswers.map((answer) => {
-              const isMatched = isAnswerMatched(answer.id);
 
-              return (
-                <div
-                  key={answer.id}
-                  draggable={!isMatched}
-                  onDragStart={() => handleDragStart(answer.id)}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all ${
-                    isMatched
-                      ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
-                      : draggedAnswerId === answer.id
-                      ? "bg-blue-100 border-blue-400 scale-105 cursor-grabbing"
-                      : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-move"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {answer.imageUrl && (
-                      <img
-                        src={answer.imageUrl}
-                        alt=""
-                        className="w-8 h-8 object-cover rounded"
-                      />
-                    )}
-                    <span className="text-sm font-medium text-gray-800">
-                      {answer.text || "Пусто"}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      {/* Grid layout: each row = answer + arrow + cell */}
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
+        {/* Header row */}
+        <div className="text-sm font-medium text-slate-700">
+          Варианты ответа:
         </div>
+        <div></div>
+        <div className="text-sm font-medium text-slate-700">Ячейки:</div>
 
-        {/* Cells on right */}
-        <div className="space-y-3 w-1/2">
-          <h3 className="text-sm font-medium text-slate-700 mb-2">Ячейки:</h3>
-          <div className="space-y-3">
-            {data.pairs.map((pair) => {
-              const matchedAnswer = getMatchedAnswerForCell(pair.id);
+        {/* Content rows */}
+        {data.pairs.map((pair, index) => {
+          const matchedAnswer = getMatchedAnswerForCell(pair.id);
 
-              return (
-                <div
-                  key={pair.id}
-                  className="flex items-center gap-4 p-3 bg-white rounded-lg border border-slate-200"
-                >
-                  {/* Arrow */}
-                  <div className="shrink-0 text-slate-400">
-                    <CgArrowRight className="w-5 h-5" />
-                  </div>
+          // Find the answer that should be shown in this row (from shuffled answers)
+          // We'll show shuffled answers in order, one per row
+          const answerForRow = shuffledAnswers[index] || null;
+          const answerIsMatched = answerForRow
+            ? isAnswerMatched(answerForRow.id)
+            : false;
 
-                  {/* Cell */}
-                  <div className="flex-1">
-                    <div
-                      onDragOver={handleDragOver}
-                      onDrop={() => handleDrop(pair.id)}
-                      className={`min-h-[60px] p-4 rounded-lg border-2 transition-all ${
-                        matchedAnswer
-                          ? "bg-slate-100 border-slate-400"
-                          : "bg-slate-50 border-slate-300 border-dashed hover:border-blue-400"
-                      }`}
-                    >
-                      {matchedAnswer ? (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-end">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveMatch(matchedAnswer.id)
-                              }
-                              className="text-xs text-red-500 hover:text-red-700"
-                            >
-                              Удалить
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {matchedAnswer.imageUrl && (
-                              <img
-                                src={matchedAnswer.imageUrl}
-                                alt=""
-                                className="w-8 h-8 object-cover rounded"
-                              />
-                            )}
-                            <span className="text-sm font-medium text-gray-800">
-                              {matchedAnswer.text}
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <div className="text-center">
-                            {pair.cell.imageUrl && (
-                              <img
-                                src={pair.cell.imageUrl}
-                                alt=""
-                                className="w-10 h-10 object-cover rounded mx-auto mb-2"
-                              />
-                            )}
-                            <p className="text-sm text-slate-500">
-                              {pair.cell.text || "Перетащите сюда"}
-                            </p>
-                          </div>
-                        </div>
+          return (
+            <div key={pair.id} className="contents">
+              {/* Answer column */}
+              <div className="flex items-center">
+                {answerForRow && (
+                  <div
+                    draggable={!answerIsMatched}
+                    onDragStart={() => handleDragStart(answerForRow.id)}
+                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all ${
+                      answerIsMatched
+                        ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
+                        : draggedAnswerId === answerForRow.id
+                        ? "bg-blue-100 border-blue-400 scale-105 cursor-grabbing"
+                        : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-move"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {answerForRow.imageUrl && (
+                        <img
+                          src={answerForRow.imageUrl}
+                          alt=""
+                          className="w-8 h-8 object-cover rounded shrink-0"
+                        />
                       )}
+                      <span className="text-sm font-medium text-gray-800 break-words">
+                        {answerForRow.text || "Пусто"}
+                      </span>
                     </div>
                   </div>
+                )}
+              </div>
+
+              {/* Arrow column */}
+              <div className="flex items-center justify-center px-2">
+                <CgArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
+              </div>
+
+              {/* Cell column */}
+              <div className="flex items-center">
+                <div
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleDrop(pair.id)}
+                  className={`w-full min-h-[60px] p-4 rounded-lg border-2 transition-all ${
+                    matchedAnswer
+                      ? "bg-slate-100 border-slate-400"
+                      : "bg-slate-50 border-slate-300 border-dashed hover:border-blue-400"
+                  }`}
+                >
+                  {matchedAnswer ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-end">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMatch(matchedAnswer.id)}
+                          className="text-xs text-red-500 hover:text-red-700"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {matchedAnswer.imageUrl && (
+                          <img
+                            src={matchedAnswer.imageUrl}
+                            alt=""
+                            className="w-8 h-8 object-cover rounded shrink-0"
+                          />
+                        )}
+                        <span className="text-sm font-medium text-gray-800 break-words">
+                          {matchedAnswer.text}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center min-h-[60px]">
+                      <div className="text-center">
+                        {pair.cell.imageUrl && (
+                          <img
+                            src={pair.cell.imageUrl}
+                            alt=""
+                            className="w-10 h-10 object-cover rounded mx-auto mb-2"
+                          />
+                        )}
+                        <p className="text-sm text-slate-500">
+                          {pair.cell.text || "Перетащите сюда"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
