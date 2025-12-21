@@ -63,13 +63,15 @@ export default function DragDrop({ value, onChange }: Props) {
     });
     setData({ ...data, cells: result });
   }
+
   return (
-    <div className="w-full">
-      <div className="flex justify-between my-2 pr-3">
-        <p className="text-slate-600 text-sm font-medium">
-          Текст задания
+    <div className="w-full space-y-4">
+      {/* Заголовок с кнопкой */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <p className="text-gray-700 font-semibold">Текст задания</p>
           <span
-            className="ml-5 relative bg-gray-300 p-2 py-1 rounded-full"
+            className="relative inline-flex items-center justify-center w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs font-bold rounded-full cursor-help transition-colors"
             onMouseEnter={() => {
               setShowHint(true);
             }}
@@ -77,68 +79,82 @@ export default function DragDrop({ value, onChange }: Props) {
               setShowHint(false);
             }}
           >
-            ?{" "}
+            ?
             {showHint && (
-              <div className="absolute top-0 left-5 w-40 bg-gray-50 border-2 rounded-2xl z-10 p-2">
-                при созданий новых контейнеров будут появляться ячейки{" "}
-                {"{{{id}}}"} это позиция ячеек
+              <div className="absolute top-8 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-3 text-sm text-gray-600 font-normal">
+                При создании контейнеров в тексте появятся метки{" "}
+                <code className="bg-gray-100 px-1 rounded">{"{{{id}}}"}</code> —
+                это позиции для ответов
               </div>
             )}
           </span>
-        </p>
+        </div>
         <button
           onClick={addCell}
-          className="text-sm bg-green-100 text-green-700 p-2 rounded-lg cursor-pointer font-semibold"
+          className="flex items-center gap-2 text-sm bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg cursor-pointer font-medium transition-colors shadow-sm"
         >
+          <span>+</span>
           Добавить контейнер
         </button>
       </div>
+
+      {/* Текстовое поле */}
       <textarea
-        contentEditable
-        className="w-full resize-none border min-h-16 border-gray-300 p-1 rounded-md outline-0 bg-white"
-        defaultValue={data.content}
+        className="w-full resize-none border-2 border-gray-200 focus:border-blue-400 min-h-24 p-3 rounded-xl outline-none bg-white text-gray-700 transition-colors"
+        placeholder="Введите текст задания..."
         value={data.content}
         onChange={(e) => {
           setData((prev) => ({ ...prev, content: e.target.value }));
           e.target.style.height = `${e.target.scrollHeight}px`;
         }}
       ></textarea>
-      <div className="bg-gray-500/5 p-2 rounded-md">
-        <div className="text-xl my-2">Контейнеры</div>
-        <div className="flex flex-col max-w-300 gap-2">
-          {data.cells.map((el) => {
-            return (
-              <div
-                key={el.id}
-                className=" flex gap-2 text-gray-500 text-xl rounded-md ring-gray-400/60 "
-              >
-                <p className="p-1 w-10">
-                  <span className="text-[18px]">№</span>
-                  {el.id}
-                </p>
-                <div className="flex gap-2 full w-full">
+
+      {/* Контейнеры */}
+      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Контейнеры ответов
+          </h3>
+        </div>
+
+        {data.cells.length === 0 ? (
+          <p className="text-gray-400 text-sm italic text-center py-4">
+            Нет контейнеров. Нажмите «Добавить контейнер» чтобы создать.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {data.cells.map((el) => {
+              return (
+                <div
+                  key={el.id}
+                  className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 font-bold rounded-lg text-sm">
+                    {el.id}
+                  </div>
                   <input
                     type="text"
-                    placeholder="ответ к контейнеру"
+                    placeholder="Введите правильный ответ..."
                     defaultValue={el.answer ?? ""}
-                    className="h-full p-1 ring-1 rounded-lg text-gray-800 bg-gray-200 ring-gray-300 w-full"
+                    className="flex-1 p-2 px-3 border border-gray-200 focus:border-blue-400 rounded-lg text-gray-700 bg-gray-50 focus:bg-white outline-none transition-colors"
                     onChange={(e) => {
                       upDateCell(el.id, e.target.value);
                     }}
                   />
-                  <div
+                  <button
                     onClick={() => {
                       deleteCell(el.id);
                     }}
-                    className="flex items-center justify-center cursor-pointer"
+                    className="flex items-center justify-center w-10 h-10 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg cursor-pointer transition-colors"
                   >
-                    <BiTrash className="w-6 h-6 text-red-400" />
-                  </div>
+                    <BiTrash className="w-5 h-5" />
+                  </button>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
