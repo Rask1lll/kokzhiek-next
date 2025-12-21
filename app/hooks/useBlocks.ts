@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { useBlocksStore } from "@/app/store/blocksStore";
+import { BlockStyle } from "@/app/types/block";
 import {
   createBlock,
   deleteBlock,
   updateBlocksOrder,
+  updateBlockStyle,
 } from "@/app/services/constructor/blocksApi";
 
 export function useBlocks() {
@@ -15,7 +17,18 @@ export function useBlocks() {
     addBlockLocal,
     removeBlockLocal,
     swapBlocksLocal,
+    updateBlockStyleLocal,
   } = useBlocksStore();
+
+  const debounceTimers = useRef<Map<number, NodeJS.Timeout>>(new Map());
+
+  useEffect(() => {
+    const timers = debounceTimers.current;
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
+    };
+  }, []);
 
   // Create block
   const create = useCallback(
@@ -93,11 +106,46 @@ export function useBlocks() {
     [blocks]
   );
 
+  // Update block style (debounced)
+  const updateStyle = useCallback(
+    (blockId: number, style: BlockStyle) => {
+      console.log("updateStyle called:", { blockId, style });
+
+      // Instant local update
+      updateBlockStyleLocal(blockId, style);
+
+      // Clear existing timer
+      const existingTimer = debounceTimers.current.get(blockId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+
+      // Debounced API call
+      const timer = setTimeout(async () => {
+        console.log("Sending API request to update block style:", {
+          blockId,
+          style,
+        });
+        try {
+          const result = await updateBlockStyle(blockId, style);
+          console.log("API response:", result);
+          debounceTimers.current.delete(blockId);
+        } catch (err) {
+          console.error("Error updating block style:", err);
+        }
+      }, 500);
+
+      debounceTimers.current.set(blockId, timer);
+    },
+    [updateBlockStyleLocal]
+  );
+
   return {
     blocks,
     create,
     remove,
     swap,
     getById,
+    updateStyle,
   };
 }

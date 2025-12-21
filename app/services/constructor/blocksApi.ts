@@ -1,4 +1,4 @@
-import { Block } from "@/app/types/block";
+import { Block, BlockStyle } from "@/app/types/block";
 import { ConstructorResponse } from "@/app/types/constructorResponse";
 import { getAuthHeaders } from "@/app/libs/auth";
 import { API_BASE } from "./constructorApi";
@@ -35,4 +35,23 @@ export async function deleteBlock(blockId: number): Promise<void> {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
+}
+
+export async function updateBlockStyle(
+  blockId: number,
+  style: BlockStyle
+): Promise<ConstructorResponse<Block>> {
+  const url = `${API_BASE}/api/v1/blocks/${blockId}`;
+  const body = JSON.stringify({ style });
+  console.log("updateBlockStyle API call:", { url, body });
+
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body,
+  });
+
+  const data = await res.json();
+  console.log("updateBlockStyle response:", data);
+  return data;
 }

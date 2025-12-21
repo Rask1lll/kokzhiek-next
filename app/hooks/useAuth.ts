@@ -12,8 +12,8 @@ export function useAuth() {
     handleGetMe().then((res) => {
       if (res) {
         setUser(res.data);
-      }
-      setLoading(false);
+    }
+    setLoading(false);
     });
   }, []);
 

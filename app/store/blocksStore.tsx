@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { Block } from "../types/block";
+import { Block, BlockStyle } from "../types/block";
 import { Widget, WidgetData } from "../types/widget";
 
 type BlocksStore = {
@@ -14,6 +14,7 @@ type BlocksStore = {
   addBlockLocal: (block: Block) => void;
   removeBlockLocal: (blockId: number) => void;
   swapBlocksLocal: (firstId: number, secondId: number) => void;
+  updateBlockStyleLocal: (blockId: number, style: BlockStyle) => void;
 
   addWidgetLocal: (blockId: number, widget: Widget) => void;
   updateWidgetLocal: (widgetId: number, data: WidgetData) => void;
@@ -27,6 +28,7 @@ function BlockToLocal(Block: Block): Block {
     id: Block.id,
     layout_type: Block.layout_type,
     order: Block.order,
+    style: Block.style ?? {},
     widgets: (Block.widgets || []).map((w) => ({
       id: w.id,
       type: w.type,
@@ -77,6 +79,15 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
 
       return { blocks: blocks.sort((a, b) => a.order - b.order) };
     }),
+
+  updateBlockStyleLocal: (blockId, style) =>
+    set((state) => ({
+      blocks: state.blocks.map((block) =>
+        block.id !== blockId
+          ? block
+          : { ...block, style: { ...block.style, ...style } }
+      ),
+    })),
 
   addWidgetLocal: (blockId, widget) =>
     set((state) => {

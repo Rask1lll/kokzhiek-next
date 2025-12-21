@@ -1,8 +1,26 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
 import { Widget } from "@/app/types/widget";
 import LayoutPlaceholder from "./LayoutPlaceholder";
 import { Block } from "@/app/types/block";
 import { useSearchParams } from "next/navigation";
 import ViewPlaceholder from "./ViewPlaceholder";
+import { useBlocks } from "@/app/hooks/useBlocks";
+import { FiMoreVertical, FiTrash2, FiDroplet } from "react-icons/fi";
+
+// Предустановленные цвета
+const PRESET_COLORS = [
+  { name: "По умолчанию", value: "" },
+  { name: "Белый", value: "#ffffff" },
+  { name: "Светло-серый", value: "#f3f4f6" },
+  { name: "Голубой", value: "#dbeafe" },
+  { name: "Зелёный", value: "#dcfce7" },
+  { name: "Жёлтый", value: "#fef9c3" },
+  { name: "Розовый", value: "#fce7f3" },
+  { name: "Фиолетовый", value: "#ede9fe" },
+  { name: "Оранжевый", value: "#ffedd5" },
+];
 
 type LayoutProps = {
   block: Block;
@@ -113,7 +131,7 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
 
   if (!isEdit) {
     return (
-      <div className={`flex flex-col gap-2 ${className || ""}`}>
+      <div className={`flex flex-col gap-2 w-19/20 ${className || ""}`}>
         {/* Render existing widgets */}
         {widgets.map((widget) => (
           <ViewPlaceholder key={widget.id} widget={widget} />
@@ -123,7 +141,7 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
   }
 
   return (
-    <div className={`flex flex-col gap-2 ${className || ""}`}>
+    <div className={`flex flex-col w-29/30 gap-2 ${className || ""}`}>
       {/* Render existing widgets */}
       {widgets.map((widget) => (
         <LayoutPlaceholder
@@ -148,45 +166,210 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
   );
 };
 
+// Block Menu Component
+type BlockMenuProps = {
+  currentColor: string;
+  onColorChange: (color: string) => void;
+  onDelete: () => void;
+};
+
+const BlockMenu = ({
+  currentColor,
+  onColorChange,
+  onDelete,
+}: BlockMenuProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setShowColorPicker(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-1.5 hover:bg-gray-200 rounded-md transition-colors"
+        title="Меню блока"
+      >
+        <FiMoreVertical className="w-5 h-5 text-gray-500" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[180px] z-20">
+          {/* Color option */}
+          <div className="relative">
+            <button
+              onClick={() => setShowColorPicker(!showColorPicker)}
+              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            >
+              <FiDroplet className="w-4 h-4" />
+              Цвет фона
+              <div
+                className="w-4 h-4 rounded border border-gray-300 ml-auto"
+                style={{
+                  backgroundColor: currentColor || "#f3f4f6",
+                }}
+              />
+            </button>
+
+            {showColorPicker && (
+              <div className="absolute right-full top-0 mr-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[180px] z-30">
+                <div className="grid grid-cols-3 gap-1.5">
+                  {PRESET_COLORS.map((color) => (
+                    <button
+                      key={color.value || "default"}
+                      onClick={() => {
+                        onColorChange(color.value);
+                        setShowColorPicker(false);
+                        setIsOpen(false);
+                      }}
+                      className={`w-10 h-10 rounded-md border-2 transition-transform hover:scale-105 ${
+                        currentColor === color.value
+                          ? "border-blue-500 ring-2 ring-blue-200"
+                          : "border-gray-200"
+                      }`}
+                      style={{
+                        backgroundColor: color.value || "#f3f4f6",
+                      }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+                {/* Custom color */}
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                  <label className="text-xs text-gray-500 block mb-1">
+                    Свой цвет
+                  </label>
+                  <input
+                    type="color"
+                    value={currentColor || "#f3f4f6"}
+                    onChange={(e) => {
+                      onColorChange(e.target.value);
+                      setShowColorPicker(false);
+                      setIsOpen(false);
+                    }}
+                    className="w-full h-8 rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100 my-1" />
+
+          {/* Delete option */}
+          <button
+            onClick={() => {
+              if (confirm("Удалить этот блок?")) {
+                onDelete();
+              }
+              setIsOpen(false);
+            }}
+            className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+          >
+            <FiTrash2 className="w-4 h-4" />
+            Удалить блок
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Layout = ({ block }: LayoutProps) => {
-  const { layout_type, widgets, id } = block;
+  const { layout_type, widgets, id, style } = block;
   const columnsCount = getColumnsCount(layout_type);
   const groupedWidgets = groupWidgetsByColumn(widgets, columnsCount);
+  const params = useSearchParams();
+  const isEdit = params.get("edit");
+  const { remove: removeBlock, updateStyle } = useBlocks();
+
+  const blockColor = style?.color || "";
+
+  const handleColorChange = (color: string) => {
+    updateStyle(id, { color });
+  };
+
+  const handleDelete = async () => {
+    await removeBlock(id);
+  };
+
+  console.log(block);
 
   // Single column layout
   if (columnsCount === 1) {
     const columnWidgets = groupedWidgets.get(0) || [];
     return (
-      <div className="w-full bg-gray-100 rounded-md p-2">
-        <Column
-          blockId={id}
-          columnIndex={0}
-          widgets={columnWidgets}
-          className=""
-        />
+      <div className="relative group/block w-full">
+        <div
+          className="w-full rounded-md p-2 transition-colors"
+          style={{ backgroundColor: blockColor || "#f3f4f6" }}
+        >
+          <Column
+            blockId={id}
+            columnIndex={0}
+            widgets={columnWidgets}
+            className=""
+          />
+        </div>
+        {isEdit && (
+          <div className="absolute top-2 right-[-40px] opacity-0 group-hover/block:opacity-100 transition-opacity">
+            <BlockMenu
+              currentColor={blockColor}
+              onColorChange={handleColorChange}
+              onDelete={handleDelete}
+            />
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="w-full flex gap-4">
-      {Array.from({ length: columnsCount }).map((_, colIndex) => {
-        const columnWidgets = groupedWidgets.get(colIndex) || [];
-        const columnClass = getColumnClasses(layout_type, colIndex);
+    <div className="relative group/block w-full">
+      <div
+        className="w-full flex gap-4 rounded-md p-2 transition-colors"
+        style={{ backgroundColor: blockColor || "#f9fafb" }}
+      >
+        {Array.from({ length: columnsCount }).map((_, colIndex) => {
+          const columnWidgets = groupedWidgets.get(colIndex) || [];
+          const columnClass = getColumnClasses(layout_type, colIndex);
 
-        return (
-          <div
-            key={colIndex}
-            className={`${columnClass} bg-gray-50 rounded-md p-2`}
-          >
-            <Column
-              blockId={id}
-              columnIndex={colIndex}
-              widgets={columnWidgets}
-            />
-          </div>
-        );
-      })}
+          return (
+            <div key={colIndex} className={`${columnClass}`}>
+              <Column
+                blockId={id}
+                columnIndex={colIndex}
+                widgets={columnWidgets}
+              />
+            </div>
+          );
+        })}
+      </div>
+      {isEdit && (
+        <div className="absolute top-2 right-[-40px] opacity-0 group-hover/block:opacity-100 transition-opacity">
+          <BlockMenu
+            currentColor={blockColor}
+            onColorChange={handleColorChange}
+            onDelete={handleDelete}
+          />
+        </div>
+      )}
     </div>
   );
 };

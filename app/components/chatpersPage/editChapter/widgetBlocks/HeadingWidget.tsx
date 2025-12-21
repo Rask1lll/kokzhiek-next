@@ -58,10 +58,10 @@ export default function HeadingWidget({ value, onChange }: HeadingWidgetProps) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-19/20">
       {/* Level selector */}
       <div
-        className={`flex items-center gap-1 mb-2 p-1 bg-gray-50 rounded-lg border border-gray-200 transition-opacity ${"opacity-100"}`}
+        className={`flex items-center gap-1 mb-2 p-1 w-fit bg-gray-50 rounded-lg border border-gray-200 transition-opacity ${"opacity-100"}`}
       >
         <span className="text-xs text-gray-500 px-2">Уровень:</span>
         {([1, 2, 3, 4, 5, 6] as HeadingLevel[]).map((level) => (
