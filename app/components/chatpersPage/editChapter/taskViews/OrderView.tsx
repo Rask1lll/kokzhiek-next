@@ -22,7 +22,7 @@ type OrderData = {
 };
 
 type UserAnswer = {
-  order: string[]; // массив id в порядке, который выбрал пользователь
+  order: string[];
 };
 
 function parseOrderData(value: string): OrderData {
@@ -31,9 +31,7 @@ function parseOrderData(value: string): OrderData {
     if (parsed && Array.isArray(parsed.answers)) {
       return parsed;
     }
-  } catch {
-    // Invalid JSON
-  }
+  } catch {}
   return { answers: [], layout: "vertical", imagePosition: "below" };
 }
 
@@ -114,14 +112,6 @@ export default function OrderView({ value, onChange }: OrderViewProps) {
         <p className="text-sm text-slate-600">
           Расположите ответы в правильном порядке:
         </p>
-        <button
-          type="button"
-          onClick={reshuffle}
-          className="px-3 py-1 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
-        >
-          <FiRefreshCw className="w-4 h-4 inline mr-1" />
-          Перемешать
-        </button>
       </div>
 
       {/* Answers list */}
@@ -192,4 +182,3 @@ export default function OrderView({ value, onChange }: OrderViewProps) {
     </div>
   );
 }
-
