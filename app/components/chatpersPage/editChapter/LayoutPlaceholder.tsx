@@ -172,9 +172,7 @@ const LayoutPlaceholder = ({
         );
         break;
       case "single_choice":
-        widgetContent = (
-          <SingleChoice value={textValue} onChange={handleChange} />
-        );
+        widgetContent = <SingleChoice widgetId={widget.id} />;
         break;
       case "dropdown":
         widgetContent = <DropDown value={textValue} onChange={handleChange} />;

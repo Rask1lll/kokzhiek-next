@@ -87,7 +87,7 @@ export default function ViewPlaceholder({
       break;
     case "single_choice":
       content = (
-        <SingleChoiceView value={textValue} onChange={handleAnswerChange} />
+        <SingleChoiceView widgetId={widget.id} onChange={handleAnswerChange} />
       );
       break;
     case "dropdown":

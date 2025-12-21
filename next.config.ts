@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "placehold.co",
       },
+      {
+        protocol: "https",
+        hostname: "api.next.shaqyrym.online",
+        pathname: "/storage/**",
+      },
     ],
   },
 };
