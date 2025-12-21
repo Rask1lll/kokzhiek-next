@@ -167,9 +167,7 @@ const LayoutPlaceholder = ({
         );
         break;
       case "multiple_choice":
-        widgetContent = (
-          <MultipleChoice value={textValue} onChange={handleChange} />
-        );
+        widgetContent = <MultipleChoice widgetId={widget.id} />;
         break;
       case "single_choice":
         widgetContent = <SingleChoice widgetId={widget.id} />;
@@ -178,15 +176,13 @@ const LayoutPlaceholder = ({
         widgetContent = <DropDown value={textValue} onChange={handleChange} />;
         break;
       case "fill_blank":
-        widgetContent = <FillBlank value={textValue} onChange={handleChange} />;
+        widgetContent = <FillBlank widgetId={widget.id} />;
         break;
       case "crossword":
         widgetContent = <Crossword value={textValue} onChange={handleChange} />;
         break;
       case "match_pairs":
-        widgetContent = (
-          <MatchPairs value={textValue} onChange={handleChange} />
-        );
+        widgetContent = <MatchPairs widgetId={widget.id} />;
         break;
       case "word_search":
         widgetContent = (
