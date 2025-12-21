@@ -35,7 +35,10 @@ export type BooksFilterState = {
   viewMode: ViewMode;
 };
 
-function parseSortOption(sortId: SortId): { sortBy: SortBy; sortOrder: SortOrder } {
+function parseSortOption(sortId: SortId): {
+  sortBy: SortBy;
+  sortOrder: SortOrder;
+} {
   const [sortBy, sortOrder] = sortId.split("-") as [SortBy, SortOrder];
   return { sortBy, sortOrder };
 }
@@ -55,15 +58,17 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
 
     const currentSort = next.sort ?? sortOption;
     const { sortBy, sortOrder } = parseSortOption(currentSort);
+    const currentViewMode = next.viewMode ?? viewMode;
+    const currentSearch = next.search ?? search;
+    const currentFilter = next.filter ?? activeFilter;
 
     const fullState: BooksFilterState = {
-      search,
-      filter: activeFilter,
+      search: currentSearch,
+      filter: currentFilter,
       sort: currentSort,
       sortBy,
       sortOrder,
-      viewMode,
-      ...next,
+      viewMode: currentViewMode,
     };
 
     onChange(fullState);
@@ -88,6 +93,7 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
+    // Explicitly pass the new mode to ensure it's used
     emitChange({ viewMode: mode });
   };
 
