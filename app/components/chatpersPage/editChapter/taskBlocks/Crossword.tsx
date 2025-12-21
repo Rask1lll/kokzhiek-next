@@ -242,6 +242,9 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
                   onChange={(e) =>
                     updateQuestion(q.id, { question: e.target.value })
                   }
+                  onBlur={(e) =>
+                    updateQuestion(q.id, { question: e.target.value.trim() })
+                  }
                   placeholder="Введите вопрос..."
                   className="w-full px-3 py-1.5 mb-2 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />

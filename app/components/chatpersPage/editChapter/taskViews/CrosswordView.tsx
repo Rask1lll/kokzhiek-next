@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 
 type CrosswordViewProps = {
   value: string;
@@ -38,14 +38,62 @@ function parseData(value: string): CrosswordData {
 export default function CrosswordView({ value, onChange }: CrosswordViewProps) {
   const data = useMemo(() => parseData(value), [value]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const inputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
-  const handleInput = (questionId: string, userAnswer: string) => {
+  const getInputRef = (questionId: string, letterIndex: number) => {
+    return `${questionId}-${letterIndex}`;
+  };
+
+  const focusNextInput = (
+    questionId: string,
+    currentLetterIndex: number,
+    answerLength: number
+  ) => {
+    // Try next cell in same row
+    if (currentLetterIndex < answerLength - 1) {
+      const nextRef = inputRefs.current.get(
+        getInputRef(questionId, currentLetterIndex + 1)
+      );
+      if (nextRef) {
+        nextRef.focus();
+        return;
+      }
+    }
+
+    // Try first cell of next row
+    const currentRowIndex = data.questions.findIndex(
+      (q) => q.id === questionId
+    );
+    if (currentRowIndex < data.questions.length - 1) {
+      const nextQuestion = data.questions[currentRowIndex + 1];
+      const nextRef = inputRefs.current.get(getInputRef(nextQuestion.id, 0));
+      if (nextRef) {
+        nextRef.focus();
+      }
+    }
+  };
+
+  const handleInput = (
+    questionId: string,
+    userAnswer: string,
+    letterIndex?: number,
+    answerLength?: number
+  ) => {
     const newAnswers = { ...answers, [questionId]: userAnswer.toUpperCase() };
     setAnswers(newAnswers);
 
     if (onChange) {
       const answer: UserAnswer = { answers: newAnswers };
       onChange(JSON.stringify(answer));
+    }
+
+    // Auto-focus next cell if letter was entered
+    if (
+      letterIndex !== undefined &&
+      answerLength !== undefined &&
+      userAnswer[letterIndex]
+    ) {
+      focusNextInput(questionId, letterIndex, answerLength);
     }
   };
 
@@ -83,17 +131,55 @@ export default function CrosswordView({ value, onChange }: CrosswordViewProps) {
               {Array.from({ length: answerLength }).map((_, letterIndex) => {
                 const isKeyLetter = letterIndex === q.keyLetterIndex;
                 const letter = userAnswer[letterIndex] || "";
+                const refKey = getInputRef(q.id, letterIndex);
 
                 return (
                   <input
                     key={letterIndex}
+                    ref={(el) => {
+                      if (el) {
+                        inputRefs.current.set(refKey, el);
+                      } else {
+                        inputRefs.current.delete(refKey);
+                      }
+                    }}
                     type="text"
                     maxLength={1}
                     value={letter}
                     onChange={(e) => {
-                      const chars = userAnswer.split("");
+                      const chars = userAnswer
+                        .padEnd(answerLength, " ")
+                        .split("");
                       chars[letterIndex] = e.target.value.toUpperCase();
-                      handleInput(q.id, chars.join(""));
+                      const newAnswer = chars.join("").trimEnd();
+                      handleInput(q.id, newAnswer, letterIndex, answerLength);
+                    }}
+                    onKeyDown={(e) => {
+                      // Handle backspace - go to previous cell
+                      if (e.key === "Backspace" && !letter && letterIndex > 0) {
+                        const prevRef = inputRefs.current.get(
+                          getInputRef(q.id, letterIndex - 1)
+                        );
+                        if (prevRef) {
+                          prevRef.focus();
+                        }
+                      }
+                      // Handle arrow keys
+                      if (
+                        e.key === "ArrowRight" &&
+                        letterIndex < answerLength - 1
+                      ) {
+                        const nextRef = inputRefs.current.get(
+                          getInputRef(q.id, letterIndex + 1)
+                        );
+                        if (nextRef) nextRef.focus();
+                      }
+                      if (e.key === "ArrowLeft" && letterIndex > 0) {
+                        const prevRef = inputRefs.current.get(
+                          getInputRef(q.id, letterIndex - 1)
+                        );
+                        if (prevRef) prevRef.focus();
+                      }
                     }}
                     className={`w-7 h-7 text-center text-sm font-bold border focus:outline-none focus:ring-2 focus:ring-purple-500 uppercase ${
                       isKeyLetter
