@@ -34,13 +34,6 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <nav className="hidden md:flex items-center space-x-1">
             <Logo />
-            <Link
-              href="/books"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            >
-              <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>Главная</span>
-            </Link>
 
             <Link
               href="/books"
@@ -50,15 +43,16 @@ export default function Navbar() {
               <span>Библиотека</span>
             </Link>
 
-            {/* Пример ссылки, видимой только для админа (сейчас просто верстка) */}
-            <Link
-              href="/books"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            >
-              {/* Иконка Shield */}
-              <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>Админ панель</span>
-            </Link>
+            {/* Админ панель - только для админа */}
+            {/* {userData?.role?.alias === "admin" && ( */}
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+              >
+                <span className="w-4 h-4 rounded-full bg-gray-300" />
+                <span>Админ панель</span>
+              </Link>
+            {/* )} */}
           </nav>
 
           {/* ПРАВАЯ ЧАСТЬ */}
@@ -129,13 +123,15 @@ export default function Navbar() {
               <span className="w-4 h-4 rounded-full bg-gray-300" />
               <span>Библиотека</span>
             </a>
-            <a
-              href="/admin"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
-            >
-              <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>Админ панель</span>
-            </a>
+            {userData?.role?.alias === "admin" && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
+              >
+                <span className="w-4 h-4 rounded-full bg-gray-300" />
+                <span>Админ панель</span>
+              </Link>
+            )}
           </div>
 
           {/* Инфо о пользователе (мобайл) */}
