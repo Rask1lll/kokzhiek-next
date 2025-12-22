@@ -59,7 +59,7 @@ export default function LoginPage() {
 
       if (userRes.data?.token) {
         localStorage.setItem("token", userRes.data.token);
-        console.log(userRes);
+        // console.log(userRes);
         router.push("/books");
       } else {
         setError("Неверные учетные данные");
