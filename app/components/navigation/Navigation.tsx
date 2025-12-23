@@ -35,24 +35,22 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center space-x-1">
             <Logo />
 
-            <Link
+            {/* <Link
               href="/books"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
             >
               <span className="w-4 h-4 rounded-full bg-gray-300" />
               <span>Библиотека</span>
-            </Link>
+            </Link> */}
 
-            {/* Админ панель - только для админа */}
-            {/* {userData?.role?.alias === "admin" && ( */}
-              <Link
-                href="/admin"
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-              >
-                <span className="w-4 h-4 rounded-full bg-gray-300" />
-                <span>Админ панель</span>
-              </Link>
-            {/* )} */}
+            {/* Панель управления - для всех авторизованных */}
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ml-10"
+            >
+              {/* <span className="w-4 h-4 rounded-full bg-gray-300" /> */}
+              <span>Панель управления</span>
+            </Link>
           </nav>
 
           {/* ПРАВАЯ ЧАСТЬ */}
@@ -73,7 +71,7 @@ export default function Navbar() {
                       {userEmail}
                     </p>
                     <p className="text-xs text-gray-500 flex items-center gap-1">
-                      <span className="w-3 h-3 rounded-full bg-gray-300" />
+                      {/* <span className="w-3 h-3 rounded-full bg-gray-300" /> */}
                       {userRole}
                     </p>
                   </div>
@@ -123,15 +121,13 @@ export default function Navbar() {
               <span className="w-4 h-4 rounded-full bg-gray-300" />
               <span>Библиотека</span>
             </a>
-            {userData?.role?.alias === "admin" && (
-              <Link
-                href="/admin"
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
-              >
-                <span className="w-4 h-4 rounded-full bg-gray-300" />
-                <span>Админ панель</span>
-              </Link>
-            )}
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
+            >
+              <span className="w-4 h-4 rounded-full bg-gray-300" />
+              <span>Панель управления</span>
+            </Link>
           </div>
 
           {/* Инфо о пользователе (мобайл) */}
