@@ -1,68 +1,217 @@
-import { parseData } from "@/app/libs/parseData";
-import { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useCallback, useRef, useState } from "react";
 import { BiTrash } from "react-icons/bi";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import { Question, QuestionOption } from "@/app/types/question";
 
-type Props = {
-  value: string;
-  onChange: (value: string) => void;
+type DragDropProps = {
+  widgetId: number;
 };
 
-type Cell = {
-  id: string;
-  answer: string | null;
-};
+export default function DragDrop({ widgetId }: DragDropProps) {
+  const { questions, loading, update } = useQuestions(widgetId);
 
-type DragDrop = {
-  content: string;
-  cells: Cell[];
-};
-
-export default function DragDrop({ value, onChange }: Props) {
-  const [data, setData] = useState<DragDrop>(
-    parseData(value) ?? { content: "", cells: [] }
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
   );
 
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
+
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [showHint, setShowHint] = useState(false);
 
-  console.log(data);
-
+  // Cleanup timers on unmount
   useEffect(() => {
-    onChange(JSON.stringify(data));
-  }, [data]);
+    const debounceTimer = debounceTimerRef.current;
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, []);
 
-  function addCell() {
-    setData((prev) => {
-      const res = data.cells
-        ? {
-            ...prev,
-            content: `${prev.content} {{{${prev.cells.length}}}}`,
-            cells: [
-              ...prev.cells,
-              { id: `${prev.cells.length}`, answer: null } as Cell,
-            ],
-          }
-        : {
-            ...prev,
-            content: `${prev.content}{{{${0}}}}`,
-            cells: [{ id: "0", answer: null } as Cell],
-          };
-      return res;
+  const updateQuestionBody = useCallback(
+    (body: string) => {
+      if (!currentQuestion?.id) return;
+
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
+
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // Debounce server update
+      const questionId = currentQuestion.id;
+      debounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) return;
+
+        update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
+  const addCell = useCallback(async () => {
+    if (!currentQuestion?.id) return;
+
+    const cells = (currentQuestion.data?.cells as string[]) || [];
+    const cellId = String(cells.length);
+    const placeholder = `{{{${cellId}}}}`;
+    const newBody = (currentQuestion.body || "") + placeholder;
+    const newCells = [...cells, cellId];
+
+    // Create new option for this cell
+    const newOptions = [
+      ...(currentQuestion.options || []),
+      {
+        body: "",
+        image_url: null,
+        is_correct: true,
+        match_id: null,
+        group: null,
+        order: parseInt(cellId),
+      },
+    ];
+
+    // Send to server and wait for response
+    const updated = await update(currentQuestion.id, {
+      options: newOptions,
+      body: newBody,
+      data: { cells: newCells },
     });
+    if (updated) {
+      // Update UI with data from server
+      setCurrentQuestion(updated);
+    }
+  }, [currentQuestion, update]);
+
+  const updateCellAnswer = useCallback(
+    async (cellId: string, answer: string) => {
+      if (!currentQuestion?.id) return;
+
+      // Find option with matching order (order corresponds to cellId)
+      const cellIndex = parseInt(cellId);
+      const existingOption = (currentQuestion.options || []).find(
+        (opt) => opt.order === cellIndex
+      );
+
+      let newOptions: QuestionOption[];
+      if (existingOption) {
+        // Update existing option - optimistic update
+        newOptions = (currentQuestion.options || []).map((opt) =>
+          opt.order === cellIndex ? { ...opt, body: answer.trim() } : opt
+        );
+
+        // Update UI immediately
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: newOptions } : prev
+        );
+
+        // Send to server
+        update(currentQuestion.id, { options: newOptions });
+      } else {
+        // Create new option - wait for server response to get ID
+        newOptions = [
+          ...(currentQuestion.options || []),
+          {
+            body: answer.trim(),
+            image_url: null,
+            is_correct: true,
+            match_id: null,
+            group: null,
+            order: cellIndex,
+          },
+        ];
+
+        // Send to server and wait for response to get IDs
+        const updated = await update(currentQuestion.id, {
+          options: newOptions,
+        });
+        if (updated) {
+          // Update UI with data from server (includes IDs for new options)
+          setCurrentQuestion(updated);
+        }
+      }
+    },
+    [currentQuestion, update]
+  );
+
+  const deleteCell = useCallback(
+    async (cellId: string) => {
+      if (!currentQuestion?.id) return;
+
+      const cells = (currentQuestion.data?.cells as string[]) || [];
+      const cellIndex = parseInt(cellId);
+
+      // Remove cell from data.cells
+      const newCells = cells.filter((c) => c !== cellId);
+
+      // Remove placeholder from body
+      const placeholder = `{{{${cellId}}}}`;
+      const newBody = (currentQuestion.body || "").replace(placeholder, "");
+
+      // Remove option with matching order
+      const newOptions = (currentQuestion.options || []).filter(
+        (opt) => opt.order !== cellIndex
+      );
+
+      // Update order for remaining options
+      const reorderedOptions = newOptions.map((opt) => {
+        if (opt.order !== undefined && opt.order > cellIndex) {
+          return { ...opt, order: opt.order - 1 };
+        }
+        return opt;
+      });
+
+      // Send to server and wait for response
+      const updated = await update(currentQuestion.id, {
+        options: reorderedOptions,
+        body: newBody,
+        data: { cells: newCells },
+      });
+      if (updated) {
+        // Update UI with data from server
+        setCurrentQuestion(updated);
+      }
+    },
+    [currentQuestion, update]
+  );
+
+  // Show loading state while loading
+  if (loading) {
+    return (
+      <div className="w-full space-y-4 p-4">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
   }
 
-  function upDateCell(id: string, value: string) {
-    const result = data.cells.map((el) => {
-      return el.id === id ? { ...el, answer: value } : el;
-    });
-    setData({ ...data, cells: result });
+  if (!currentQuestion) {
+    return (
+      <div className="w-full space-y-4 p-4 text-gray-500">
+        Ошибка загрузки вопроса
+      </div>
+    );
   }
 
-  function deleteCell(id: string) {
-    const result = data.cells.filter((el) => {
-      return el.id !== id && { ...el, answer: value };
-    });
-    setData({ ...data, cells: result });
-  }
+  const cells = (currentQuestion.data?.cells as string[]) || [];
 
   return (
     <div className="w-full space-y-4">
@@ -102,9 +251,9 @@ export default function DragDrop({ value, onChange }: Props) {
       <textarea
         className="w-full resize-none border-2 border-gray-200 focus:border-blue-400 min-h-24 p-3 rounded-xl outline-none bg-white text-gray-700 transition-colors"
         placeholder="Введите текст задания..."
-        value={data.content}
+        value={currentQuestion.body || ""}
         onChange={(e) => {
-          setData((prev) => ({ ...prev, content: e.target.value }));
+          updateQuestionBody(e.target.value);
           e.target.style.height = `${e.target.scrollHeight}px`;
         }}
       ></textarea>
@@ -118,33 +267,36 @@ export default function DragDrop({ value, onChange }: Props) {
           </h3>
         </div>
 
-        {data.cells.length === 0 ? (
+        {cells.length === 0 ? (
           <p className="text-gray-400 text-sm italic text-center py-4">
             Нет контейнеров. Нажмите «Добавить контейнер» чтобы создать.
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            {data.cells.map((el) => {
+            {cells.map((cellId) => {
+              const option = (currentQuestion.options || []).find(
+                (opt) => opt.order === parseInt(cellId)
+              );
               return (
                 <div
-                  key={el.id}
+                  key={cellId}
                   className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 font-bold rounded-lg text-sm">
-                    {el.id}
+                    {cellId}
                   </div>
                   <input
                     type="text"
                     placeholder="Введите правильный ответ..."
-                    defaultValue={el.answer ?? ""}
+                    value={option?.body || ""}
                     className="flex-1 p-2 px-3 border border-gray-200 focus:border-blue-400 rounded-lg text-gray-700 bg-gray-50 focus:bg-white outline-none transition-colors"
                     onChange={(e) => {
-                      upDateCell(el.id, e.target.value);
+                      updateCellAnswer(cellId, e.target.value);
                     }}
                   />
                   <button
                     onClick={() => {
-                      deleteCell(el.id);
+                      deleteCell(cellId);
                     }}
                     className="flex items-center justify-center w-10 h-10 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg cursor-pointer transition-colors"
                   >

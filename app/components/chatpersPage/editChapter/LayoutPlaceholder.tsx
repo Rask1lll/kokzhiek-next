@@ -173,7 +173,7 @@ const LayoutPlaceholder = ({
         widgetContent = <SingleChoice widgetId={widget.id} />;
         break;
       case "dropdown":
-        widgetContent = <DropDown value={textValue} onChange={handleChange} />;
+        widgetContent = <DropDown widgetId={widget.id} />;
         break;
       case "fill_blank":
         widgetContent = <FillBlank widgetId={widget.id} />;
@@ -201,7 +201,7 @@ const LayoutPlaceholder = ({
         widgetContent = <Order value={textValue} onChange={handleChange} />;
         break;
       case "drag_drop":
-        widgetContent = <DragDrop value={textValue} onChange={handleChange} />;
+        widgetContent = <DragDrop widgetId={widget.id} />;
         break;
       default:
         widgetContent = <GenericWidget type={widget.type} />;
