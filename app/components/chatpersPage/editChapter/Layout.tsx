@@ -132,7 +132,11 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
 
   if (!isEdit) {
     return (
-      <div className={`flex flex-col gap-2 w-19/20 ${className || ""}`}>
+      <div
+        className={`flex flex-col gap-2 ${isEdit ? "w-19/20" : "w-full"} ${
+          className || ""
+        }`}
+      >
         {/* Render existing widgets */}
         {widgets.map((widget) => (
           <ViewPlaceholder key={widget.id} widget={widget} />
