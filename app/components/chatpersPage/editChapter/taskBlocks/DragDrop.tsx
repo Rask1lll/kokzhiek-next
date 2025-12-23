@@ -2,15 +2,18 @@
 
 import { useEffect, useCallback, useRef, useState } from "react";
 import { BiTrash } from "react-icons/bi";
+import { FiImage, FiTrash2 } from "react-icons/fi";
+import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
-import { Question, QuestionOption } from "@/app/types/question";
+import { Question } from "@/app/types/question";
 
 type DragDropProps = {
   widgetId: number;
 };
 
 export default function DragDrop({ widgetId }: DragDropProps) {
-  const { questions, loading, update } = useQuestions(widgetId);
+  const { questions, loading, update, uploadImage, removeImage } =
+    useQuestions(widgetId);
 
   // Get first question from array
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
@@ -31,6 +34,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
   }, [questions]);
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRefs = useRef<Map<number, HTMLInputElement>>(new Map());
   const [showHint, setShowHint] = useState(false);
 
   // Cleanup timers on unmount
@@ -106,17 +110,16 @@ export default function DragDrop({ widgetId }: DragDropProps) {
     async (cellId: string, answer: string) => {
       if (!currentQuestion?.id) return;
 
-      // Find option with matching order (order corresponds to cellId)
       const cellIndex = parseInt(cellId);
+      // Find option by position (position corresponds to cellId index)
       const existingOption = (currentQuestion.options || []).find(
-        (opt) => opt.order === cellIndex
+        (opt) => opt.position === cellIndex
       );
 
-      let newOptions: QuestionOption[];
-      if (existingOption) {
-        // Update existing option - optimistic update
-        newOptions = (currentQuestion.options || []).map((opt) =>
-          opt.order === cellIndex ? { ...opt, body: answer.trim() } : opt
+      if (existingOption?.id) {
+        // Update existing option by ID - optimistic update
+        const newOptions = (currentQuestion.options || []).map((opt) =>
+          opt.id === existingOption.id ? { ...opt, body: answer.trim() } : opt
         );
 
         // Update UI immediately
@@ -128,7 +131,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
         update(currentQuestion.id, { options: newOptions });
       } else {
         // Create new option - wait for server response to get ID
-        newOptions = [
+        const newOptions = [
           ...(currentQuestion.options || []),
           {
             body: answer.trim(),
@@ -160,6 +163,13 @@ export default function DragDrop({ widgetId }: DragDropProps) {
       const cells = (currentQuestion.data?.cells as string[]) || [];
       const cellIndex = parseInt(cellId);
 
+      // Find option by position (position corresponds to cellId index)
+      const optionToDelete = (currentQuestion.options || []).find(
+        (opt) => opt.position === cellIndex
+      );
+
+      if (!optionToDelete?.id) return;
+
       // Remove cell from data.cells
       const newCells = cells.filter((c) => c !== cellId);
 
@@ -167,15 +177,16 @@ export default function DragDrop({ widgetId }: DragDropProps) {
       const placeholder = `{{{${cellId}}}}`;
       const newBody = (currentQuestion.body || "").replace(placeholder, "");
 
-      // Remove option with matching order
+      // Remove option by ID
       const newOptions = (currentQuestion.options || []).filter(
-        (opt) => opt.order !== cellIndex
+        (opt) => opt.id !== optionToDelete.id
       );
 
-      // Update order for remaining options
+      // Update order for remaining options (position is read-only from server)
       const reorderedOptions = newOptions.map((opt) => {
-        if (opt.order !== undefined && opt.order > cellIndex) {
-          return { ...opt, order: opt.order - 1 };
+        // Use position to determine which options need order update
+        if (opt.position !== undefined && opt.position > cellIndex) {
+          return { ...opt, order: opt.position - 1 };
         }
         return opt;
       });
@@ -192,6 +203,42 @@ export default function DragDrop({ widgetId }: DragDropProps) {
       }
     },
     [currentQuestion, update]
+  );
+
+  const handleImageUpload = useCallback(
+    async (optionId: number | undefined, file: File) => {
+      if (optionId === undefined || !currentQuestion?.id) return;
+
+      const imageUrl = await uploadImage(optionId, file);
+      if (imageUrl) {
+        // Update currentQuestion with image URL from server
+        const updatedOptions = (currentQuestion.options || []).map((opt) =>
+          opt.id === optionId ? { ...opt, image_url: imageUrl } : opt
+        );
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: updatedOptions } : prev
+        );
+      }
+    },
+    [uploadImage, currentQuestion]
+  );
+
+  const handleImageDelete = useCallback(
+    async (optionId: number | undefined) => {
+      if (optionId === undefined || !currentQuestion?.id) return;
+
+      const success = await removeImage(optionId);
+      if (success) {
+        // Update currentQuestion - remove image_url
+        const updatedOptions = (currentQuestion.options || []).map((opt) =>
+          opt.id === optionId ? { ...opt, image_url: null } : opt
+        );
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: updatedOptions } : prev
+        );
+      }
+    },
+    [removeImage, currentQuestion]
   );
 
   // Show loading state while loading
@@ -274,34 +321,96 @@ export default function DragDrop({ widgetId }: DragDropProps) {
         ) : (
           <div className="flex flex-col gap-3">
             {cells.map((cellId) => {
+              const cellIndex = parseInt(cellId);
+              // Find option by position (position corresponds to cellId index)
               const option = (currentQuestion.options || []).find(
-                (opt) => opt.order === parseInt(cellId)
+                (opt) => opt.position === cellIndex
               );
               return (
                 <div
                   key={cellId}
-                  className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                  className="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 font-bold rounded-lg text-sm">
-                    {cellId}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 font-bold rounded-lg text-sm">
+                      {cellId}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Введите правильный ответ..."
+                      value={option?.body || ""}
+                      className="flex-1 p-2 px-3 border border-gray-200 focus:border-blue-400 rounded-lg text-gray-700 bg-gray-50 focus:bg-white outline-none transition-colors"
+                      onChange={(e) => {
+                        updateCellAnswer(cellId, e.target.value);
+                      }}
+                    />
+                    {/* Image upload button */}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={(el) => {
+                        if (el && option?.id) {
+                          fileInputRefs.current.set(option.id, el);
+                        }
+                      }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file && option?.id !== undefined) {
+                          handleImageUpload(option.id, file);
+                        }
+                        if (e.target) {
+                          e.target.value = "";
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const input = option?.id
+                          ? fileInputRefs.current.get(option.id)
+                          : null;
+                        input?.click();
+                      }}
+                      className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded transition-colors"
+                      title="Добавить изображение"
+                    >
+                      <FiImage className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        deleteCell(cellId);
+                      }}
+                      className="flex items-center justify-center w-10 h-10 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <BiTrash className="w-5 h-5" />
+                    </button>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Введите правильный ответ..."
-                    value={option?.body || ""}
-                    className="flex-1 p-2 px-3 border border-gray-200 focus:border-blue-400 rounded-lg text-gray-700 bg-gray-50 focus:bg-white outline-none transition-colors"
-                    onChange={(e) => {
-                      updateCellAnswer(cellId, e.target.value);
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      deleteCell(cellId);
-                    }}
-                    className="flex items-center justify-center w-10 h-10 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg cursor-pointer transition-colors"
-                  >
-                    <BiTrash className="w-5 h-5" />
-                  </button>
+                  {/* Image preview */}
+                  {option?.image_url && (
+                    <div className="relative ml-12 mt-2">
+                      <div className="relative w-32 h-32 border border-slate-200 rounded-lg overflow-hidden">
+                        <Image
+                          src={option.image_url}
+                          alt={option.body || ""}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (option.id !== undefined) {
+                            handleImageDelete(option.id);
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                        title="Удалить изображение"
+                      >
+                        <FiTrash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
