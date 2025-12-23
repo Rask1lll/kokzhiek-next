@@ -40,7 +40,8 @@ export default function BooksPageClient() {
     <>
       <BooksFilterBar onChange={handleFilterChange} />
       <div
-        className={`w-full px-14 ${
+        // зафиксированная высота мин для корректного отображения заднего фона
+        className={`w-full px-14 min-h-[calc(100vh-330px)] ${
           viewMode === "list"
             ? "flex flex-col gap-4"
             : style.booksGrid
