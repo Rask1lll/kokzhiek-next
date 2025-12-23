@@ -6,7 +6,6 @@ import { FiX, FiImage, FiTrash2 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
-import { TaskType } from "@/app/types/enums";
 
 type MatchPairsProps = {
   widgetId: number;
@@ -30,11 +29,14 @@ type MatchPairsData = {
 };
 
 export default function MatchPairs({ widgetId }: MatchPairsProps) {
-  const { questions, loading, create, update, uploadImage, removeImage } =
+  const { questions, loading, update, uploadImage, removeImage } =
     useQuestions(widgetId);
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const hasCreatedQuestionRef = useRef(false);
+
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
+
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const answerDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(
     new Map()
@@ -43,11 +45,6 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
   const dataDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
-  const questionsArray = useMemo(
-    () => (Array.isArray(questions) ? questions : []),
-    [questions]
-  );
-
   // Convert question options to pairs data structure
   const data = useMemo((): MatchPairsData => {
     if (!currentQuestion?.options) {
@@ -55,31 +52,50 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     }
 
     const options = currentQuestion.options;
-    const leftOptions = options
-      .filter((opt) => opt.group === "left")
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const rightOptions = options
-      .filter((opt) => opt.group === "right")
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-    const pairs: PairItem[] = [];
-    const minLength = Math.min(leftOptions.length, rightOptions.length);
+    // Group options by match_id
+    const pairsMap = new Map<
+      string,
+      { left?: QuestionOption; right?: QuestionOption }
+    >();
 
-    for (let i = 0; i < minLength; i++) {
-      if (leftOptions[i] && rightOptions[i]) {
-        pairs.push({
-          id: String(i),
-          answer: {
-            text: leftOptions[i].body || "",
-            imageUrl: leftOptions[i].image_url || undefined,
-          },
-          cell: {
-            text: rightOptions[i].body || "",
-            imageUrl: rightOptions[i].image_url || undefined,
-          },
-        });
+    options.forEach((opt) => {
+      if (opt.match_id) {
+        if (!pairsMap.has(opt.match_id)) {
+          pairsMap.set(opt.match_id, {});
+        }
+        const pair = pairsMap.get(opt.match_id)!;
+        if (opt.group === "left") {
+          pair.left = opt;
+        } else if (opt.group === "right") {
+          pair.right = opt;
+        }
       }
-    }
+    });
+
+    // Convert to pairs array, sorted by order
+    const pairs: PairItem[] = [];
+    Array.from(pairsMap.entries())
+      .sort(([, a], [, b]) => {
+        const orderA = a.left?.order ?? a.right?.order ?? 0;
+        const orderB = b.left?.order ?? b.right?.order ?? 0;
+        return orderA - orderB;
+      })
+      .forEach(([matchId, pair]) => {
+        if (pair.left && pair.right) {
+          pairs.push({
+            id: matchId,
+            answer: {
+              text: pair.left.body || "",
+              imageUrl: pair.left.image_url || undefined,
+            },
+            cell: {
+              text: pair.right.body || "",
+              imageUrl: pair.right.image_url || undefined,
+            },
+          });
+        }
+      });
 
     const shuffleInOpiq =
       (currentQuestion.data as { shuffle?: boolean })?.shuffle ?? true;
@@ -87,47 +103,18 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     return { pairs, shuffleInOpiq };
   }, [currentQuestion]);
 
-  // Initialize or update current question
   useEffect(() => {
-    if (questionsArray.length > 0) {
-      const firstQuestion = questionsArray[0];
-      if (
-        !currentQuestion ||
-        currentQuestion.id !== firstQuestion.id ||
-        firstQuestion.options?.length !== currentQuestion.options?.length
-      ) {
-        const timer = setTimeout(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
           setCurrentQuestion(firstQuestion);
         }, 0);
-        return () => clearTimeout(timer);
       }
-      return;
     }
-
-    if (
-      !loading &&
-      !hasCreatedQuestionRef.current &&
-      !currentQuestion &&
-      !isCreating
-    ) {
-      hasCreatedQuestionRef.current = true;
-      setTimeout(() => {
-        setIsCreating(true);
-        create({
-          type: TaskType.MATCH_PAIRS,
-          body: "Соедините пары",
-          data: { shuffle: true },
-          points: 1,
-          options: [],
-        }).then((newQuestion) => {
-          setIsCreating(false);
-          if (newQuestion) {
-            setCurrentQuestion(newQuestion);
-          }
-        });
-      }, 0);
-    }
-  }, [questionsArray, loading, currentQuestion, create, isCreating]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
 
   useEffect(() => {
     const debounceTimer = debounceTimerRef.current;
@@ -162,20 +149,23 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       let order = 0;
 
       newData.pairs.forEach((pair) => {
-        // Find existing options by matching text and group
+        // Find existing options by match_id (pair.id is match_id)
         const existingLeft = currentQuestion.options?.find(
-          (opt) => opt.group === "left" && opt.body === pair.answer.text
+          (opt) => opt.match_id === pair.id && opt.group === "left"
         );
         const existingRight = currentQuestion.options?.find(
-          (opt) => opt.group === "right" && opt.body === pair.cell.text
+          (opt) => opt.match_id === pair.id && opt.group === "right"
         );
+
+        // Use pair.id as match_id (it's the match_id from data structure)
+        const matchId = pair.id;
 
         options.push({
           id: existingLeft?.id,
           body: pair.answer.text,
           image_url: pair.answer.imageUrl || null,
           is_correct: false,
-          match_id: null,
+          match_id: matchId,
           group: "left",
           order: order++,
         });
@@ -185,7 +175,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           body: pair.cell.text,
           image_url: pair.cell.imageUrl || null,
           is_correct: false,
-          match_id: null,
+          match_id: matchId,
           group: "right",
           order: order++,
         });
@@ -253,8 +243,12 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
   const addPair = useCallback(async () => {
     if (!currentQuestion?.id) return;
 
+    // Generate unique match_id for new pair
+    const newMatchId = `${data.pairs.length}-${Math.ceil(
+      Math.random() * 1000
+    )}`;
     const newPair: PairItem = {
-      id: String(data.pairs.length),
+      id: newMatchId,
       answer: { text: "" },
       cell: { text: "" },
     };
@@ -264,11 +258,12 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     let order = 0;
 
     [...data.pairs, newPair].forEach((pair) => {
+      // Find existing options by match_id
       const existingLeft = currentQuestion.options?.find(
-        (opt) => opt.group === "left" && opt.body === pair.answer.text
+        (opt) => opt.match_id === pair.id && opt.group === "left"
       );
       const existingRight = currentQuestion.options?.find(
-        (opt) => opt.group === "right" && opt.body === pair.cell.text
+        (opt) => opt.match_id === pair.id && opt.group === "right"
       );
 
       options.push({
@@ -276,7 +271,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         body: pair.answer.text,
         image_url: pair.answer.imageUrl || null,
         is_correct: false,
-        match_id: null,
+        match_id: pair.id,
         group: "left",
         order: order++,
       });
@@ -286,7 +281,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         body: pair.cell.text,
         image_url: pair.cell.imageUrl || null,
         is_correct: false,
-        match_id: null,
+        match_id: pair.id,
         group: "right",
         order: order++,
       });
@@ -332,11 +327,12 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       let order = 0;
 
       newPairs.forEach((p) => {
+        // Find existing options by match_id (pair.id is match_id)
         const existingLeft = currentQuestion.options?.find(
-          (opt) => opt.group === "left" && opt.body === p.answer.text
+          (opt) => opt.match_id === p.id && opt.group === "left"
         );
         const existingRight = currentQuestion.options?.find(
-          (opt) => opt.group === "right" && opt.body === p.cell.text
+          (opt) => opt.match_id === p.id && opt.group === "right"
         );
 
         options.push({
@@ -344,7 +340,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           body: p.answer.text,
           image_url: p.answer.imageUrl || null,
           is_correct: false,
-          match_id: null,
+          match_id: p.id,
           group: "left",
           order: order++,
         });
@@ -354,7 +350,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           body: p.cell.text,
           image_url: p.cell.imageUrl || null,
           is_correct: false,
-          match_id: null,
+          match_id: p.id,
           group: "right",
           order: order++,
         });
@@ -408,11 +404,12 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       let order = 0;
 
       newPairs.forEach((p) => {
+        // Find existing options by match_id (pair.id is match_id)
         const existingLeft = currentQuestion.options?.find(
-          (opt) => opt.group === "left" && opt.body === p.answer.text
+          (opt) => opt.match_id === p.id && opt.group === "left"
         );
         const existingRight = currentQuestion.options?.find(
-          (opt) => opt.group === "right" && opt.body === p.cell.text
+          (opt) => opt.match_id === p.id && opt.group === "right"
         );
 
         options.push({
@@ -420,7 +417,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           body: p.answer.text,
           image_url: p.answer.imageUrl || null,
           is_correct: false,
-          match_id: null,
+          match_id: p.id,
           group: "left",
           order: order++,
         });
@@ -430,7 +427,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           body: p.cell.text,
           image_url: p.cell.imageUrl || null,
           is_correct: false,
-          match_id: null,
+          match_id: p.id,
           group: "right",
           order: order++,
         });
@@ -475,11 +472,11 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
 
       const options = currentQuestion.options || [];
       const targetOption = options.find((opt) => {
-        if (side === "answer") {
-          return opt.group === "left" && opt.body === pair.answer.text;
-        } else {
-          return opt.group === "right" && opt.body === pair.cell.text;
-        }
+        // Find by match_id (pairId is match_id) and group
+        return (
+          opt.match_id === pairId &&
+          opt.group === (side === "answer" ? "left" : "right")
+        );
       });
 
       if (!targetOption?.id) return;
@@ -503,18 +500,15 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
 
       if (!pair) return;
 
-      // Find the corresponding option
+      // Find the corresponding option by match_id (pairId is match_id)
       const options = currentQuestion?.options || [];
-      console.log(options);
       const targetOption = options.find((opt) => {
-        if (side === "answer") {
-          return opt.group === "left" && opt.body === pair.answer.text;
-        } else {
-          return opt.group === "right" && opt.body === pair.cell.text;
-        }
+        // Find by match_id and group
+        return (
+          opt.match_id === pairId &&
+          opt.group === (side === "answer" ? "left" : "right")
+        );
       });
-
-      console.log(pairId);
 
       if (!targetOption?.id) return;
 
@@ -530,7 +524,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     [data.pairs, currentQuestion, uploadImage, updateAnswer, updateCell]
   );
 
-  if (loading || isCreating) {
+  if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
         <div className="animate-pulse">Загрузка...</div>
