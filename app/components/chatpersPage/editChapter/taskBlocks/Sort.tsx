@@ -1,140 +1,387 @@
 "use client";
 
 import Button from "@/app/components/Button/Button";
-import { parseData } from "@/app/libs/parseData";
-import { useMemo, useState } from "react";
+import { useEffect, useCallback, useRef, useState, useMemo } from "react";
 import { FiX, FiPlus } from "react-icons/fi";
 import style from "./Sort.module.css";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import { Question, QuestionOption } from "@/app/types/question";
 
-type Props = {
-  value: string;
-  onChange: (s: string) => void;
-};
-
-type Sorting = {
-  columns: Column[];
+type SortProps = {
+  widgetId: number;
 };
 
 type Column = {
   id: string;
   question: string;
-  answerCards: AnswerCard[];
 };
 
-type AnswerCard = {
-  id: string;
-  text: string;
-};
+export default function Sort({ widgetId }: SortProps) {
+  const { questions, loading, update } = useQuestions(widgetId);
 
-function parseSortingData(value: string): Sorting | undefined {
-  try {
-    const parsed = parseData(value);
-    if (parsed && Array.isArray(parsed.columns)) {
-      return parsed;
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
+
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
     }
-  } catch {
-    return;
-  }
-}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
 
-export default function Sort({ value, onChange }: Props) {
-  const validateData = useMemo(() => parseSortingData(value), [value]);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const columnDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(
+    new Map()
+  );
+  const cardDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
-  const [data, setData] = useState<Sorting>(() => {
-    return validateData ?? { columns: [] };
-  });
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const debounceTimer = debounceTimerRef.current;
+    const columnTimers = columnDebounceTimersRef.current;
+    const cardTimers = cardDebounceTimersRef.current;
 
-  const updateData = (newData: Sorting) => {
-    setData(newData);
-    onChange(JSON.stringify(newData));
-  };
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      columnTimers.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      columnTimers.clear();
+      cardTimers.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      cardTimers.clear();
+    };
+  }, []);
 
-  const addColumn = () => {
+  // Convert question to columns structure
+  const columns = useMemo(() => {
+    if (!currentQuestion?.options || !currentQuestion.data) {
+      return [];
+    }
+
+    const columnsData =
+      (currentQuestion.data as { columns?: Column[] })?.columns || [];
+    const options = currentQuestion.options;
+
+    return columnsData.map((column) => {
+      const columnOptions = options
+        .filter((opt) => opt.group === column.id)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+      return {
+        ...column,
+        answerCards: columnOptions.map((opt) => ({
+          id: String(opt.id || opt.body),
+          text: opt.body || "",
+          optionId: opt.id,
+        })),
+      };
+    });
+  }, [currentQuestion]);
+
+  const updateQuestionBody = useCallback(
+    (body: string) => {
+      if (!currentQuestion?.id) return;
+
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
+
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // Debounce server update
+      const questionId = currentQuestion.id;
+      debounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) return;
+
+        update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
+  const syncToServer = useCallback(
+    (newColumns: Column[], newOptions: QuestionOption[]) => {
+      if (!currentQuestion?.id) return;
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              options: newOptions,
+              data: { ...prev.data, columns: newColumns },
+            }
+          : null
+      );
+
+      // Send to server
+      update(currentQuestion.id, {
+        options: newOptions,
+        data: { columns: newColumns },
+      });
+    },
+    [currentQuestion, update]
+  );
+
+  const addColumn = useCallback(async () => {
+    if (!currentQuestion?.id) return;
+
+    const columnId = `column-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
     const newColumn: Column = {
-      id: String(data.columns.length),
+      id: columnId,
       question: "",
-      answerCards: [],
     };
-    updateData({ ...data, columns: [...data.columns, newColumn] });
-  };
 
-  const removeColumn = (columnId: string) => {
-    if (data.columns.length <= 2) return; // Минимум 2 столбца
-    updateData({
-      ...data,
-      columns: data.columns.filter((col) => col.id !== columnId),
+    const currentColumns =
+      (currentQuestion.data as { columns?: Column[] })?.columns || [];
+    const newColumns = [...currentColumns, newColumn];
+
+    // Update UI immediately
+    setCurrentQuestion((prev) =>
+      prev
+        ? {
+            ...prev,
+            data: { ...prev.data, columns: newColumns },
+          }
+        : null
+    );
+
+    // Send to server
+    update(currentQuestion.id, {
+      data: { columns: newColumns },
     });
-  };
+  }, [currentQuestion, update]);
 
-  const updateColumnQuestion = (columnId: string, question: string) => {
-    updateData({
-      ...data,
-      columns: data.columns.map((col) =>
+  const removeColumn = useCallback(
+    (columnId: string) => {
+      if (!currentQuestion?.id) return;
+      if (columns.length <= 2) return; // Минимум 2 столбца
+
+      const currentColumns =
+        (currentQuestion.data as { columns?: Column[] })?.columns || [];
+      const newColumns = currentColumns.filter((col) => col.id !== columnId);
+
+      // Remove all options with this group
+      const newOptions = (currentQuestion.options || []).filter(
+        (opt) => opt.group !== columnId
+      );
+
+      syncToServer(newColumns, newOptions);
+    },
+    [currentQuestion, columns.length, syncToServer]
+  );
+
+  const updateColumnQuestion = useCallback(
+    (columnId: string, question: string) => {
+      if (!currentQuestion?.id) return;
+
+      const currentColumns =
+        (currentQuestion.data as { columns?: Column[] })?.columns || [];
+      const newColumns = currentColumns.map((col) =>
         col.id === columnId ? { ...col, question } : col
-      ),
-    });
-  };
+      );
 
-  const addCardToColumn = (columnId: string) => {
-    const column = data.columns.find((col) => col.id === columnId);
-    if (!column) return;
-
-    const newCard: AnswerCard = {
-      id: `${columnId}-${column.answerCards.length}`,
-      text: "",
-    };
-
-    updateData({
-      ...data,
-      columns: data.columns.map((col) =>
-        col.id === columnId
-          ? { ...col, answerCards: [...col.answerCards, newCard] }
-          : col
-      ),
-    });
-  };
-
-  const removeCardFromColumn = (columnId: string, cardId: string) => {
-    updateData({
-      ...data,
-      columns: data.columns.map((col) =>
-        col.id === columnId
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
           ? {
-              ...col,
-              answerCards: col.answerCards.filter((card) => card.id !== cardId),
+              ...prev,
+              data: { ...prev.data, columns: newColumns },
             }
-          : col
-      ),
-    });
-  };
+          : null
+      );
 
-  const updateCardText = (columnId: string, cardId: string, text: string) => {
-    updateData({
-      ...data,
-      columns: data.columns.map((col) =>
-        col.id === columnId
-          ? {
-              ...col,
-              answerCards: col.answerCards.map((card) =>
-                card.id === cardId ? { ...card, text } : card
-              ),
-            }
-          : col
-      ),
-    });
-  };
+      // Debounce server update
+      const timerKey = `column-${columnId}`;
+      const existingTimer = columnDebounceTimersRef.current.get(timerKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
 
-  const getGridCols = (count: number) => {
-    if (count === 0) return "grid-cols-1";
-    if (count === 1) return "grid-cols-1";
-    if (count === 2) return "grid-cols-2";
-    if (count === 3) return "grid-cols-3";
-    if (count === 4) return "grid-cols-4";
-    return "grid-cols-4"; // Максимум 4 столбца в ряд
-  };
+      const questionId = currentQuestion.id;
+      const timer = setTimeout(() => {
+        if (!questionId) {
+          columnDebounceTimersRef.current.delete(timerKey);
+          return;
+        }
+        update(questionId, {
+          data: { columns: newColumns },
+        });
+        columnDebounceTimersRef.current.delete(timerKey);
+      }, 500);
+
+      columnDebounceTimersRef.current.set(timerKey, timer);
+    },
+    [currentQuestion, update]
+  );
+
+  const addCardToColumn = useCallback(
+    async (columnId: string) => {
+      if (!currentQuestion?.id) return;
+
+      const newOptions = [
+        ...(currentQuestion.options || []),
+        {
+          body: "",
+          image_url: null,
+          is_correct: false,
+          match_id: null,
+          group: columnId,
+          order: (currentQuestion.options || []).filter(
+            (opt) => opt.group === columnId
+          ).length,
+        },
+      ];
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev ? { ...prev, options: newOptions } : null
+      );
+
+      // Send to server and wait for response to get IDs
+      const updated = await update(currentQuestion.id, {
+        options: newOptions,
+      });
+
+      if (updated) {
+        setCurrentQuestion(updated);
+      }
+    },
+    [currentQuestion, update]
+  );
+
+  const removeCardFromColumn = useCallback(
+    (optionId: number | undefined) => {
+      if (!currentQuestion?.id || !optionId) return;
+
+      const newOptions = (currentQuestion.options || []).filter(
+        (opt) => opt.id !== optionId
+      );
+
+      // Update order for remaining options in the same group
+      const groupId = (currentQuestion.options || []).find(
+        (opt) => opt.id === optionId
+      )?.group;
+      if (groupId) {
+        const groupOptions = newOptions
+          .filter((opt) => opt.group === groupId)
+          .map((opt, idx) => ({ ...opt, order: idx }));
+        const otherOptions = newOptions.filter((opt) => opt.group !== groupId);
+        const reorderedOptions = [...otherOptions, ...groupOptions];
+
+        // Update UI immediately
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: reorderedOptions } : null
+        );
+
+        // Send to server
+        update(currentQuestion.id, { options: reorderedOptions });
+      } else {
+        // Update UI immediately
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: newOptions } : null
+        );
+
+        // Send to server
+        update(currentQuestion.id, { options: newOptions });
+      }
+    },
+    [currentQuestion, update]
+  );
+
+  const updateCardText = useCallback(
+    (optionId: number | undefined, text: string) => {
+      if (!currentQuestion?.id || optionId === undefined) return;
+
+      // Update UI immediately
+      const newOptions = (currentQuestion.options || []).map((opt) =>
+        opt.id === optionId ? { ...opt, body: text } : opt
+      );
+      setCurrentQuestion((prev) =>
+        prev ? { ...prev, options: newOptions } : prev
+      );
+
+      // Debounce server update
+      const timerKey = `card-${optionId}`;
+      const existingTimer = cardDebounceTimersRef.current.get(timerKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+
+      const questionId = currentQuestion.id;
+      const trimmedText = text.trim();
+      const timer = setTimeout(() => {
+        if (!questionId) {
+          cardDebounceTimersRef.current.delete(timerKey);
+          return;
+        }
+        if (trimmedText.length === 0) {
+          cardDebounceTimersRef.current.delete(timerKey);
+          return;
+        }
+
+        const serverOptions = newOptions.map((opt) =>
+          opt.id === optionId ? { ...opt, body: trimmedText } : opt
+        );
+
+        update(questionId, { options: serverOptions });
+        cardDebounceTimersRef.current.delete(timerKey);
+      }, 500);
+
+      cardDebounceTimersRef.current.set(timerKey, timer);
+    },
+    [currentQuestion, update]
+  );
+
+  // Show loading state while loading
+  if (loading) {
+    return (
+      <div className="w-full space-y-4 p-4">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="w-full space-y-4 p-4 text-gray-500">
+        Ошибка загрузки вопроса
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4">
+      {/* Question input */}
+      <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <input
+          type="text"
+          placeholder="Вопрос к заданию"
+          className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
+          value={currentQuestion.body || ""}
+          onChange={(e) => updateQuestionBody(e.target.value)}
+        />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-slate-700">
@@ -148,16 +395,16 @@ export default function Sort({ value, onChange }: Props) {
         />
       </div>
 
-      {data.columns.length === 0 && (
+      {columns.length === 0 && (
         <div className="text-sm text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-lg">
           Нет столбцов. Нажмите «Добавить столбец» чтобы создать.
         </div>
       )}
 
       {/* Columns grid */}
-      {data.columns.length > 0 && (
+      {columns.length > 0 && (
         <div className={`grid w-full gap-4 ${style.sortGrid}`}>
-          {data.columns.map((column) => (
+          {columns.map((column) => (
             <div
               key={column.id}
               className="p-4 w-full bg-white rounded-lg border-2 border-slate-200 space-y-3"
@@ -176,7 +423,7 @@ export default function Sort({ value, onChange }: Props) {
                 <button
                   type="button"
                   onClick={() => removeColumn(column.id)}
-                  disabled={data.columns.length <= 2}
+                  disabled={columns.length <= 2}
                   className="p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   title="Удалить столбец"
                 >
@@ -195,14 +442,14 @@ export default function Sort({ value, onChange }: Props) {
                       type="text"
                       value={card.text}
                       onChange={(e) =>
-                        updateCardText(column.id, card.id, e.target.value)
+                        updateCardText(card.optionId, e.target.value)
                       }
                       placeholder="Текст..."
                       className="flex-1 px-2 py-1 w-full text-sm bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
                       type="button"
-                      onClick={() => removeCardFromColumn(column.id, card.id)}
+                      onClick={() => removeCardFromColumn(card.optionId)}
                       className="p-1 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors"
                       title="Удалить карточку"
                     >

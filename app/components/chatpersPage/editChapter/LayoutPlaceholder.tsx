@@ -195,7 +195,7 @@ const LayoutPlaceholder = ({
         );
         break;
       case "sort":
-        widgetContent = <Sort value={textValue} onChange={handleChange} />;
+        widgetContent = <Sort widgetId={widget.id} />;
         break;
       case "order":
         widgetContent = <Order widgetId={widget.id} />;
