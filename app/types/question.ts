@@ -15,6 +15,7 @@ export type Question = {
   id?: number;
   type: TaskType | string;
   body: string;
+  image_url?: string | null;
   data?: Record<string, unknown>;
   points: number;
   order?: number;

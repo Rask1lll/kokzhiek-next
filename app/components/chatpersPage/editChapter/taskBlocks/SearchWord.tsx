@@ -28,7 +28,7 @@ function CreateCell(
     <input
       type="text"
       maxLength={1}
-      value={value}
+      value={value || ""}
       onChange={(e) => {
         onChange(id, e.target.value);
       }}
@@ -43,7 +43,7 @@ function generateCells(grid: Cell[], size: number): Cell[] {
   for (let index = 0; index < size * size; index++) {
     const element = grid[index];
     if (element) {
-      temp.push({ id: String(index), symbol: element.symbol });
+      temp.push({ id: String(index), symbol: element.symbol || "" });
     } else {
       temp.push({ id: String(index), symbol: "" });
     }

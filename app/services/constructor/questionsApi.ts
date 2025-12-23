@@ -195,3 +195,58 @@ export async function deleteOptionImage(
 
   return res.json();
 }
+
+// Upload image for a question
+export async function uploadQuestionImage(
+  questionId: number,
+  file: File
+): Promise<ConstructorResponse<{ image_url: string; question: Question }>> {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(`${API_BASE}/api/v1/questions/${questionId}/image`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("uploadQuestionImage failed:", res.status, errorText);
+    return {
+      data: null as unknown as { image_url: string; question: Question },
+      messages: [`HTTP ${res.status}: ${errorText}`],
+      success: false,
+    };
+  }
+
+  return res.json();
+}
+
+// Delete image from a question
+export async function deleteQuestionImage(
+  questionId: number
+): Promise<ConstructorResponse<Question>> {
+  const res = await fetch(`${API_BASE}/api/v1/questions/${questionId}/image`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("deleteQuestionImage failed:", res.status, errorText);
+    return {
+      data: null as unknown as Question,
+      messages: [`HTTP ${res.status}: ${errorText}`],
+      success: false,
+    };
+  }
+
+  return res.json();
+}

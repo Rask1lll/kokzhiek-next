@@ -1,20 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { parseData } from "@/app/libs/parseData";
 import Xarrow, { Xwrapper } from "react-xarrows";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import TaskViewWrapper from "./TaskViewWrapper";
 
 type ConceptMapViewProps = {
-  value: string;
-};
-
-type ConceptMap = {
-  tableSize: {
-    width: number;
-    height: number;
-  };
-  arrows: Arrow[];
-  Cells: Cell[][];
+  widgetId: number;
 };
 
 type Arrow = {
@@ -26,6 +18,16 @@ type Arrow = {
 type Cell = {
   id: string;
   text: string;
+};
+
+type ConceptMap = {
+  tableSize: {
+    width: number;
+    height: number;
+  };
+  arrows: Arrow[];
+  Cells: Cell[][];
+  color: "green" | "red" | "blue";
 };
 
 function createMatrix(
@@ -53,7 +55,13 @@ function createMatrix(
   return result;
 }
 
-function ArrowsLayerView({ arrows }: { arrows: Arrow[] }) {
+function ArrowsLayerView({
+  arrows,
+  color,
+}: {
+  arrows: Arrow[];
+  color: string;
+}) {
   return (
     <>
       {arrows
@@ -66,7 +74,7 @@ function ArrowsLayerView({ arrows }: { arrows: Arrow[] }) {
             strokeWidth={2}
             headSize={6}
             path="straight"
-            color="red"
+            color={color ?? "red"}
           />
         ))}
     </>
@@ -90,9 +98,9 @@ function TableView({ matrix }: { matrix: Cell[][] }) {
                 <div
                   key={el.id}
                   id={el.id}
-                  className=" relative ring-2 max-w-[20%] min-w-20 ring-slate-300 rounded-md bg-white"
+                  className="relative ring-2 max-w-[20%] min-w-20 ring-slate-300 rounded-md bg-white"
                 >
-                  <div className="p-1 text-sm text-gray-800 ">{el.text}</div>
+                  <div className="p-1 text-sm text-gray-800">{el.text}</div>
                 </div>
               );
             })}
@@ -103,24 +111,37 @@ function TableView({ matrix }: { matrix: Cell[][] }) {
   );
 }
 
-export default function ConceptMapView({ value }: ConceptMapViewProps) {
+export default function ConceptMapView({ widgetId }: ConceptMapViewProps) {
+  const { questions } = useQuestions(widgetId);
+
+  const questionsArray = questions;
+  const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
+  const data = currentQuestion?.data as ConceptMap | undefined;
+
   const table = useMemo<ConceptMap>(() => {
-    const parsed = parseData(value) as Partial<ConceptMap> | undefined;
+    if (!data) {
+      return {
+        tableSize: { width: 2, height: 2 },
+        Cells: [],
+        arrows: [],
+        color: "red",
+      };
+    }
 
     if (
-      parsed &&
-      parsed.tableSize &&
-      typeof parsed.tableSize.width === "number" &&
-      typeof parsed.tableSize.height === "number" &&
-      Array.isArray(parsed.Cells)
+      data.tableSize &&
+      typeof data.tableSize.width === "number" &&
+      typeof data.tableSize.height === "number" &&
+      Array.isArray(data.Cells)
     ) {
       return {
         tableSize: {
-          width: parsed.tableSize.width,
-          height: parsed.tableSize.height,
+          width: data.tableSize.width,
+          height: data.tableSize.height,
         },
-        Cells: parsed.Cells,
-        arrows: Array.isArray(parsed.arrows) ? parsed.arrows : [],
+        Cells: data.Cells,
+        arrows: Array.isArray(data.arrows) ? data.arrows : [],
+        color: data.color || "red",
       };
     }
 
@@ -128,8 +149,9 @@ export default function ConceptMapView({ value }: ConceptMapViewProps) {
       tableSize: { width: 2, height: 2 },
       Cells: [],
       arrows: [],
+      color: "red",
     };
-  }, [value]);
+  }, [data]);
 
   const tableMatrix = useMemo(() => {
     return createMatrix(
@@ -139,12 +161,18 @@ export default function ConceptMapView({ value }: ConceptMapViewProps) {
     );
   }, [table.tableSize.width, table.tableSize.height, table.Cells]);
 
+  if (!currentQuestion) {
+    return null;
+  }
+
   return (
-    <div className="w-full max-w-full">
-      <Xwrapper>
-        <TableView matrix={tableMatrix} />
-        <ArrowsLayerView arrows={table.arrows} />
-      </Xwrapper>
-    </div>
+    <TaskViewWrapper widgetId={widgetId}>
+      <div className="w-full max-w-full">
+        <Xwrapper>
+          <TableView matrix={tableMatrix} />
+          <ArrowsLayerView arrows={table.arrows} color={table.color} />
+        </Xwrapper>
+      </div>
+    </TaskViewWrapper>
   );
 }

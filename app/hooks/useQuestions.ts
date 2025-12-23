@@ -7,6 +7,8 @@ import {
   reorderQuestions,
   uploadOptionImage,
   deleteOptionImage,
+  uploadQuestionImage,
+  deleteQuestionImage,
 } from "@/app/services/constructor/questionsApi";
 import {
   Question,
@@ -144,6 +146,33 @@ export function useQuestions(widgetId: number | null) {
     return true;
   }, []);
 
+  /** QUESTION IMAGE UPLOAD */
+  const uploadQuestionImageHandler = useCallback(
+    async (questionId: number, file: File) => {
+      const res = await uploadQuestionImage(questionId, file);
+      if (!res.success) return null;
+
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? res.data.question : q))
+      );
+
+      return res.data.image_url;
+    },
+    []
+  );
+
+  /** QUESTION IMAGE DELETE */
+  const removeQuestionImage = useCallback(async (questionId: number) => {
+    const res = await deleteQuestionImage(questionId);
+    if (!res.success) return false;
+
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === questionId ? res.data : q))
+    );
+
+    return true;
+  }, []);
+
   console.log(questions);
 
   return {
@@ -157,5 +186,7 @@ export function useQuestions(widgetId: number | null) {
     reorder,
     uploadImage,
     removeImage,
+    uploadQuestionImage: uploadQuestionImageHandler,
+    removeQuestionImage,
   };
 }

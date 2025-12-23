@@ -28,6 +28,7 @@ import ConceptMap from "./taskBlocks/ConceptMap";
 import Sort from "./taskBlocks/Sort";
 import Order from "./taskBlocks/Order";
 import DragDrop from "./taskBlocks/DragDrop";
+import TaskBlockWrapper from "./taskBlocks/TaskBlockWrapper";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -167,37 +168,81 @@ const LayoutPlaceholder = ({
         );
         break;
       case "multiple_choice":
-        widgetContent = <MultipleChoice widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <MultipleChoice widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "single_choice":
-        widgetContent = <SingleChoice widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <SingleChoice widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "dropdown":
-        widgetContent = <DropDown widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <DropDown widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "fill_blank":
-        widgetContent = <FillBlank widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <FillBlank widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "crossword":
-        widgetContent = <Crossword widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <Crossword widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "match_pairs":
-        widgetContent = <MatchPairs widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <MatchPairs widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "word_search":
-        widgetContent = <SearchWord widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <SearchWord widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "concept_map":
-        widgetContent = <ConceptMap widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <ConceptMap widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "sort":
-        widgetContent = <Sort widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <Sort widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "order":
-        widgetContent = <Order widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <Order widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "drag_drop":
-        widgetContent = <DragDrop widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <DragDrop widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       default:
         widgetContent = <GenericWidget type={widget.type} />;

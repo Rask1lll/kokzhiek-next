@@ -7,8 +7,7 @@ import { Block } from "@/app/types/block";
 import { useSearchParams } from "next/navigation";
 import ViewPlaceholder from "./ViewPlaceholder";
 import { useBlocks } from "@/app/hooks/useBlocks";
-import { FiMoreVertical, FiTrash2, FiDroplet } from "react-icons/fi";
-import { IoOptions } from "react-icons/io5";
+import { FiTrash2, FiDroplet } from "react-icons/fi";
 import { CgOptions } from "react-icons/cg";
 
 // Предустановленные цвета
@@ -182,23 +181,41 @@ const BlockMenu = ({
 }: BlockMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [tempColor, setTempColor] = useState<string | null>(null);
+  const [isColorPicking, setIsColorPicking] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        // Apply temp color if picking was in progress
+        if (isColorPicking && tempColor !== null) {
+          onColorChange(tempColor);
+          setTempColor(null);
+        }
+        setIsColorPicking(false);
         setIsOpen(false);
         setShowColorPicker(false);
       }
     };
 
+    const handleMouseUp = () => {
+      if (isColorPicking && tempColor !== null) {
+        onColorChange(tempColor);
+        setTempColor(null);
+      }
+      setIsColorPicking(false);
+    };
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mouseup", handleMouseUp);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isOpen]);
+  }, [isOpen, isColorPicking, tempColor, onColorChange]);
 
   return (
     <div className="relative mt-2" ref={menuRef}>
@@ -215,7 +232,11 @@ const BlockMenu = ({
           {/* Color option */}
           <div className="relative">
             <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
+              onClick={() => {
+                setShowColorPicker(!showColorPicker);
+                setTempColor(null);
+                setIsColorPicking(false);
+              }}
               className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             >
               <FiDroplet className="w-4 h-4" />
@@ -258,13 +279,16 @@ const BlockMenu = ({
                   </label>
                   <input
                     type="color"
-                    value={currentColor || "#f3f4f6"}
+                    value={
+                      tempColor !== null ? tempColor : currentColor || "#f3f4f6"
+                    }
                     onChange={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      onColorChange(e.target.value);
-                      setShowColorPicker(false);
-                      // setIsOpen(false);
+                      setTempColor(e.target.value);
+                      if (!isColorPicking) {
+                        setIsColorPicking(true);
+                      }
                     }}
                     className="w-full h-8 rounded cursor-pointer"
                   />
@@ -321,7 +345,7 @@ const Layout = ({ block }: LayoutProps) => {
     return (
       <div className="flex group/block w-full">
         <div
-          className="w-full rounded-md p-2 transition-colors"
+          className="w-full ring ring-gray-300 rounded-md p-2 transition-colors"
           style={{ backgroundColor: blockColor || "#f3f4f6" }}
         >
           <Column
@@ -353,17 +377,17 @@ const Layout = ({ block }: LayoutProps) => {
   }
 
   return (
-    <div className="relative flex group/block w-full">
+    <div className="relative  flex group/block w-full">
       <div
-        className="w-full flex gap-4 rounded-md p-2 transition-colors"
-        style={{ backgroundColor: blockColor || "#f9fafb" }}
+        className="w-full flex gap-4 rounded-md ring ring-gray-300 p-2 transition-colors"
+        style={{ backgroundColor: blockColor || "#EDEDED" }}
       >
         {Array.from({ length: columnsCount }).map((_, colIndex) => {
           const columnWidgets = groupedWidgets.get(colIndex) || [];
           const columnClass = getColumnClasses(layout_type, colIndex);
 
           return (
-            <div key={colIndex} className={`${columnClass}`}>
+            <div key={colIndex} className={`${columnClass} mb-2`}>
               <Column
                 blockId={id}
                 columnIndex={colIndex}

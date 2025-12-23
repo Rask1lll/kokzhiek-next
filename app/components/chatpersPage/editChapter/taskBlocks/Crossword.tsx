@@ -148,14 +148,15 @@ export default function Crossword({ widgetId }: CrosswordProps) {
     data.questions.forEach((q, index) => {
       if (index < keyword.length) {
         const requiredLetter = keyword[index];
-        const answer = q.answer.toUpperCase();
+
+        const answer = (q.answer || "").toUpperCase();
 
         if (!q.answer) {
           errors.push(`Вопрос ${index + 1}: введите ответ`);
         } else if (!answer.includes(requiredLetter)) {
           errors.push(
             `Вопрос ${index + 1}: ответ "${
-              q.answer
+              q.answer || ""
             }" не содержит букву "${requiredLetter}"`
           );
         }
@@ -464,7 +465,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
 
           {data.questions.map((q, index) => {
             const requiredLetter = data.keyword[index] || "";
-            const hasLetter = q.answer
+            const hasLetter = (q.answer || "")
               .toUpperCase()
               .includes(requiredLetter.toUpperCase());
 
@@ -509,7 +510,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
 
                 <input
                   type="text"
-                  value={q.answer}
+                  value={q.answer || ""}
                   onChange={(e) =>
                     updateQuestion(q.id, {
                       answer: e.target.value.toUpperCase(),
@@ -548,7 +549,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
           <div className="inline-block font-mono">
             {data.questions.map((q, rowIndex) => {
               const offset = maxKeyLetterIndex - q.keyLetterIndex;
-              const letters = q.answer.toUpperCase().split("");
+              const letters = (q.answer || "").toUpperCase().split("");
 
               return (
                 <div key={q.id} className="flex items-center gap-0.5 mb-0.5">
