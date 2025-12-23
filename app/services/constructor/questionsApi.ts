@@ -13,13 +13,10 @@ import {
 export async function getQuestions(
   widgetId: number
 ): Promise<ConstructorResponse<Question[]>> {
-  const res = await fetch(
-    `${API_BASE}/api/v1/widgets/${widgetId}/questions`,
-    {
-      method: "GET",
-      headers: getAuthHeaders(),
-    }
-  );
+  const res = await fetch(`${API_BASE}/api/v1/widgets/${widgetId}/questions`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -39,14 +36,11 @@ export async function createQuestion(
   widgetId: number,
   payload: CreateQuestionPayload
 ): Promise<ConstructorResponse<Question>> {
-  const res = await fetch(
-    `${API_BASE}/api/v1/widgets/${widgetId}/questions`,
-    {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
+  const res = await fetch(`${API_BASE}/api/v1/widgets/${widgetId}/questions`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -201,4 +195,3 @@ export async function deleteOptionImage(
 
   return res.json();
 }
-

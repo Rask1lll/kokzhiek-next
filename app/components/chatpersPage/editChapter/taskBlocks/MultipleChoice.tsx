@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/app/components/Button/Button";
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import {
   FiX,
   FiChevronUp,
@@ -12,72 +12,38 @@ import {
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
-import { TaskType } from "@/app/types/enums";
 
 type MultipleChoiceProps = {
   widgetId: number;
 };
 
 export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
-  const { questions, loading, create, update, uploadImage, removeImage } =
+  const { questions, loading, update, uploadImage, removeImage } =
     useQuestions(widgetId);
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const hasCreatedQuestionRef = useRef(false);
+
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
+
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
+
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const optionDebounceTimersRef = useRef<Map<number, NodeJS.Timeout>>(
     new Map()
   );
   const fileInputRefs = useRef<Map<number, HTMLInputElement>>(new Map());
-
-  // Ensure questions is an array
-  const questionsArray = useMemo(
-    () => (Array.isArray(questions) ? questions : []),
-    [questions]
-  );
-
-  // Initialize or update current question from questions array
-  useEffect(() => {
-    // If we have questions, use the first one
-    if (questionsArray.length > 0) {
-      const firstQuestion = questionsArray[0];
-      // Only update if the question changed (different ID or more complete data)
-      if (
-        !currentQuestion ||
-        currentQuestion.id !== firstQuestion.id ||
-        (firstQuestion.options && !currentQuestion.options) ||
-        (firstQuestion.body && !currentQuestion.body)
-      ) {
-        // Use setTimeout to avoid synchronous setState in effect
-        const timer = setTimeout(() => {
-          setCurrentQuestion(firstQuestion);
-        }, 0);
-        return () => clearTimeout(timer);
-      }
-      return;
-    }
-
-    // If no questions and haven't created one yet, create it
-    // Only create if not loading (to avoid creating multiple questions)
-    if (!loading && !hasCreatedQuestionRef.current && !currentQuestion && !isCreating) {
-      hasCreatedQuestionRef.current = true;
-      setTimeout(() => {
-        setIsCreating(true);
-        create({
-          type: TaskType.MULTIPLE_CHOICE,
-          body: "Новый вопрос",
-          data: {},
-          points: 1,
-          options: [],
-        }).then((newQuestion) => {
-          setIsCreating(false);
-          if (newQuestion) {
-            setCurrentQuestion(newQuestion);
-          }
-        });
-      }, 0);
-    }
-  }, [questionsArray, loading, currentQuestion, create, isCreating]);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -99,8 +65,8 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
     (body: string) => {
       if (!currentQuestion?.id) return;
 
-      // Update local state immediately
-      setCurrentQuestion((prev) => (prev ? { ...prev, body } : null));
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
 
       // Clear existing timer
       if (debounceTimerRef.current) {
@@ -109,15 +75,12 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
 
       // Debounce server update
       const questionId = currentQuestion.id;
-      debounceTimerRef.current = setTimeout(async () => {
+      debounceTimerRef.current = setTimeout(() => {
         if (!questionId) return;
         const trimmedBody = body.trim();
         if (trimmedBody.length === 0) return;
 
-        const updated = await update(questionId, { body: trimmedBody });
-        if (updated) {
-          setCurrentQuestion(updated);
-        }
+        update(questionId, { body: trimmedBody });
       }, 500);
     },
     [currentQuestion, update]
@@ -125,7 +88,6 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
 
   const addOption = useCallback(async () => {
     if (!currentQuestion?.id) return;
-
     const newOptions = [
       ...(currentQuestion.options || []),
       {
@@ -138,14 +100,17 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
       },
     ];
 
+    // Send to server and wait for response to get IDs
     const updated = await update(currentQuestion.id, { options: newOptions });
+    console.log(updated);
     if (updated) {
+      // Update UI with data from server (includes IDs for new options)
       setCurrentQuestion(updated);
     }
   }, [currentQuestion, update]);
 
   const removeOption = useCallback(
-    async (optionId: number | undefined) => {
+    (optionId: number | undefined) => {
       if (!currentQuestion?.id || !optionId) return;
       if ((currentQuestion.options?.length || 0) <= 2) return;
 
@@ -153,16 +118,19 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
         (opt) => opt.id !== optionId
       );
 
-      const updated = await update(currentQuestion.id, { options: newOptions });
-      if (updated) {
-        setCurrentQuestion(updated);
-      }
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev ? { ...prev, options: newOptions } : null
+      );
+
+      // Send to server
+      update(currentQuestion.id, { options: newOptions });
     },
     [currentQuestion, update]
   );
 
   const moveOption = useCallback(
-    async (optionId: number | undefined, direction: "up" | "down") => {
+    (optionId: number | undefined, direction: "up" | "down") => {
       if (!currentQuestion?.id || !optionId) return;
 
       const options = [...(currentQuestion.options || [])];
@@ -186,89 +154,78 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
         opt.order = idx;
       });
 
-      const updated = await update(currentQuestion.id, { options });
-      if (updated) {
-        setCurrentQuestion(updated);
-      }
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, options } : null));
+
+      // Send to server
+      update(currentQuestion.id, { options });
     },
     [currentQuestion, update]
   );
 
-  const updateOption = useCallback(
-    (optionId: number | undefined, updates: Partial<QuestionOption>) => {
-      if (!currentQuestion?.id || optionId === undefined) return;
+  const updateOption = (
+    optionId: number | undefined,
+    updates: Partial<QuestionOption>
+  ) => {
+    if (!currentQuestion?.id || optionId === undefined) return;
 
-      // Update local state immediately
-      const newOptionsLocal = (currentQuestion.options || []).map((opt) =>
-        opt.id === optionId ? { ...opt, ...updates } : opt
-      );
-      setCurrentQuestion((prev) =>
-        prev ? { ...prev, options: newOptionsLocal } : null
-      );
+    // Update UI immediately
+    const newOptions = (currentQuestion.options || []).map((opt) =>
+      opt.id === optionId ? { ...opt, ...updates } : opt
+    );
+    setCurrentQuestion((prev) =>
+      prev ? { ...prev, options: newOptions } : prev
+    );
 
-      // If updating body, use debounce
-      if (updates.body !== undefined) {
-        const existingTimer = optionDebounceTimersRef.current.get(optionId);
-        if (existingTimer) {
-          clearTimeout(existingTimer);
-        }
+    // If updating body, use debounce for server update
+    if (updates.body !== undefined) {
+      const existingTimer = optionDebounceTimersRef.current.get(optionId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
 
-        const questionId = currentQuestion.id;
-        const timer = setTimeout(async () => {
-          if (!questionId) {
-            optionDebounceTimersRef.current.delete(optionId);
-            return;
-          }
-          const trimmedBody = updates.body?.trim() || "";
-          if (trimmedBody.length === 0) {
-            optionDebounceTimersRef.current.delete(optionId);
-            return;
-          }
-
-          const newOptions = (currentQuestion.options || []).map((opt) =>
-            opt.id === optionId
-              ? { ...opt, ...updates, body: trimmedBody }
-              : opt
-          );
-
-          const updated = await update(questionId, { options: newOptions });
-          if (updated) {
-            setCurrentQuestion(updated);
-          }
+      const questionId = currentQuestion.id;
+      const trimmedBody = updates.body?.trim() || "";
+      const timer = setTimeout(() => {
+        if (!questionId) {
           optionDebounceTimersRef.current.delete(optionId);
-        }, 500);
-
-        optionDebounceTimersRef.current.set(optionId, timer);
-        return;
-      }
-
-      // For other updates (like is_correct), send immediately
-      const newOptions = (currentQuestion.options || []).map((opt) =>
-        opt.id === optionId ? { ...opt, ...updates } : opt
-      );
-
-      // For multiple choice, multiple options can be correct (no need to uncheck others)
-
-      // Send immediately for non-body updates
-      update(currentQuestion.id, { options: newOptions }).then((updated) => {
-        if (updated) {
-          setCurrentQuestion(updated);
+          return;
         }
-      });
-    },
-    [currentQuestion, update]
-  );
+        if (trimmedBody.length === 0) {
+          optionDebounceTimersRef.current.delete(optionId);
+          return;
+        }
 
+        // Use the newOptions we already created for UI, just update the body
+        const serverOptions = newOptions.map((opt) =>
+          opt.id === optionId ? { ...opt, body: trimmedBody } : opt
+        );
+
+        update(questionId, { options: serverOptions });
+        optionDebounceTimersRef.current.delete(optionId);
+      }, 500);
+
+      optionDebounceTimersRef.current.set(optionId, timer);
+      return;
+    }
+
+    // For other updates (like is_correct), send immediately
+    // For multiple choice, allow multiple correct answers (no need to uncheck others)
+    update(currentQuestion.id, { options: newOptions });
+  };
   const handleImageUpload = useCallback(
     async (optionId: number | undefined, file: File) => {
-      if (optionId === undefined) return;
+      if (optionId === undefined || !currentQuestion?.id) return;
 
       const imageUrl = await uploadImage(optionId, file);
-      if (imageUrl && currentQuestion) {
+      if (imageUrl) {
+        // Update currentQuestion with image URL from server
         const updatedOptions = (currentQuestion.options || []).map((opt) =>
           opt.id === optionId ? { ...opt, image_url: imageUrl } : opt
         );
-        setCurrentQuestion({ ...currentQuestion, options: updatedOptions });
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: updatedOptions } : prev
+        );
       }
     },
     [uploadImage, currentQuestion]
@@ -276,21 +233,24 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
 
   const handleImageDelete = useCallback(
     async (optionId: number | undefined) => {
-      if (optionId === undefined) return;
+      if (optionId === undefined || !currentQuestion?.id) return;
 
       const success = await removeImage(optionId);
-      if (success && currentQuestion) {
+      if (success) {
+        // Update currentQuestion - remove image_url
         const updatedOptions = (currentQuestion.options || []).map((opt) =>
           opt.id === optionId ? { ...opt, image_url: null } : opt
         );
-        setCurrentQuestion({ ...currentQuestion, options: updatedOptions });
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: updatedOptions } : prev
+        );
       }
     },
     [removeImage, currentQuestion]
   );
 
   // Show loading state while loading or creating question
-  if (loading || isCreating) {
+  if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
         <div className="animate-pulse">Загрузка...</div>
@@ -310,6 +270,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
 
   return (
     <div className="w-full space-y-4">
+      {/* Settings bar */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
         <div className="text-sm text-gray-600">Вопрос к заданию</div>
         <input
@@ -321,6 +282,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
         />
       </div>
 
+      {/* Options list */}
       <div className="space-y-2">
         <span className="text-sm font-medium flex justify-between text-slate-700">
           Варианты ответа:
@@ -337,17 +299,19 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
             className="flex flex-col gap-2 p-2 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
           >
             <div className="flex items-center gap-2">
+              {/* Correct checkbox */}
               <label className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
                   checked={option.is_correct || false}
-                  onChange={() => {
-                    updateOption(option.id, { is_correct: !option.is_correct });
-                  }}
+                  onChange={(e) =>
+                    updateOption(option.id, { is_correct: e.target.checked })
+                  }
                   className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                 />
               </label>
 
+              {/* Text input */}
               <input
                 type="text"
                 value={option.body || ""}
