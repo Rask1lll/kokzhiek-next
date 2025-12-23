@@ -38,6 +38,7 @@ export default function RegisterPage() {
             email,
             password,
             password_confirmation: confirmPassword,
+            ...(registrationKey && { activation_key: registrationKey }),
           }),
         }
       );
