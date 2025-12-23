@@ -117,21 +117,6 @@ export default function ChapterPageClient() {
             } group`}
           >
             <Layout block={block} />
-            {isEditMode && (
-              <div className="flex flex-col justify-between items-center gap-1">
-                <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
-                  <p className="h-3 leading-none">::</p>
-                  <p className="leading-none">::</p>
-                </div>
-                <button
-                  onClick={() => handleDeleteBlock(block.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 text-sm"
-                  title="Удалить блок"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
           </div>
         ))}
         {isEditMode && <CreateBlock onClick={handleCreate} />}

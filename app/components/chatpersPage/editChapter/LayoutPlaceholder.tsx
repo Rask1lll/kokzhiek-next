@@ -179,20 +179,16 @@ const LayoutPlaceholder = ({
         widgetContent = <FillBlank widgetId={widget.id} />;
         break;
       case "crossword":
-        widgetContent = <Crossword value={textValue} onChange={handleChange} />;
+        widgetContent = <Crossword widgetId={widget.id} />;
         break;
       case "match_pairs":
         widgetContent = <MatchPairs widgetId={widget.id} />;
         break;
       case "word_search":
-        widgetContent = (
-          <SearchWord value={textValue} onChange={handleChange} />
-        );
+        widgetContent = <SearchWord widgetId={widget.id} />;
         break;
       case "concept_map":
-        widgetContent = (
-          <ConceptMap value={textValue} onChange={handleChange} />
-        );
+        widgetContent = <ConceptMap widgetId={widget.id} />;
         break;
       case "sort":
         widgetContent = <Sort widgetId={widget.id} />;

@@ -1,9 +1,12 @@
-import { parseData } from "@/app/libs/parseData";
-import { JSX, useEffect, useState } from "react";
+"use client";
 
-type Props = {
-  value: string;
-  onChange: (s: string) => void;
+import { useEffect, useCallback, useRef, useState, useMemo } from "react";
+import { FiMinus, FiPlus } from "react-icons/fi";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import { Question } from "@/app/types/question";
+
+type SearchWordProps = {
+  widgetId: number;
 };
 
 type GridData = {
@@ -22,17 +25,16 @@ function CreateCell(
   onChange: (id: string, s: string) => void
 ) {
   return (
-    <div className="flex-1 flex">
-      <input
-        type="text"
-        maxLength={1}
-        value={value}
-        onChange={(e) => {
-          onChange(id, e.target.value);
-        }}
-        className="w-full text-center uppercase text-2xl h-full ring ring-gray-300 rounded-lg py-0.5"
-      />
-    </div>
+    <input
+      type="text"
+      maxLength={1}
+      value={value}
+      onChange={(e) => {
+        onChange(id, e.target.value);
+      }}
+      className="w-12 h-12 text-center uppercase text-xl font-bold ring-2 ring-slate-300 rounded-lg py-0.5 focus:ring-blue-500 focus:ring-2 transition-all hover:ring-slate-400 bg-white"
+      placeholder=""
+    />
   );
 }
 
@@ -49,15 +51,98 @@ function generateCells(grid: Cell[], size: number): Cell[] {
   return temp;
 }
 
-export default function SearchWord({ value, onChange }: Props) {
-  const [validatedData, setValidatedData] = useState<GridData>(() => {
-    const parsed = parseData(value) ?? { Cells: [], size: 3 };
+export default function SearchWord({ widgetId }: SearchWordProps) {
+  const { questions, loading, update } = useQuestions(widgetId);
+
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
+
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
+
+  const cellDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const sizeDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const debounceTimer = debounceTimerRef.current;
+    const sizeTimer = sizeDebounceTimerRef.current;
+    const cellTimers = cellDebounceTimersRef.current;
+
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      if (sizeTimer) {
+        clearTimeout(sizeTimer);
+      }
+      cellTimers.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      cellTimers.clear();
+    };
+  }, []);
+
+  const updateQuestionBody = useCallback(
+    (body: string) => {
+      if (!currentQuestion?.id) return;
+
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
+
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // Debounce server update
+      const questionId = currentQuestion.id;
+      debounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) return;
+
+        update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
+  // Convert question data to GridData structure
+  const validatedData = useMemo((): GridData => {
+    if (!currentQuestion?.data) {
+      return {
+        size: 3,
+        Cells: generateCells([], 3),
+      };
+    }
+
+    const questionData = currentQuestion.data as {
+      size?: number;
+      Cells?: Cell[];
+    };
+
+    const size = questionData.size || 3;
+    const cells = questionData.Cells || [];
 
     return {
-      size: parsed.size,
-      Cells: generateCells(parsed.Cells, parsed.size),
+      size,
+      Cells: generateCells(cells, size),
     };
-  });
+  }, [currentQuestion]);
 
   const gridType = (size: number) => {
     switch (size) {
@@ -80,75 +165,197 @@ export default function SearchWord({ value, onChange }: Props) {
     }
   };
 
-  function updateInput(id: string, value: string) {
-    const updated = validatedData.Cells.map((el) =>
-      el.id === id ? { ...el, symbol: value } : el
-    );
-    setValidatedData({ ...validatedData, Cells: updated });
-    onChange(JSON.stringify({ size: validatedData.size, Cells: updated }));
-  }
+  const updateInput = useCallback(
+    (id: string, value: string) => {
+      if (!currentQuestion?.id) return;
 
-  function updateSize(size: number) {
-    setValidatedData((prev) => {
-      const updated = {
-        size: size,
-        Cells: generateCells(prev.Cells, size),
+      const updated = validatedData.Cells.map((el) =>
+        el.id === id ? { ...el, symbol: value.toUpperCase() } : el
+      );
+
+      const newData = {
+        ...validatedData,
+        Cells: updated,
       };
 
-      return updated;
-    });
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                size: newData.size,
+                Cells: newData.Cells,
+              },
+            }
+          : null
+      );
 
-    onChange(
-      JSON.stringify({
-        size: size,
-        Cells: generateCells(validatedData.Cells, size),
-      })
+      // Debounce server update
+      const timerKey = `cell-${id}`;
+      const existingTimer = cellDebounceTimersRef.current.get(timerKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+
+      const questionId = currentQuestion.id;
+      const timer = setTimeout(() => {
+        if (!questionId) {
+          cellDebounceTimersRef.current.delete(timerKey);
+          return;
+        }
+
+        update(questionId, {
+          data: {
+            size: newData.size,
+            Cells: newData.Cells,
+          },
+        });
+        cellDebounceTimersRef.current.delete(timerKey);
+      }, 300);
+
+      cellDebounceTimersRef.current.set(timerKey, timer);
+    },
+    [currentQuestion, validatedData, update]
+  );
+
+  const updateSize = useCallback(
+    (size: number) => {
+      if (!currentQuestion?.id) return;
+
+      // Clamp size between 3 and 10
+      const clampedSize = Math.max(3, Math.min(10, size));
+
+      const newCells = generateCells(validatedData.Cells, clampedSize);
+      const newData = {
+        size: clampedSize,
+        Cells: newCells,
+      };
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                size: newData.size,
+                Cells: newData.Cells,
+              },
+            }
+          : null
+      );
+
+      // Debounce server update
+      if (sizeDebounceTimerRef.current) {
+        clearTimeout(sizeDebounceTimerRef.current);
+      }
+
+      const questionId = currentQuestion.id;
+      sizeDebounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+
+        update(questionId, {
+          data: {
+            size: newData.size,
+            Cells: newData.Cells,
+          },
+        });
+      }, 500);
+    },
+    [currentQuestion, validatedData.Cells, update]
+  );
+
+  const decreaseSize = useCallback(() => {
+    if (validatedData.size > 3) {
+      updateSize(validatedData.size - 1);
+    }
+  }, [validatedData.size, updateSize]);
+
+  const increaseSize = useCallback(() => {
+    if (validatedData.size < 10) {
+      updateSize(validatedData.size + 1);
+    }
+  }, [validatedData.size, updateSize]);
+
+  // Show loading state while loading
+  if (loading) {
+    return (
+      <div className="w-full space-y-4 p-4">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
     );
-    console.log("salem");
   }
 
-  function setDataSize(n: number) {
-    setValidatedData((prev) => {
-      return { ...prev, size: n };
-    });
+  if (!currentQuestion) {
+    return (
+      <div className="w-full space-y-4 p-4 text-gray-500">
+        Ошибка загрузки вопроса
+      </div>
+    );
   }
 
   return (
-    <div className="w-full flex flex-col gap-2 h-auto">
-      <div className="flex gap-2">
-        <label htmlFor="grid_number" className="font-semibold text-gray-500">
-          Размер сетки:
-        </label>
+    <div className="w-full space-y-4">
+      {/* Question input */}
+      <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-sm text-gray-600">Вопрос к заданию</div>
         <input
-          type="number"
-          name="grid_number"
-          className="w-10 ring rounded-md text-center text-xl decoration-0"
-          max={10}
-          min={2}
-          value={validatedData.size}
-          onInput={(e) => {
-            const value = Number(e.currentTarget.value);
-            if (value > 10) {
-              e.currentTarget.value = "10";
-              setDataSize(10);
-              updateSize(10);
-            } else if (value < 3) {
-              e.currentTarget.value = "3";
-              setDataSize(3);
-              updateSize(3);
-            } else {
-              setDataSize(value);
-              updateSize(value);
-            }
-          }}
+          type="text"
+          placeholder="Вопрос к заданию"
+          className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
+          value={currentQuestion.body || ""}
+          onChange={(e) => updateQuestionBody(e.target.value)}
         />
       </div>
-      <div className={`grid  gap-1 ${gridType(validatedData.size)}`}>
-        {validatedData.Cells.map((el) => {
-          return (
-            <div key={el.id}>{CreateCell(el.symbol, el.id, updateInput)}</div>
-          );
-        })}
+
+      {/* Grid size controls */}
+      <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <label className="text-sm font-medium text-slate-700">
+          Размер сетки:
+        </label>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={decreaseSize}
+            disabled={validatedData.size <= 3}
+            className="flex items-center justify-center w-8 h-8 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            title="Уменьшить размер"
+          >
+            <FiMinus className="w-4 h-4" />
+          </button>
+          <div className="flex items-center justify-center w-16 h-10 bg-white border border-slate-300 rounded-lg text-lg font-semibold text-slate-700">
+            {validatedData.size}×{validatedData.size}
+          </div>
+          <button
+            type="button"
+            onClick={increaseSize}
+            disabled={validatedData.size >= 10}
+            className="flex items-center justify-center w-8 h-8 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            title="Увеличить размер"
+          >
+            <FiPlus className="w-4 h-4" />
+          </button>
+        </div>
+        <span className="text-xs text-slate-500 ml-auto">
+          {validatedData.size * validatedData.size} ячеек
+        </span>
+      </div>
+
+      {/* Grid */}
+      <div className="w-full flex justify-center p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div
+          className={`grid w-fit justify-center gap-2 ${gridType(
+            validatedData.size
+          )}`}
+        >
+          {validatedData.Cells.map((el) => {
+            return (
+              <div key={el.id} className="w-fit">
+                {CreateCell(el.symbol, el.id, updateInput)}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ import { useSearchParams } from "next/navigation";
 import ViewPlaceholder from "./ViewPlaceholder";
 import { useBlocks } from "@/app/hooks/useBlocks";
 import { FiMoreVertical, FiTrash2, FiDroplet } from "react-icons/fi";
+import { IoOptions } from "react-icons/io5";
+import { CgOptions } from "react-icons/cg";
 
 // Предустановленные цвета
 const PRESET_COLORS = [
@@ -199,13 +201,13 @@ const BlockMenu = ({
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative mt-2" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1.5 hover:bg-gray-200 rounded-md transition-colors"
+        className="p-1.5 hover:bg-gray-200 border border-gray-300 border-l-0 rounded-l-none rounded-md transition-colors"
         title="Меню блока"
       >
-        <FiMoreVertical className="w-5 h-5 text-gray-500" />
+        <CgOptions className="w-7 h-7 text-gray-500" />
       </button>
 
       {isOpen && (
@@ -258,9 +260,11 @@ const BlockMenu = ({
                     type="color"
                     value={currentColor || "#f3f4f6"}
                     onChange={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       onColorChange(e.target.value);
                       setShowColorPicker(false);
-                      setIsOpen(false);
+                      // setIsOpen(false);
                     }}
                     className="w-full h-8 rounded cursor-pointer"
                   />
@@ -315,7 +319,7 @@ const Layout = ({ block }: LayoutProps) => {
   if (columnsCount === 1) {
     const columnWidgets = groupedWidgets.get(0) || [];
     return (
-      <div className="relative group/block w-full">
+      <div className="flex group/block w-full">
         <div
           className="w-full rounded-md p-2 transition-colors"
           style={{ backgroundColor: blockColor || "#f3f4f6" }}
@@ -328,12 +332,20 @@ const Layout = ({ block }: LayoutProps) => {
           />
         </div>
         {isEdit && (
-          <div className="absolute top-2 right-[-40px] opacity-0 group-hover/block:opacity-100 transition-opacity">
+          <div className=" top-2 right-[-40px] opacity-100 transition-opacity">
             <BlockMenu
               currentColor={blockColor}
               onColorChange={handleColorChange}
               onDelete={handleDelete}
             />
+            <div className="flex flex-col justify-between items-center gap-1">
+              <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
+                <p className="h-3 leading-none">::</p>
+                <p className="h-3 leading-none">::</p>
+                <p className="h-3 leading-none">::</p>
+                <p className="leading-none">::</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -341,7 +353,7 @@ const Layout = ({ block }: LayoutProps) => {
   }
 
   return (
-    <div className="relative group/block w-full">
+    <div className="relative flex group/block w-full">
       <div
         className="w-full flex gap-4 rounded-md p-2 transition-colors"
         style={{ backgroundColor: blockColor || "#f9fafb" }}
@@ -362,12 +374,20 @@ const Layout = ({ block }: LayoutProps) => {
         })}
       </div>
       {isEdit && (
-        <div className="absolute top-2 right-[-40px] opacity-0 group-hover/block:opacity-100 transition-opacity">
+        <div className=" top-2 right-[-40px] opacity-100 transition-opacity">
           <BlockMenu
             currentColor={blockColor}
             onColorChange={handleColorChange}
             onDelete={handleDelete}
           />
+          <div className="flex flex-col justify-between items-center gap-1">
+            <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
+              <p className="h-3 leading-none">::</p>
+              <p className="h-3 leading-none">::</p>
+              <p className="h-3 leading-none">::</p>
+              <p className="leading-none">::</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

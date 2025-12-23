@@ -1,11 +1,14 @@
-import { parseData } from "@/app/libs/parseData";
-import { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { BiTrash } from "react-icons/bi";
 import { BsArrowBarRight } from "react-icons/bs";
 import Xarrow, { Xwrapper } from "react-xarrows";
-type Props = {
-  value: string;
-  onChange: (s: string) => void;
+import { useQuestions } from "@/app/hooks/useQuestions";
+import { Question } from "@/app/types/question";
+
+type ConceptMapProps = {
+  widgetId: number;
 };
 
 const Colors = {
@@ -101,7 +104,7 @@ function Table({
                     {el.id}
                   </span>
                   <textarea
-                    defaultValue={el.text}
+                    value={el.text}
                     className="p-0.5 resize-none outline-0"
                     onChange={(e) => onCellChange?.(el.id, e.target.value)}
                   />
@@ -141,7 +144,7 @@ function Arrows({
       <h3 className="font-medium text-xl mb-2">Стрелки между ячейками</h3>
       <button
         color="green"
-        className="bg-green-300 opacity-80 cursor-pointer rounded-lg p-2 py-1"
+        className="bg-green-200/90 font-semibold text-green-900 opacity-80 cursor-pointer rounded-lg p-2 py-1"
         onClick={addArrow}
       >
         Добавить стрелку +
@@ -232,96 +235,244 @@ function Arrows({
   );
 }
 
-export default function ConceptMap({ value, onChange }: Props) {
-  const [table, setTable] = useState<ConceptMap>(() => {
-    return (
-      parseData(value) ?? {
+export default function ConceptMap({ widgetId }: ConceptMapProps) {
+  const { questions, loading, update } = useQuestions(widgetId);
+
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
+
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
+
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const cellDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const debounceTimer = debounceTimerRef.current;
+    const cellTimers = cellDebounceTimersRef.current;
+
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      cellTimers.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      cellTimers.clear();
+    };
+  }, []);
+
+  // Convert question data to ConceptMap structure
+  const table = useMemo((): ConceptMap => {
+    if (!currentQuestion?.data) {
+      return {
         tableSize: { width: 2, height: 2 },
         Cells: [],
         arrows: [],
-        color: "redc",
-      }
-    );
-  });
+        color: "red",
+      };
+    }
+
+    const data = currentQuestion.data as {
+      tableSize?: { width: number; height: number };
+      arrows?: Arrow[];
+      Cells?: Cell[][];
+      color?: "green" | "red" | "blue";
+    };
+
+    return {
+      tableSize: data.tableSize || { width: 2, height: 2 },
+      arrows: data.arrows || [],
+      Cells: data.Cells || [],
+      color: data.color || "red",
+    };
+  }, [currentQuestion]);
 
   const [colorChoose, setColorChoose] = useState<boolean>(false);
 
-  function handleCellChange(id: string, text: string) {
-    setTable((prev) => {
-      const cells = prev.Cells.map((row) =>
+  const syncToServer = useCallback(
+    (newData: Partial<ConceptMap>) => {
+      if (!currentQuestion?.id) return;
+
+      const updatedData = {
+        ...table,
+        ...newData,
+      };
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                tableSize: updatedData.tableSize,
+                arrows: updatedData.arrows,
+                Cells: updatedData.Cells,
+                color: updatedData.color,
+              },
+            }
+          : null
+      );
+
+      // Send to server
+      update(currentQuestion.id, {
+        data: {
+          tableSize: updatedData.tableSize,
+          arrows: updatedData.arrows,
+          Cells: updatedData.Cells,
+          color: updatedData.color,
+        },
+      });
+    },
+    [currentQuestion, table, update]
+  );
+
+  const handleCellChange = useCallback(
+    (id: string, text: string) => {
+      if (!currentQuestion?.id) return;
+
+      const cells = table.Cells.map((row) =>
         row.map((cell) => (cell.id === id ? { ...cell, text } : cell))
       );
 
-      return { ...prev, Cells: cells };
-    });
-  }
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                ...prev.data,
+                Cells: cells,
+              },
+            }
+          : null
+      );
 
-  useEffect(() => {
-    onChange(JSON.stringify(table));
-  }, [table]);
+      // Debounce server update
+      const timerKey = `cell-${id}`;
+      const existingTimer = cellDebounceTimersRef.current.get(timerKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
 
-  function addArrow() {
-    setTable((prev) => ({
-      ...prev,
-      arrows: [
-        ...prev.arrows,
-        { id: String(table.arrows.length), to: "", from: "" },
-      ],
-    }));
+      const questionId = currentQuestion.id;
+      const timer = setTimeout(() => {
+        if (!questionId) {
+          cellDebounceTimersRef.current.delete(timerKey);
+          return;
+        }
 
-    onChange(
-      JSON.stringify({
-        ...table,
-        arrows: [
-          ...table.arrows,
-          { id: String(table.arrows.length), to: "", from: "" },
-        ],
-      })
+        update(questionId, {
+          data: {
+            ...currentQuestion.data,
+            Cells: cells,
+          },
+        });
+        cellDebounceTimersRef.current.delete(timerKey);
+      }, 500);
+
+      cellDebounceTimersRef.current.set(timerKey, timer);
+    },
+    [currentQuestion, table.Cells, update]
+  );
+
+  const addArrow = useCallback(() => {
+    const newArrow: Arrow = {
+      id: String(table.arrows.length),
+      to: "",
+      from: "",
+    };
+    syncToServer({ arrows: [...table.arrows, newArrow] });
+  }, [table.arrows, syncToServer]);
+
+  const removeArrow = useCallback(
+    (id: string) => {
+      const filtered = table.arrows.filter((a) => a.id !== id);
+      syncToServer({ arrows: filtered });
+    },
+    [table.arrows, syncToServer]
+  );
+
+  const editArrow = useCallback(
+    (arrow: Arrow) => {
+      const edited = table.arrows.map((el) =>
+        el.id === arrow.id
+          ? { id: String(arrow.id), to: arrow.to, from: arrow.from }
+          : el
+      );
+      syncToServer({ arrows: edited });
+    },
+    [table.arrows, syncToServer]
+  );
+
+  const tableMatrix = useMemo(() => {
+    return createMatrix(
+      table.tableSize.width,
+      table.tableSize.height,
+      table.Cells
     );
-  }
+  }, [table.tableSize.width, table.tableSize.height, table.Cells]);
 
-  function removeArrow(id: string) {
-    setTable((prev) => {
-      const filtered = prev.arrows.filter((a) => a.id !== id);
+  const handleTableSizeChange = useCallback(
+    (field: "width" | "height", value: number) => {
+      if (value > 9 || value < 2) value = value > 9 ? 9 : 2;
 
-      const next = {
-        ...prev,
-        arrows: filtered,
+      const newSize = {
+        ...table.tableSize,
+        [field]: value,
       };
 
-      onChange(JSON.stringify(next));
-      return next;
-    });
-  }
+      const nextCells = createMatrix(
+        newSize.width,
+        newSize.height,
+        table.Cells
+      );
 
-  function editArrow(arrow: Arrow) {
-    console.log(arrow);
-    const edited = table.arrows.map((el) => {
-      return el.id === arrow.id
-        ? { id: String(arrow.id), to: arrow.to, from: arrow.from }
-        : el;
-    });
-    setTable((prev) => ({
-      ...prev,
-      arrows: edited,
-    }));
-    console.log(table);
-    onChange(
-      JSON.stringify({
-        ...table,
-        arrows: edited,
-      })
+      syncToServer({
+        tableSize: newSize,
+        Cells: nextCells,
+      });
+    },
+    [table.tableSize, table.Cells, syncToServer]
+  );
+
+  const handleColorChange = useCallback(
+    (color: "green" | "red" | "blue") => {
+      syncToServer({ color });
+      setColorChoose(false);
+    },
+    [syncToServer]
+  );
+
+  // Show loading state while loading
+  if (loading) {
+    return (
+      <div className="w-full space-y-4 p-4">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
     );
   }
-  console.log(table.color);
 
-  // const tableMatrix = useMemo(() => {
-  //   return createMatrix(
-  //     table.tableSize.width,
-  //     table.tableSize.height,
-  //     table.Cells
-  //   );
-  // }, [table.tableSize.width, table.tableSize.height, table.Cells]);
+  if (!currentQuestion) {
+    return (
+      <div className="w-full space-y-4 p-4 text-gray-500">
+        Ошибка загрузки вопроса
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-full">
@@ -338,58 +489,22 @@ export default function ConceptMap({ value, onChange }: Props) {
               type="number"
               className="w-10 text-center border rounded-lg border-gray-500"
               value={table.tableSize.width}
-              onChange={(e) => {
-                let value = Number(e.target.value);
-                if (value > 9 || value < 2) value = value > 9 ? 9 : 2;
-
-                setTable((prev) => {
-                  const nextCells = createMatrix(
-                    value,
-                    prev.tableSize.height,
-                    prev.Cells
-                  );
-
-                  const next = {
-                    ...prev,
-                    tableSize: { width: value, height: prev.tableSize.height },
-                    Cells: nextCells,
-                  };
-
-                  onChange(JSON.stringify(next));
-                  return next;
-                });
-              }}
+              onChange={(e) =>
+                handleTableSizeChange("width", Number(e.target.value))
+              }
             />
           </div>
           <div className="flex gap-2 items-center">
-            <label htmlFor="tableWidth">Ширина:</label>
+            <label htmlFor="tableHeight">Высота:</label>
             <input
-              id="tableWidth"
-              name="tableWidth"
+              id="tableHeight"
+              name="tableHeight"
               type="number"
               className="w-10 text-center border rounded-lg border-gray-500"
               value={table.tableSize.height}
-              onChange={(e) => {
-                let value = Number(e.target.value);
-                if (value > 9 || value < 2) value = value > 9 ? 9 : 2;
-
-                setTable((prev) => {
-                  const nextCells = createMatrix(
-                    prev.tableSize.width,
-                    value,
-                    prev.Cells
-                  );
-
-                  const next = {
-                    ...prev,
-                    tableSize: { width: prev.tableSize.width, height: value },
-                    Cells: nextCells,
-                  };
-
-                  onChange(JSON.stringify(next));
-                  return next;
-                });
-              }}
+              onChange={(e) =>
+                handleTableSizeChange("height", Number(e.target.value))
+              }
             />
           </div>
           <div className="px-2 flex gap-2 items-center">
@@ -406,24 +521,15 @@ export default function ConceptMap({ value, onChange }: Props) {
               <>
                 <div
                   className="bg-red-500  w-7 h-7 cursor-pointer rounded-full"
-                  onClick={() => {
-                    setTable((prev) => ({ ...prev, color: "red" }));
-                    setColorChoose(!colorChoose);
-                  }}
+                  onClick={() => handleColorChange("red")}
                 ></div>
                 <div
                   className="bg-green-500 w-7 h-7 cursor-pointer rounded-full"
-                  onClick={() => {
-                    setTable((prev) => ({ ...prev, color: "green" }));
-                    setColorChoose(!colorChoose);
-                  }}
+                  onClick={() => handleColorChange("green")}
                 ></div>
                 <div
                   className="bg-blue-500 w-7 h-7 cursor-pointer rounded-full"
-                  onClick={() => {
-                    setTable((prev) => ({ ...prev, color: "blue" }));
-                    setColorChoose(!colorChoose);
-                  }}
+                  onClick={() => handleColorChange("blue")}
                 ></div>
               </>
             )}
@@ -432,7 +538,7 @@ export default function ConceptMap({ value, onChange }: Props) {
       </div>
       <div className="mt-10">
         <Xwrapper>
-          <Table matrix={table.Cells} onCellChange={handleCellChange} />
+          <Table matrix={tableMatrix} onCellChange={handleCellChange} />
           <ArrowsLayer arrows={table.arrows} color={table.color} />
         </Xwrapper>
       </div>
@@ -442,7 +548,7 @@ export default function ConceptMap({ value, onChange }: Props) {
           addArrow={addArrow}
           editArrow={editArrow}
           removeArrow={removeArrow}
-          cells={table.Cells}
+          cells={tableMatrix}
         />
       </div>
     </div>
