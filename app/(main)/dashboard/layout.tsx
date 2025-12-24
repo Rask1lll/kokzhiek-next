@@ -15,6 +15,7 @@ type SidebarLink = {
 
 const sidebarLinks: SidebarLink[] = [
   { href: "/dashboard/keys", label: "Ключи", icon: FiKey },
+  { href: "/dashboard/members", label: "Пользователи", icon: FiUsers },
   { href: "/dashboard/stats", label: "Статистика", icon: FiBarChart2 },
 ];
 
