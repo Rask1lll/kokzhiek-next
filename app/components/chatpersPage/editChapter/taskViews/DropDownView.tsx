@@ -1,42 +1,49 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import TaskViewWrapper from "./TaskViewWrapper";
 
 type DropDownViewProps = {
-  value: string;
+  widgetId: number;
   onChange?: (value: string) => void;
-};
-
-type DropdownItem = {
-  id: string;
-  options: string[];
-  correctIndex: number;
-};
-
-type DropDownData = {
-  text: string;
-  dropdowns: DropdownItem[];
 };
 
 type UserAnswer = {
   answers: Record<string, number>; // dropdownId -> selectedIndex
 };
 
-function parseData(value: string): DropDownData {
-  try {
-    const parsed = JSON.parse(value);
-    if (parsed && typeof parsed.text === "string") {
-      return parsed;
-    }
-  } catch {
-    // Invalid JSON
-  }
-  return { text: "", dropdowns: [] };
-}
-
-export default function DropDownView({ value, onChange }: DropDownViewProps) {
-  const data = useMemo(() => parseData(value), [value]);
+export default function DropDownView({
+  widgetId,
+  onChange,
+}: DropDownViewProps) {
+  const { questions } = useQuestions(widgetId);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+
+  const questionsArray = questions;
+  const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
+  const body = currentQuestion?.body || "";
+  const data = currentQuestion?.data as { dropdowns?: string[] } | undefined;
+  const dropdowns = useMemo(() => data?.dropdowns || [], [data?.dropdowns]);
+  const options = useMemo(
+    () => currentQuestion?.options || [],
+    [currentQuestion?.options]
+  );
+
+  // Create a map of dropdownId -> options array
+  const dropdownOptionsMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    dropdowns.forEach((dropdownId) => {
+      const dropdownOptions = options
+        .filter((opt) => opt.match_id === dropdownId)
+        .map((opt) => opt.body)
+        .filter(Boolean);
+      if (dropdownOptions.length > 0) {
+        map[dropdownId] = dropdownOptions;
+      }
+    });
+    return map;
+  }, [dropdowns, options]);
 
   const handleSelect = (dropdownId: string, selectedIndex: number) => {
     const newAnswers = { ...answers, [dropdownId]: selectedIndex };
@@ -50,14 +57,14 @@ export default function DropDownView({ value, onChange }: DropDownViewProps) {
 
   // Render text with inline dropdowns
   const renderContent = () => {
-    const parts = data.text.split(/(\{\{[^}]+\}\})/g);
+    const parts = body.split(/(\{\{[^}]+\}\})/g);
 
     return parts.map((part, index) => {
       const match = part.match(/\{\{([^}]+)\}\}/);
       if (match) {
         const dropdownId = match[1];
-        const dropdown = data.dropdowns.find((d) => d.id === dropdownId);
-        if (dropdown) {
+        if (dropdowns.includes(dropdownId)) {
+          const dropdownOptions = dropdownOptionsMap[dropdownId] || [];
           return (
             <select
               key={index}
@@ -68,7 +75,7 @@ export default function DropDownView({ value, onChange }: DropDownViewProps) {
               <option value="" disabled>
                 Выберите...
               </option>
-              {dropdown.options.map((opt, optIndex) => (
+              {dropdownOptions.map((opt, optIndex) => (
                 <option key={optIndex} value={optIndex}>
                   {opt}
                 </option>
@@ -81,14 +88,15 @@ export default function DropDownView({ value, onChange }: DropDownViewProps) {
     });
   };
 
-  if (!data.text) {
-    return <p className="text-gray-400">Нет содержимого</p>;
+  if (!currentQuestion || !body) {
+    return null;
   }
 
   return (
-    <div className="text-base text-gray-800 leading-relaxed">
-      {renderContent()}
-    </div>
+    <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
+      <div className="text-base text-gray-800 leading-relaxed">
+        {renderContent()}
+      </div>
+    </TaskViewWrapper>
   );
 }
-

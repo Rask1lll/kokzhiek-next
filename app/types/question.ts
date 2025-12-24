@@ -19,6 +19,7 @@ export type Question = {
   points: number;
   order?: number;
   options?: QuestionOption[];
+  image_url: string | null;
 };
 
 export type CreateQuestionPayload = {
@@ -41,4 +42,3 @@ export type ReorderQuestionsPayload = {
   id: number;
   order: number;
 }[];
-

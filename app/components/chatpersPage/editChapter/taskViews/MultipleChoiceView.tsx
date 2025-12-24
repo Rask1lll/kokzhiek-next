@@ -1,50 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import TaskViewWrapper from "./TaskViewWrapper";
 
 type MultipleChoiceViewProps = {
-  value: string;
+  widgetId: number;
   onChange?: (value: string) => void;
 };
 
-type Option = {
-  id: string;
-  text: string;
-  isCorrect: boolean;
-};
-
-type MultipleChoiceData = {
-  options: Option[];
-  question: string;
-};
-
 type UserAnswer = {
-  selectedIds: string[];
+  selectedIds: number[];
 };
-
-function parseData(value: string): MultipleChoiceData {
-  try {
-    const parsed = JSON.parse(value);
-    if (parsed && Array.isArray(parsed.options)) {
-      return parsed;
-    }
-  } catch {
-    // Invalid JSON
-  }
-  return { options: [], question: "" };
-}
 
 export default function MultipleChoiceView({
-  value,
+  widgetId,
   onChange,
 }: MultipleChoiceViewProps) {
-  const data = useMemo(() => parseData(value), [value]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { questions } = useQuestions(widgetId);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-  const handleToggle = (id: string) => {
-    const newSelected = selectedIds.includes(id)
-      ? selectedIds.filter((s) => s !== id)
-      : [...selectedIds, id];
+  const questionsArray = questions;
+  const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
+  const options = currentQuestion?.options || [];
+
+  const handleToggle = (optionId: number | undefined) => {
+    if (optionId === undefined) return;
+
+    const newSelected = selectedIds.includes(optionId)
+      ? selectedIds.filter((id) => id !== optionId)
+      : [...selectedIds, optionId];
 
     setSelectedIds(newSelected);
 
@@ -54,31 +40,45 @@ export default function MultipleChoiceView({
     }
   };
 
-  if (data.options.length === 0) {
-    return <p className="text-gray-400">Нет вариантов ответа</p>;
+  if (!currentQuestion || options.length === 0) {
+    return null;
   }
 
   return (
-    <div className="space-y-2">
-      <div className="text-lg pl-2">{data.question}</div>
-      {data.options.map((option) => (
-        <label
-          key={option.id}
-          className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-            selectedIds.includes(option.id)
-              ? "bg-blue-50 border-blue-300"
-              : "bg-white border-gray-200 hover:bg-gray-50"
-          }`}
-        >
-          <input
-            type="checkbox"
-            checked={selectedIds.includes(option.id)}
-            onChange={() => handleToggle(option.id)}
-            className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-gray-800">{option.text}</span>
-        </label>
-      ))}
-    </div>
+    <TaskViewWrapper widgetId={widgetId}>
+      <div className="space-y-2">
+        {options.map((option) => (
+          <label
+            key={option.id || option.order}
+            className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
+              selectedIds.includes(option.id!)
+                ? "bg-blue-50 border-blue-300 shadow-sm"
+                : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={selectedIds.includes(option.id!)}
+              onChange={() => handleToggle(option.id)}
+              className="w-5 h-5 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+            />
+            <div className="flex-1 flex flex-col gap-2">
+              <span className="text-gray-800">{option.body}</span>
+              {option.image_url && (
+                <div className="relative w-full max-w-xs h-48 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                  <Image
+                    src={option.image_url}
+                    alt={option.body || "Изображение опции"}
+                    fill
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+              )}
+            </div>
+          </label>
+        ))}
+      </div>
+    </TaskViewWrapper>
   );
 }

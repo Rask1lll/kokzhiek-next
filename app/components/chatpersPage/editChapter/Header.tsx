@@ -12,7 +12,7 @@ export default function ChapterHeader() {
   const isEdit = param.get("edit");
 
   return (
-    <header className="fixed top-0 left-0 z-10 w-full h-14 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
+    <header className="fixed top-0 left-0 z-50 w-full h-14 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
       <div className="mx-auto h-full w-5/6 flex items-center justify-between">
         <Link
           href={`/books/book?book=${bookId}`}

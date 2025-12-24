@@ -1,43 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { parseData } from "@/app/libs/parseData";
+import Image from "next/image";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import TaskViewWrapper from "./TaskViewWrapper";
 
 type SortViewProps = {
-  value: string;
+  widgetId: number;
   onChange?: (value: string) => void;
 };
 
-type Sorting = {
-  columns: Column[];
-};
-
-type Column = {
-  id: string;
-  question: string;
-  answerCards: AnswerCard[];
-};
-
-type AnswerCard = {
-  id: string;
-  text: string;
-};
-
 type UserAnswer = {
-  assignments: Record<string, string>; // cardId -> columnId
+  assignments: Record<string, string>; // optionId -> columnId (group)
 };
-
-function parseSortingData(value: string): Sorting {
-  try {
-    const parsed = parseData(value);
-    if (parsed && Array.isArray(parsed.columns)) {
-      return parsed;
-    }
-  } catch {
-    // Invalid JSON
-  }
-  return { columns: [] };
-}
 
 // Fisher-Yates shuffle with seed
 function shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
@@ -51,35 +26,73 @@ function shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
   return shuffled;
 }
 
-export default function SortView({ value, onChange }: SortViewProps) {
-  const data = useMemo(() => parseSortingData(value), [value]);
+export default function SortView({ widgetId, onChange }: SortViewProps) {
+  const { questions } = useQuestions(widgetId);
   const [assignments, setAssignments] = useState<Record<string, string>>({});
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [shuffleSeed] = useState(() => Math.random());
 
-  // Collect all cards from all columns
-  const allCards = useMemo(() => {
-    const cards: (AnswerCard & { originalColumnId: string })[] = [];
-    data.columns.forEach((column) => {
-      column.answerCards.forEach((card) => {
-        cards.push({ ...card, originalColumnId: column.id });
-      });
+  const questionsArray = questions;
+  const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
+  const options = currentQuestion?.options || [];
+  const data = currentQuestion?.data as
+    | {
+        columns?: Array<{ id: string; question: string }>;
+      }
+    | undefined;
+  const columns = data?.columns || [];
+
+  // Group options by column (group)
+  const columnsMap = useMemo(() => {
+    const map: Record<
+      string,
+      { id: string; question: string; options: typeof options }
+    > = {};
+    columns.forEach((col) => {
+      map[col.id] = {
+        id: col.id,
+        question: col.question,
+        options: [],
+      };
     });
+    options.forEach((opt) => {
+      if (opt.group && map[opt.group]) {
+        map[opt.group].options.push(opt);
+      }
+    });
+    return map;
+  }, [columns, options]);
+
+  // Collect all cards (options) from all columns
+  const allCards = useMemo(() => {
+    const cards = options
+      .filter((opt) => opt.id !== undefined)
+      .map((opt) => ({
+        id: opt.id!,
+        text: opt.body,
+        imageUrl: opt.image_url,
+        originalColumnId: opt.group || "",
+      }));
     return shuffleArrayWithSeed(cards, shuffleSeed);
-  }, [data.columns, shuffleSeed]);
+  }, [options, shuffleSeed]);
 
   // Get cards assigned to each column
   const getCardsInColumn = (columnId: string) => {
-    return allCards.filter((card) => assignments[card.id] === columnId);
+    return allCards.filter(
+      (card) => assignments[card.id.toString()] === columnId
+    );
   };
 
-  const handleCardClick = (cardId: string) => {
+  const handleCardClick = (cardId: number) => {
     setSelectedCardId(selectedCardId === cardId ? null : cardId);
   };
 
   const handleColumnSelect = (columnId: string) => {
-    if (selectedCardId) {
-      const newAssignments = { ...assignments, [selectedCardId]: columnId };
+    if (selectedCardId !== null) {
+      const newAssignments = {
+        ...assignments,
+        [selectedCardId.toString()]: columnId,
+      };
       setAssignments(newAssignments);
       setSelectedCardId(null);
 
@@ -90,9 +103,9 @@ export default function SortView({ value, onChange }: SortViewProps) {
     }
   };
 
-  const handleRemoveAssignment = (cardId: string) => {
+  const handleRemoveAssignment = (cardId: number) => {
     const newAssignments = { ...assignments };
-    delete newAssignments[cardId];
+    delete newAssignments[cardId.toString()];
     setAssignments(newAssignments);
 
     if (onChange) {
@@ -101,8 +114,8 @@ export default function SortView({ value, onChange }: SortViewProps) {
     }
   };
 
-  if (data.columns.length === 0) {
-    return <p className="text-gray-400">Нет столбцов для сортировки</p>;
+  if (!currentQuestion || columns.length === 0) {
+    return null;
   }
 
   const getGridCols = (count: number) => {
@@ -111,107 +124,136 @@ export default function SortView({ value, onChange }: SortViewProps) {
     if (count === 2) return "grid-cols-2";
     if (count === 3) return "grid-cols-3";
     if (count === 4) return "grid-cols-4";
-    return "grid-cols-4"; // Максимум 4 столбца в ряд
+    return "grid-cols-4";
   };
 
   return (
-    <div className="w-full space-y-6">
-      {/* Available cards */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium text-slate-700">
-          {selectedCardId
-            ? "Карточка вопроса. Нажмите на ответы ниже:"
-            : "Карточки (нажмите на карточку, затем выберите ответ):"}
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {allCards.map((card) => {
-            const isAssigned = card.id in assignments;
-            const isSelected = selectedCardId === card.id;
+    <TaskViewWrapper widgetId={widgetId}>
+      <div className="w-full space-y-6">
+        {/* Available cards */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-slate-700">
+            {selectedCardId !== null
+              ? "Карточка вопроса. Нажмите на ответы ниже:"
+              : "Карточки (нажмите на карточку, затем выберите ответ):"}
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {allCards.map((card) => {
+              const isAssigned = card.id.toString() in assignments;
+              const isSelected = selectedCardId === card.id;
 
-            return (
-              <button
-                key={card.id}
-                type="button"
-                onClick={() => handleCardClick(card.id)}
-                disabled={isAssigned}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  isSelected
-                    ? "bg-blue-100 border-blue-400 scale-105"
-                    : isAssigned
-                    ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
-                    : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-pointer"
-                }`}
-              >
-                <span className="text-sm font-medium text-gray-800">
-                  {card.text || "Пусто"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Columns grid */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium text-slate-700">
-          {selectedCardId
-            ? "Нажмите на ответ, чтобы переместить карточку:"
-            : "Ответы:"}
-        </h3>
-        <div className={`grid gap-4 ${getGridCols(data.columns.length)}`}>
-          {data.columns.map((column) => {
-            const cardsInColumn = getCardsInColumn(column.id);
-
-            return (
-              <div
-                key={column.id}
-                onClick={() => {
-                  if (selectedCardId) {
-                    handleColumnSelect(column.id);
-                  }
-                }}
-                className={`p-4 rounded-lg border-2 min-h-[150px] transition-all ${
-                  selectedCardId
-                    ? "bg-blue-50 border-blue-400 cursor-pointer hover:bg-blue-100 hover:shadow-md"
-                    : "bg-slate-50 border-slate-200"
-                }`}
-              >
-                {/* Column header */}
-                <h4 className="text-sm font-semibold text-slate-700 mb-3">
-                  {column.question || `Столбец ${Number(column.id) + 1}`}
-                </h4>
-
-                {/* Cards in column */}
-                <div className="space-y-2">
-                  {cardsInColumn.length === 0 ? (
-                    <p className="text-xs text-slate-400 text-center py-4">
-                      Перетащите карточки сюда
-                    </p>
-                  ) : (
-                    cardsInColumn.map((card) => (
-                      <div
-                        key={card.id}
-                        className="flex items-center justify-between bg-white rounded border border-slate-200"
-                      >
-                        <span className="text-sm text-wrap wrap-anywhere text-gray-800">
-                          {card.text}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveAssignment(card.id)}
-                          className="text-xs text-red-500 hover:text-red-700"
-                        >
-                          Удалить
-                        </button>
+              return (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => handleCardClick(card.id)}
+                  disabled={isAssigned}
+                  className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                    isSelected
+                      ? "bg-blue-100 border-blue-400 scale-105"
+                      : isAssigned
+                      ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
+                      : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {card.imageUrl && (
+                      <div className="relative w-8 h-8 shrink-0">
+                        <Image
+                          src={card.imageUrl}
+                          alt=""
+                          fill
+                          className="object-cover rounded"
+                          unoptimized
+                        />
                       </div>
-                    ))
-                  )}
+                    )}
+                    <span className="text-sm font-medium text-gray-800">
+                      {card.text || "Пусто"}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Columns grid */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-slate-700">
+            {selectedCardId !== null
+              ? "Нажмите на ответ, чтобы переместить карточку:"
+              : "Ответы:"}
+          </h3>
+          <div className={`grid gap-4 ${getGridCols(columns.length)}`}>
+            {columns.map((col) => {
+              const columnData = columnsMap[col.id];
+              const cardsInColumn = getCardsInColumn(col.id);
+
+              return (
+                <div
+                  key={col.id}
+                  onClick={() => {
+                    if (selectedCardId !== null) {
+                      handleColumnSelect(col.id);
+                    }
+                  }}
+                  className={`p-4 rounded-lg border-2 min-h-[150px] transition-all ${
+                    selectedCardId !== null
+                      ? "bg-blue-50 border-blue-400 cursor-pointer hover:bg-blue-100 hover:shadow-md"
+                      : "bg-slate-50 border-slate-200"
+                  }`}
+                >
+                  {/* Column header */}
+                  <h4 className="text-sm font-semibold text-slate-700 mb-3">
+                    {columnData?.question || `Столбец ${Number(col.id) + 1}`}
+                  </h4>
+
+                  {/* Cards in column */}
+                  <div className="space-y-2">
+                    {cardsInColumn.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-4">
+                        Перетащите карточки сюда
+                      </p>
+                    ) : (
+                      cardsInColumn.map((card) => (
+                        <div
+                          key={card.id}
+                          className="flex items-center justify-between bg-white rounded border border-slate-200 p-2"
+                        >
+                          <div className="flex items-center gap-2 flex-1">
+                            {card.imageUrl && (
+                              <div className="relative w-6 h-6 shrink-0">
+                                <Image
+                                  src={card.imageUrl}
+                                  alt=""
+                                  fill
+                                  className="object-cover rounded"
+                                  unoptimized
+                                />
+                              </div>
+                            )}
+                            <span className="text-sm text-wrap wrap-anywhere text-gray-800">
+                              {card.text}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAssignment(card.id)}
+                            className="text-xs text-red-500 hover:text-red-700 ml-2"
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </TaskViewWrapper>
   );
 }

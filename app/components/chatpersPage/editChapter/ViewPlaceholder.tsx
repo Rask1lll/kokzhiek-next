@@ -82,7 +82,7 @@ export default function ViewPlaceholder({
     // Task widgets (interactive)
     case "multiple_choice":
       content = (
-        <MultipleChoiceView value={textValue} onChange={handleAnswerChange} />
+        <MultipleChoiceView widgetId={widget.id} onChange={handleAnswerChange} />
       );
       break;
     case "single_choice":
@@ -92,39 +92,39 @@ export default function ViewPlaceholder({
       break;
     case "dropdown":
       content = (
-        <DropDownView value={textValue} onChange={handleAnswerChange} />
+        <DropDownView widgetId={widget.id} onChange={handleAnswerChange} />
       );
       break;
     case "fill_blank":
       content = (
-        <FillBlankView value={textValue} onChange={handleAnswerChange} />
+        <FillBlankView widgetId={widget.id} onChange={handleAnswerChange} />
       );
       break;
     case "crossword":
       content = (
-        <CrosswordView value={textValue} onChange={handleAnswerChange} />
+        <CrosswordView widgetId={widget.id} onChange={handleAnswerChange} />
       );
       break;
     case "match_pairs":
       content = (
-        <MatchPairsView value={textValue} onChange={handleAnswerChange} />
+        <MatchPairsView widgetId={widget.id} onChange={handleAnswerChange} />
       );
       break;
     case "word_search":
-      content = <SearchWordView value={textValue} />;
+      content = <SearchWordView widgetId={widget.id} />;
       break;
     case "concept_map":
-      content = <ConceptMapView value={textValue} />;
+      content = <ConceptMapView widgetId={widget.id} />;
       break;
     case "sort":
-      content = <SortView value={textValue} onChange={handleAnswerChange} />;
+      content = <SortView widgetId={widget.id} onChange={handleAnswerChange} />;
       break;
     case "order":
-      content = <OrderView value={textValue} onChange={handleAnswerChange} />;
+      content = <OrderView widgetId={widget.id} onChange={handleAnswerChange} />;
       break;
     case "drag_drop":
       content = (
-        <DragDropView value={textValue} onChange={handleAnswerChange} />
+        <DragDropView widgetId={widget.id} onChange={handleAnswerChange} />
       );
       break;
     default:

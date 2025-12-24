@@ -1,12 +1,13 @@
 "use client";
 
 import Button from "@/app/components/Button/Button";
-import { useMemo } from "react";
+import { useEffect, useCallback, useRef, useState, useMemo } from "react";
 import { FiAlertCircle, FiPlus, FiX } from "react-icons/fi";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import { Question } from "@/app/types/question";
 
 type CrosswordProps = {
-  value: string;
-  onChange: (value: string) => void;
+  widgetId: number;
 };
 
 type QuestionItem = {
@@ -21,33 +22,118 @@ type CrosswordData = {
   questions: QuestionItem[];
 };
 
-function parseData(value: string): CrosswordData | undefined {
-  try {
-    const parsed = JSON.parse(value);
-    if (parsed && typeof parsed.keyword === "string") {
-      return parsed;
+export default function Crossword({ widgetId }: CrosswordProps) {
+  const { questions, loading, update } = useQuestions(widgetId);
+
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
+
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
     }
-  } catch {
-    return;
-  }
-}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
 
-export default function Crossword({ value, onChange }: CrosswordProps) {
-  const validateData = useMemo(() => parseData(value), [value]);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const keywordDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const questionDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(
+    new Map()
+  );
+  const answerDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(
+    new Map()
+  );
 
-  const data: CrosswordData = validateData ?? {
-    keyword: "",
-    questions: [],
-  };
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const debounceTimer = debounceTimerRef.current;
+    const keywordTimer = keywordDebounceTimerRef.current;
+    const questionTimers = questionDebounceTimersRef.current;
+    const answerTimers = answerDebounceTimersRef.current;
 
-  const updateData = (newData: CrosswordData) => {
-    onChange(JSON.stringify(newData));
-  };
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      if (keywordTimer) {
+        clearTimeout(keywordTimer);
+      }
+      questionTimers.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      questionTimers.clear();
+      answerTimers.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      answerTimers.clear();
+    };
+  }, []);
+
+  // Convert question data to CrosswordData structure
+  const data = useMemo((): CrosswordData => {
+    if (!currentQuestion?.data) {
+      return {
+        keyword: "",
+        questions: [],
+      };
+    }
+
+    const questionData = currentQuestion.data as {
+      keyword?: string;
+      questions?: QuestionItem[];
+    };
+
+    return {
+      keyword: questionData.keyword || "",
+      questions: questionData.questions || [],
+    };
+  }, [currentQuestion]);
+
+  const syncToServer = useCallback(
+    (newData: Partial<CrosswordData>) => {
+      if (!currentQuestion?.id) return;
+
+      const updatedData = {
+        ...data,
+        ...newData,
+      };
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                keyword: updatedData.keyword,
+                questions: updatedData.questions,
+              },
+            }
+          : null
+      );
+
+      // Send to server
+      update(currentQuestion.id, {
+        data: {
+          keyword: updatedData.keyword,
+          questions: updatedData.questions,
+        },
+      });
+    },
+    [currentQuestion, data, update]
+  );
 
   // Validate crossword
   const validation = useMemo(() => {
     const errors: string[] = [];
-    const keyword = data.keyword.toUpperCase();
+    const keyword = data.keyword.toUpperCase().trim();
 
     if (!keyword) {
       return { isValid: false, errors: ["Введите ключевое слово"] };
@@ -62,14 +148,15 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
     data.questions.forEach((q, index) => {
       if (index < keyword.length) {
         const requiredLetter = keyword[index];
-        const answer = q.answer.toUpperCase();
+
+        const answer = (q.answer || "").toUpperCase();
 
         if (!q.answer) {
           errors.push(`Вопрос ${index + 1}: введите ответ`);
         } else if (!answer.includes(requiredLetter)) {
           errors.push(
             `Вопрос ${index + 1}: ответ "${
-              q.answer
+              q.answer || ""
             }" не содержит букву "${requiredLetter}"`
           );
         }
@@ -79,69 +166,213 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
     return { isValid: errors.length === 0, errors };
   }, [data]);
 
-  // Auto-find key letter position in answer
-  const findKeyLetterIndex = (answer: string, keyLetter: string): number => {
-    return answer.toUpperCase().indexOf(keyLetter.toUpperCase());
-  };
+  const updateQuestionBody = useCallback(
+    (body: string) => {
+      if (!currentQuestion?.id) return;
 
-  const updateKeyword = (keyword: string) => {
-    const newQuestions = [...data.questions];
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
 
-    // Update existing questions with new key letter positions
-    keyword.split("").forEach((letter, index) => {
-      if (newQuestions[index]) {
-        const newIndex = findKeyLetterIndex(newQuestions[index].answer, letter);
-        newQuestions[index].keyLetterIndex = newIndex >= 0 ? newIndex : 0;
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
-    });
 
-    updateData({ keyword, questions: newQuestions });
-  };
+      // Debounce server update
+      const questionId = currentQuestion.id;
+      debounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) return;
 
-  const addQuestion = () => {
+        update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
+  // Auto-find key letter position in answer
+  const findKeyLetterIndex = useCallback(
+    (answer: string, keyLetter: string): number => {
+      return answer.toUpperCase().indexOf(keyLetter.toUpperCase());
+    },
+    []
+  );
+
+  const updateKeyword = useCallback(
+    (keyword: string) => {
+      const upperKeyword = keyword.toUpperCase();
+      const newQuestions = [...data.questions];
+
+      // Update existing questions with new key letter positions
+      upperKeyword.split("").forEach((letter, index) => {
+        if (newQuestions[index]) {
+          const newIndex = findKeyLetterIndex(
+            newQuestions[index].answer,
+            letter
+          );
+          newQuestions[index].keyLetterIndex = newIndex >= 0 ? newIndex : 0;
+        }
+      });
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                ...prev.data,
+                keyword: upperKeyword,
+                questions: newQuestions,
+              },
+            }
+          : null
+      );
+
+      // Debounce server update
+      if (keywordDebounceTimerRef.current) {
+        clearTimeout(keywordDebounceTimerRef.current);
+      }
+
+      const questionId = currentQuestion?.id;
+      keywordDebounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+
+        update(questionId, {
+          data: {
+            keyword: upperKeyword,
+            questions: newQuestions,
+          },
+        });
+      }, 500);
+    },
+    [currentQuestion, data.questions, findKeyLetterIndex, update]
+  );
+
+  const addQuestion = useCallback(() => {
     const index = data.questions.length;
 
     const newQuestion: QuestionItem = {
-      id: String(index),
+      id: String(Date.now() + index),
       question: "",
       answer: "",
       keyLetterIndex: 0,
     };
 
-    updateData({
-      ...data,
-      questions: [...data.questions, newQuestion],
-    });
-  };
+    syncToServer({ questions: [...data.questions, newQuestion] });
+  }, [data.questions, syncToServer]);
 
-  const updateQuestion = (id: string, updates: Partial<QuestionItem>) => {
-    const newQuestions = data.questions.map((q, index) => {
-      if (q.id === id) {
-        const updated = { ...q, ...updates };
+  const updateQuestion = useCallback(
+    (id: string, updates: Partial<QuestionItem>) => {
+      if (!currentQuestion?.id) return;
 
-        // Auto-update keyLetterIndex if answer changed
-        if (updates.answer !== undefined && data.keyword[index]) {
-          const newIndex = findKeyLetterIndex(
-            updates.answer,
-            data.keyword[index]
-          );
-          updated.keyLetterIndex = newIndex >= 0 ? newIndex : 0;
+      const newQuestions = data.questions.map((q, index) => {
+        if (q.id === id) {
+          const updated = { ...q, ...updates };
+
+          // Auto-update keyLetterIndex if answer changed
+          if (updates.answer !== undefined && data.keyword[index]) {
+            const newIndex = findKeyLetterIndex(
+              updates.answer,
+              data.keyword[index]
+            );
+            updated.keyLetterIndex = newIndex >= 0 ? newIndex : 0;
+          }
+
+          return updated;
+        }
+        return q;
+      });
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                ...prev.data,
+                questions: newQuestions,
+              },
+            }
+          : null
+      );
+
+      // Debounce for question text, immediate for answer
+      if (updates.question !== undefined) {
+        const timerKey = `question-${id}`;
+        const existingTimer = questionDebounceTimersRef.current.get(timerKey);
+        if (existingTimer) {
+          clearTimeout(existingTimer);
         }
 
-        return updated;
+        const questionId = currentQuestion.id;
+        const trimmedQuestion = updates.question.trim();
+        const timer = setTimeout(() => {
+          if (!questionId) {
+            questionDebounceTimersRef.current.delete(timerKey);
+            return;
+          }
+
+          const serverQuestions = newQuestions.map((q) =>
+            q.id === id ? { ...q, question: trimmedQuestion } : q
+          );
+
+          update(questionId, {
+            data: {
+              keyword: data.keyword,
+              questions: serverQuestions,
+            },
+          });
+          questionDebounceTimersRef.current.delete(timerKey);
+        }, 500);
+
+        questionDebounceTimersRef.current.set(timerKey, timer);
+      } else if (updates.answer !== undefined) {
+        // Debounce for answer
+        const timerKey = `answer-${id}`;
+        const existingTimer = answerDebounceTimersRef.current.get(timerKey);
+        if (existingTimer) {
+          clearTimeout(existingTimer);
+        }
+
+        const questionId = currentQuestion.id;
+        const upperAnswer = updates.answer.toUpperCase();
+        const timer = setTimeout(() => {
+          if (!questionId) {
+            answerDebounceTimersRef.current.delete(timerKey);
+            return;
+          }
+
+          const serverQuestions = newQuestions.map((q) =>
+            q.id === id ? { ...q, answer: upperAnswer } : q
+          );
+
+          update(questionId, {
+            data: {
+              keyword: data.keyword,
+              questions: serverQuestions,
+            },
+          });
+          answerDebounceTimersRef.current.delete(timerKey);
+        }, 500);
+
+        answerDebounceTimersRef.current.set(timerKey, timer);
+      } else {
+        // Immediate update for other fields
+        syncToServer({ questions: newQuestions });
       }
-      return q;
-    });
+    },
+    [currentQuestion, data, findKeyLetterIndex, syncToServer, update]
+  );
 
-    updateData({ ...data, questions: newQuestions });
-  };
-
-  const removeQuestion = (id: string) => {
-    updateData({
-      ...data,
-      questions: data.questions.filter((q) => q.id !== id),
-    });
-  };
+  const removeQuestion = useCallback(
+    (id: string) => {
+      syncToServer({
+        questions: data.questions.filter((q) => q.id !== id),
+      });
+    },
+    [data.questions, syncToServer]
+  );
 
   // Calculate max offset needed for crossword alignment
   const maxKeyLetterIndex = Math.max(
@@ -149,8 +380,36 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
     ...data.questions.map((q) => q.keyLetterIndex)
   );
 
+  // Show loading state while loading
+  if (loading) {
+    return (
+      <div className="w-full space-y-4 p-4">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="w-full space-y-4 p-4 text-gray-500">
+        Ошибка загрузки вопроса
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4">
+      {/* Question input */}
+      <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <input
+          type="text"
+          placeholder="Вопрос к заданию"
+          className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
+          value={currentQuestion.body || ""}
+          onChange={(e) => updateQuestionBody(e.target.value)}
+        />
+      </div>
       {/* Error display */}
       {!validation.isValid && data.keyword && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -206,7 +465,7 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
 
           {data.questions.map((q, index) => {
             const requiredLetter = data.keyword[index] || "";
-            const hasLetter = q.answer
+            const hasLetter = (q.answer || "")
               .toUpperCase()
               .includes(requiredLetter.toUpperCase());
 
@@ -251,7 +510,7 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
 
                 <input
                   type="text"
-                  value={q.answer}
+                  value={q.answer || ""}
                   onChange={(e) =>
                     updateQuestion(q.id, {
                       answer: e.target.value.toUpperCase(),
@@ -290,7 +549,7 @@ export default function Crossword({ value, onChange }: CrosswordProps) {
           <div className="inline-block font-mono">
             {data.questions.map((q, rowIndex) => {
               const offset = maxKeyLetterIndex - q.keyLetterIndex;
-              const letters = q.answer.toUpperCase().split("");
+              const letters = (q.answer || "").toUpperCase().split("");
 
               return (
                 <div key={q.id} className="flex items-center gap-0.5 mb-0.5">

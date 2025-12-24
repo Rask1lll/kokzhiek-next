@@ -22,6 +22,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
   const { questions, loading, create, update, uploadImage, removeImage } =
     useQuestions(widgetId);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const hasCreatedQuestionRef = useRef(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const optionDebounceTimersRef = useRef<Map<number, NodeJS.Timeout>>(
@@ -37,8 +38,6 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
 
   // Initialize or update current question from questions array
   useEffect(() => {
-    if (loading) return;
-
     // If we have questions, use the first one
     if (questionsArray.length > 0) {
       const firstQuestion = questionsArray[0];
@@ -49,7 +48,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
         (firstQuestion.options && !currentQuestion.options) ||
         (firstQuestion.body && !currentQuestion.body)
       ) {
-        // Use setTimeout to set state asynchronously
+        // Use setTimeout to avoid synchronous setState in effect
         const timer = setTimeout(() => {
           setCurrentQuestion(firstQuestion);
         }, 0);
@@ -59,21 +58,16 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
     }
 
     // If no questions and haven't created one yet, create it
-    if (!hasCreatedQuestionRef.current && !currentQuestion) {
+    // Only create if not loading (to avoid creating multiple questions)
+    if (
+      !loading &&
+      !hasCreatedQuestionRef.current &&
+      !currentQuestion &&
+      !isCreating
+    ) {
       hasCreatedQuestionRef.current = true;
-      create({
-        type: TaskType.SINGLE_CHOICE,
-        body: "Новый вопрос",
-        data: {},
-        points: 1,
-        options: [],
-      }).then((newQuestion) => {
-        if (newQuestion) {
-          setCurrentQuestion(newQuestion);
-        }
-      });
     }
-  }, [questionsArray, loading, currentQuestion, create]);
+  }, [questionsArray, loading, currentQuestion, create, isCreating]);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -292,7 +286,8 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
     [removeImage, currentQuestion]
   );
 
-  if (loading && !currentQuestion) {
+  // Show loading state while loading or creating question
+  if (loading || isCreating) {
     return (
       <div className="w-full space-y-4 p-4">
         <div className="animate-pulse">Загрузка...</div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
+import TaskViewWrapper from "./TaskViewWrapper";
 
 type SingleChoiceViewProps = {
   widgetId: number;
@@ -17,21 +18,12 @@ export default function SingleChoiceView({
   widgetId,
   onChange,
 }: SingleChoiceViewProps) {
-  const { questions, loading, error } = useQuestions(widgetId);
+  const { questions } = useQuestions(widgetId);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
 
-  // Ensure questions is an array
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
   const options = currentQuestion?.options || [];
-
-  console.log("SingleChoiceView - widgetId:", widgetId);
-  console.log("SingleChoiceView - loading:", loading);
-  console.log("SingleChoiceView - error:", error);
-  console.log("SingleChoiceView - questions:", questions);
-  console.log("SingleChoiceView - questionsArray:", questionsArray);
-  console.log("SingleChoiceView - currentQuestion:", currentQuestion);
-  console.log("SingleChoiceView - options:", options);
 
   const handleSelect = (optionId: number | undefined) => {
     if (optionId === undefined) return;
@@ -44,46 +36,12 @@ export default function SingleChoiceView({
     }
   };
 
-  if (loading) {
-    return <p className="text-gray-400">Загрузка...</p>;
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-600">Ошибка загрузки: {error}</p>
-        <p className="text-sm text-red-500 mt-1">Widget ID: {widgetId}</p>
-      </div>
-    );
-  }
-
-  if (!currentQuestion) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-yellow-600">Вопрос не найден</p>
-        <p className="text-sm text-yellow-500 mt-1">
-          Widget ID: {widgetId}, Questions count: {questionsArray.length}
-        </p>
-      </div>
-    );
-  }
-
-  if (options.length === 0) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-yellow-600">Нет вариантов ответа</p>
-        <p className="text-sm text-yellow-500 mt-1">
-          Вопрос: {currentQuestion.body}
-        </p>
-      </div>
-    );
+  if (!currentQuestion || options.length === 0) {
+    return null;
   }
 
   return (
-    <div className="space-y-3">
-      <div className="text-lg font-medium pl-2 text-gray-800">
-        {currentQuestion.body}
-      </div>
+    <TaskViewWrapper widgetId={widgetId}>
       <div className="space-y-2">
         {options.map((option) => (
           <label
@@ -118,6 +76,6 @@ export default function SingleChoiceView({
           </label>
         ))}
       </div>
-    </div>
+    </TaskViewWrapper>
   );
 }

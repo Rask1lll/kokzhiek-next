@@ -7,7 +7,8 @@ import { Block } from "@/app/types/block";
 import { useSearchParams } from "next/navigation";
 import ViewPlaceholder from "./ViewPlaceholder";
 import { useBlocks } from "@/app/hooks/useBlocks";
-import { FiMoreVertical, FiTrash2, FiDroplet } from "react-icons/fi";
+import { FiTrash2, FiDroplet } from "react-icons/fi";
+import { CgOptions } from "react-icons/cg";
 
 // Предустановленные цвета
 const PRESET_COLORS = [
@@ -131,7 +132,11 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
 
   if (!isEdit) {
     return (
-      <div className={`flex flex-col gap-2 w-19/20 ${className || ""}`}>
+      <div
+        className={`flex flex-col gap-2 ${isEdit ? "w-19/20" : "w-full"} ${
+          className || ""
+        }`}
+      >
         {/* Render existing widgets */}
         {widgets.map((widget) => (
           <ViewPlaceholder key={widget.id} widget={widget} />
@@ -141,7 +146,7 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
   }
 
   return (
-    <div className={`flex flex-col w-29/30 gap-2 ${className || ""}`}>
+    <div className={`flex flex-col gap-2 ${className || ""}`}>
       {/* Render existing widgets */}
       {widgets.map((widget) => (
         <LayoutPlaceholder
@@ -180,32 +185,50 @@ const BlockMenu = ({
 }: BlockMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [tempColor, setTempColor] = useState<string | null>(null);
+  const [isColorPicking, setIsColorPicking] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        // Apply temp color if picking was in progress
+        if (isColorPicking && tempColor !== null) {
+          onColorChange(tempColor);
+          setTempColor(null);
+        }
+        setIsColorPicking(false);
         setIsOpen(false);
         setShowColorPicker(false);
       }
     };
 
+    const handleMouseUp = () => {
+      if (isColorPicking && tempColor !== null) {
+        onColorChange(tempColor);
+        setTempColor(null);
+      }
+      setIsColorPicking(false);
+    };
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mouseup", handleMouseUp);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isOpen]);
+  }, [isOpen, isColorPicking, tempColor, onColorChange]);
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative mt-2" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1.5 hover:bg-gray-200 rounded-md transition-colors"
+        className="p-1.5 hover:bg-gray-200 border border-gray-300 border-l-0 rounded-l-none rounded-md transition-colors"
         title="Меню блока"
       >
-        <FiMoreVertical className="w-5 h-5 text-gray-500" />
+        <CgOptions className="w-7 h-7 text-gray-500" />
       </button>
 
       {isOpen && (
@@ -213,7 +236,11 @@ const BlockMenu = ({
           {/* Color option */}
           <div className="relative">
             <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
+              onClick={() => {
+                setShowColorPicker(!showColorPicker);
+                setTempColor(null);
+                setIsColorPicking(false);
+              }}
               className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             >
               <FiDroplet className="w-4 h-4" />
@@ -256,11 +283,16 @@ const BlockMenu = ({
                   </label>
                   <input
                     type="color"
-                    value={currentColor || "#f3f4f6"}
+                    value={
+                      tempColor !== null ? tempColor : currentColor || "#f3f4f6"
+                    }
                     onChange={(e) => {
-                      onColorChange(e.target.value);
-                      setShowColorPicker(false);
-                      setIsOpen(false);
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setTempColor(e.target.value);
+                      if (!isColorPicking) {
+                        setIsColorPicking(true);
+                      }
                     }}
                     className="w-full h-8 rounded cursor-pointer"
                   />
@@ -315,9 +347,9 @@ const Layout = ({ block }: LayoutProps) => {
   if (columnsCount === 1) {
     const columnWidgets = groupedWidgets.get(0) || [];
     return (
-      <div className="relative group/block w-full">
+      <div className="flex group/block w-full">
         <div
-          className="w-full rounded-md p-2 transition-colors"
+          className="w-full ring ring-gray-300 rounded-md transition-colors"
           style={{ backgroundColor: blockColor || "#f3f4f6" }}
         >
           <Column
@@ -328,12 +360,20 @@ const Layout = ({ block }: LayoutProps) => {
           />
         </div>
         {isEdit && (
-          <div className="absolute top-2 right-[-40px] opacity-0 group-hover/block:opacity-100 transition-opacity">
+          <div className=" top-2 right-[-40px] opacity-100 transition-opacity">
             <BlockMenu
               currentColor={blockColor}
               onColorChange={handleColorChange}
               onDelete={handleDelete}
             />
+            <div className="flex flex-col justify-between items-center gap-1">
+              <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
+                <p className="h-3 leading-none">::</p>
+                <p className="h-3 leading-none">::</p>
+                <p className="h-3 leading-none">::</p>
+                <p className="leading-none">::</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -341,17 +381,17 @@ const Layout = ({ block }: LayoutProps) => {
   }
 
   return (
-    <div className="relative group/block w-full">
+    <div className="relative  flex group/block w-full">
       <div
-        className="w-full flex gap-4 rounded-md p-2 transition-colors"
-        style={{ backgroundColor: blockColor || "#f9fafb" }}
+        className="w-full flex gap-4 rounded-md ring ring-gray-300 transition-colors"
+        style={{ backgroundColor: blockColor || "#EDEDED" }}
       >
         {Array.from({ length: columnsCount }).map((_, colIndex) => {
           const columnWidgets = groupedWidgets.get(colIndex) || [];
           const columnClass = getColumnClasses(layout_type, colIndex);
 
           return (
-            <div key={colIndex} className={`${columnClass}`}>
+            <div key={colIndex} className={`${columnClass} mb-2`}>
               <Column
                 blockId={id}
                 columnIndex={colIndex}
@@ -362,12 +402,20 @@ const Layout = ({ block }: LayoutProps) => {
         })}
       </div>
       {isEdit && (
-        <div className="absolute top-2 right-[-40px] opacity-0 group-hover/block:opacity-100 transition-opacity">
+        <div className=" top-2 right-[-40px] opacity-100 transition-opacity">
           <BlockMenu
             currentColor={blockColor}
             onColorChange={handleColorChange}
             onDelete={handleDelete}
           />
+          <div className="flex flex-col justify-between items-center gap-1">
+            <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
+              <p className="h-3 leading-none">::</p>
+              <p className="h-3 leading-none">::</p>
+              <p className="h-3 leading-none">::</p>
+              <p className="leading-none">::</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

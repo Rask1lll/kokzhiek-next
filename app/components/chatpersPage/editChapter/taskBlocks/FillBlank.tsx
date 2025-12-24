@@ -1,83 +1,186 @@
 "use client";
 
 import Button from "@/app/components/Button/Button";
-import { useMemo } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import { Question, QuestionOption } from "@/app/types/question";
 
 type FillBlankProps = {
-  value: string;
-  onChange: (value: string) => void;
+  widgetId: number;
 };
 
-type BlankItem = {
-  id: string;
-  answer: string;
-};
+export default function FillBlank({ widgetId }: FillBlankProps) {
+  const { questions, loading, update } = useQuestions(widgetId);
 
-type FillBlankData = {
-  text: string;
-  blanks: BlankItem[];
-};
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
 
-function parseData(value: string): FillBlankData | undefined {
-  try {
-    const parsed = JSON.parse(value);
-    if (parsed && typeof parsed.text === "string") {
-      return parsed;
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
     }
-  } catch {
-    return;
-  }
-}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
 
-export default function FillBlank({ value, onChange }: FillBlankProps) {
-  const validateData = useMemo(() => parseData(value), [value]);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const data: FillBlankData = validateData ?? {
-    text: "",
-    blanks: [],
-  };
-
-  const updateData = (newData: FillBlankData) => {
-    onChange(JSON.stringify(newData));
-  };
-
-  const insertBlank = () => {
-    const newBlank: BlankItem = {
-      id: data.blanks ? String(data.blanks.length) : "0",
-      answer: "",
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const debounceTimer = debounceTimerRef.current;
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
     };
+  }, []);
 
-    const placeholder = `{{${newBlank.id}}}`;
-    const newText = data.text + placeholder;
+  const updateQuestionBody = useCallback(
+    (body: string) => {
+      if (!currentQuestion?.id) return;
 
-    updateData({
-      text: newText,
-      blanks: [...(data.blanks || []), newBlank],
-    });
-  };
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
 
-  const updateBlankAnswer = (id: string, answer: string) => {
-    const newBlanks = (data.blanks || []).map((b) =>
-      b.id === id ? { ...b, answer } : b
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // Debounce server update
+      const questionId = currentQuestion.id;
+      debounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) return;
+
+        update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
+  const insertBlank = useCallback(async () => {
+    if (!currentQuestion?.id) return;
+
+    const blanks = (currentQuestion.data?.blanks as string[]) || [];
+    const blankId = `blank${blanks.length + 1}`;
+    const placeholder = `{{${blankId}}}`;
+    const newBody = (currentQuestion.body || "") + placeholder;
+    const newBlanks = [...blanks, blankId];
+
+    const newOptions = [
+      ...(currentQuestion.options || []),
+      {
+        body: "",
+        image_url: null,
+        is_correct: true,
+        match_id: blankId,
+        group: null,
+        order: currentQuestion.options?.length || 0,
+      },
+    ];
+
+    console.log("Sending blankId:", blankId);
+    console.log(
+      "New options with match_id:",
+      newOptions.map((opt) => ({ body: opt.body, match_id: opt.match_id }))
     );
-    updateData({ ...data, blanks: newBlanks });
-  };
+
+    // Send to server and wait for response
+    const payload = {
+      options: newOptions,
+      body: newBody,
+      data: { blanks: newBlanks },
+    };
+    console.log("Payload:", JSON.stringify(payload, null, 2));
+
+    const updated = await update(currentQuestion.id, payload);
+    console.log("Response:", updated);
+    if (updated) {
+      // Update UI with data from server
+      setCurrentQuestion(updated);
+    }
+  }, [currentQuestion, update]);
+
+  const updateBlankAnswer = useCallback(
+    async (blankId: string, answer: string) => {
+      if (!currentQuestion?.id) return;
+
+      const existingOption = (currentQuestion.options || []).find(
+        (opt) => opt.match_id === blankId
+      );
+
+      let newOptions: QuestionOption[];
+      if (existingOption) {
+        // Update existing option - optimistic update
+        newOptions = (currentQuestion.options || []).map((opt) =>
+          opt.match_id === blankId ? { ...opt, body: answer.trim() } : opt
+        );
+
+        // Update UI immediately
+        setCurrentQuestion((prev) =>
+          prev ? { ...prev, options: newOptions } : prev
+        );
+
+        // Send to server
+        update(currentQuestion.id, { options: newOptions });
+      } else {
+        // Create new option - wait for server response to get ID
+        newOptions = [
+          ...(currentQuestion.options || []),
+          {
+            body: answer.trim(),
+            image_url: null,
+            is_correct: true,
+            match_id: blankId,
+            group: null,
+            order: currentQuestion.options?.length || 0,
+          },
+        ];
+
+        // Send to server and wait for response to get IDs
+        const updated = await update(currentQuestion.id, {
+          options: newOptions,
+        });
+        if (updated) {
+          // Update UI with data from server (includes IDs for new options)
+          setCurrentQuestion(updated);
+        }
+      }
+    },
+    [currentQuestion, update]
+  );
 
   const renderPreview = () => {
-    const parts = data.text.split(/(\{\{[^}]+\}\})/g);
+    if (!currentQuestion?.body) return null;
+
+    const parts = (currentQuestion.body || "").split(/(\{\{[^}]+\}\})/g);
 
     return parts.map((part, index) => {
       const match = part.match(/\{\{([^}]+)\}\}/);
+
       if (match) {
         const blankId = match[1];
-        const blank = (data.blanks || []).find((b) => b.id === blankId);
-        if (blank) {
+        const option = (currentQuestion.options || []).find(
+          (opt) => opt.match_id === blankId
+        );
+
+        console.log(currentQuestion);
+        if (option) {
           return (
             <input
               key={index}
               type="text"
-              value={blank.answer}
-              onChange={(e) => updateBlankAnswer(blank.id, e.target.value)}
+              value={option.body || ""}
+              onChange={(e) => updateBlankAnswer(blankId, e.target.value)}
               placeholder="ответ"
               className="inline-block mx-1 px-2 py-0.5 w-28 text-center text-sm bg-white border-b-2 border-slate-400 focus:border-blue-500 focus:outline-none transition-colors"
             />
@@ -87,6 +190,23 @@ export default function FillBlank({ value, onChange }: FillBlankProps) {
       return <span key={index}>{part}</span>;
     });
   };
+
+  // Show loading state while loading
+  if (loading) {
+    return (
+      <div className="w-full space-y-4 p-4">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="w-full space-y-4 p-4 text-gray-500">
+        Ошибка загрузки вопроса
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4">
@@ -105,15 +225,15 @@ export default function FillBlank({ value, onChange }: FillBlankProps) {
         </div>
 
         <textarea
-          value={data.text}
-          onChange={(e) => updateData({ ...data, text: e.target.value })}
+          value={currentQuestion.body || ""}
+          onChange={(e) => updateQuestionBody(e.target.value)}
           placeholder="Введите текст. Нажмите '+ Вставить пропуск' для добавления поля ввода."
           className="w-full min-h-[80px] px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
         />
       </div>
 
       {/* Preview with inputs */}
-      {data.text && (
+      {currentQuestion.body && (
         <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
           <span className="text-xs text-slate-400 mb-3 block">
             Заполните правильные ответы:

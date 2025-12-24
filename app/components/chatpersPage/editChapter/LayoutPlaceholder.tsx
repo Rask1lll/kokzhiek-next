@@ -28,6 +28,7 @@ import ConceptMap from "./taskBlocks/ConceptMap";
 import Sort from "./taskBlocks/Sort";
 import Order from "./taskBlocks/Order";
 import DragDrop from "./taskBlocks/DragDrop";
+import TaskBlockWrapper from "./taskBlocks/TaskBlockWrapper";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -168,44 +169,80 @@ const LayoutPlaceholder = ({
         break;
       case "multiple_choice":
         widgetContent = (
-          <MultipleChoice value={textValue} onChange={handleChange} />
+          <TaskBlockWrapper widgetId={widget.id}>
+            <MultipleChoice widgetId={widget.id} />
+          </TaskBlockWrapper>
         );
         break;
       case "single_choice":
-        widgetContent = <SingleChoice widgetId={widget.id} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <SingleChoice widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "dropdown":
-        widgetContent = <DropDown value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <DropDown widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "fill_blank":
-        widgetContent = <FillBlank value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <FillBlank widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "crossword":
-        widgetContent = <Crossword value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <Crossword widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "match_pairs":
         widgetContent = (
-          <MatchPairs value={textValue} onChange={handleChange} />
+          <TaskBlockWrapper widgetId={widget.id}>
+            <MatchPairs widgetId={widget.id} />
+          </TaskBlockWrapper>
         );
         break;
       case "word_search":
         widgetContent = (
-          <SearchWord value={textValue} onChange={handleChange} />
+          <TaskBlockWrapper widgetId={widget.id}>
+            <SearchWord widgetId={widget.id} />
+          </TaskBlockWrapper>
         );
         break;
       case "concept_map":
         widgetContent = (
-          <ConceptMap value={textValue} onChange={handleChange} />
+          <TaskBlockWrapper widgetId={widget.id}>
+            <ConceptMap widgetId={widget.id} />
+          </TaskBlockWrapper>
         );
         break;
       case "sort":
-        widgetContent = <Sort value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <Sort widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "order":
-        widgetContent = <Order value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <Order widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       case "drag_drop":
-        widgetContent = <DragDrop value={textValue} onChange={handleChange} />;
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <DragDrop widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
         break;
       default:
         widgetContent = <GenericWidget type={widget.type} />;

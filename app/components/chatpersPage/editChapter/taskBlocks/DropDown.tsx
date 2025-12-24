@@ -1,131 +1,309 @@
 "use client";
 
 import Button from "@/app/components/Button/Button";
-import { useMemo, useState } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { FiX, FiChevronDown } from "react-icons/fi";
+import { useQuestions } from "@/app/hooks/useQuestions";
+import { Question } from "@/app/types/question";
 
 type DropDownProps = {
-  value: string;
-  onChange: (value: string) => void;
+  widgetId: number;
 };
 
-type DropdownItem = {
+type DropdownData = {
   id: string;
-  options: string[];
-  correctIndex: number;
+  correct_index: number;
 };
 
-type DropDownData = {
-  text: string;
-  dropdowns: DropdownItem[];
-};
+export default function DropDown({ widgetId }: DropDownProps) {
+  const { questions, loading, update } = useQuestions(widgetId);
 
-function parseData(value: string): DropDownData | undefined {
-  try {
-    const parsed = JSON.parse(value);
-    if (parsed && typeof parsed.text === "string") {
-      return parsed;
+  // Get first question from array
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
+    Array.isArray(questions) && questions.length > 0 ? questions[0] : null
+  );
+
+  useEffect(() => {
+    if (Array.isArray(questions) && questions.length > 0) {
+      const firstQuestion = questions[0];
+      // Only update if question ID changed
+      if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        setTimeout(() => {
+          setCurrentQuestion(firstQuestion);
+        }, 0);
+      }
     }
-  } catch {
-    return;
-  }
-}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions]);
 
-export default function DropDown({ value, onChange }: DropDownProps) {
-  const validateData = useMemo(() => parseData(value), [value]);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [editingDropdown, setEditingDropdown] = useState<string | null>(null);
 
-  const data: DropDownData = validateData ?? {
-    text: "",
-    dropdowns: [],
-  };
-
-  const updateData = (newData: DropDownData) => {
-    onChange(JSON.stringify(newData));
-  };
-
-  // Insert dropdown placeholder at cursor position in text
-  const insertDropdown = () => {
-    const newDropdown: DropdownItem = {
-      id: String(data.dropdowns.length),
-      options: ["Вариант 1", "Вариант 2"],
-      correctIndex: 0,
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const debounceTimer = debounceTimerRef.current;
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
     };
+  }, []);
 
-    const placeholder = `{{${newDropdown.id}}}`;
-    const newText = data.text + placeholder;
+  const updateQuestionBody = useCallback(
+    (body: string) => {
+      if (!currentQuestion?.id) return;
 
-    updateData({
-      text: newText,
-      dropdowns: [...data.dropdowns, newDropdown],
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
+
+      // Clear existing timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // Debounce server update
+      const questionId = currentQuestion.id;
+      debounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) return;
+
+        update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
+  const insertDropdown = useCallback(async () => {
+    if (!currentQuestion?.id) return;
+
+    const dropdowns = (currentQuestion.data?.dropdowns as DropdownData[]) || [];
+    const dropdownId = `dropdown${dropdowns.length + 1}`;
+    const placeholder = `{{${dropdownId}}}`;
+    const newBody = (currentQuestion.body || "") + placeholder;
+    const newDropdowns = [...dropdowns, { id: dropdownId, correct_index: 0 }];
+
+    // Create initial options for this dropdown
+    const newOptions = [
+      ...(currentQuestion.options || []),
+      {
+        body: "Вариант 1",
+        image_url: null,
+        is_correct: true,
+        match_id: dropdownId,
+        group: null,
+        order: 0,
+      },
+      {
+        body: "Вариант 2",
+        image_url: null,
+        is_correct: false,
+        match_id: dropdownId,
+        group: null,
+        order: 1,
+      },
+    ];
+
+    // Send to server and wait for response
+    const updated = await update(currentQuestion.id, {
+      options: newOptions,
+      body: newBody,
+      data: { dropdowns: newDropdowns },
     });
-  };
-
-  const updateDropdown = (id: string, updates: Partial<DropdownItem>) => {
-    const newDropdowns = data.dropdowns.map((d) =>
-      d.id === id ? { ...d, ...updates } : d
-    );
-    updateData({ ...data, dropdowns: newDropdowns });
-  };
-
-  const removeDropdown = (id: string) => {
-    const placeholder = `{{${id}}}`;
-    const newText = data.text.replace(placeholder, "");
-    const newDropdowns = data.dropdowns.filter((d) => d.id !== id);
-    updateData({ text: newText, dropdowns: newDropdowns });
-    setEditingDropdown(null);
-  };
-
-  const addOptionToDropdown = (dropdownId: string) => {
-    const dropdown = data.dropdowns.find((d) => d.id === dropdownId);
-    if (dropdown) {
-      updateDropdown(dropdownId, {
-        options: [
-          ...dropdown.options,
-          `Вариант ${dropdown.options.length + 1}`,
-        ],
-      });
+    if (updated) {
+      // Update UI with data from server
+      setCurrentQuestion(updated);
     }
-  };
+  }, [currentQuestion, update]);
 
-  const updateOptionText = (
-    dropdownId: string,
-    optionIndex: number,
-    text: string
-  ) => {
-    const dropdown = data.dropdowns.find((d) => d.id === dropdownId);
-    if (dropdown) {
-      const newOptions = [...dropdown.options];
-      newOptions[optionIndex] = text;
-      updateDropdown(dropdownId, { options: newOptions });
-    }
-  };
+  const removeDropdown = useCallback(
+    async (dropdownId: string) => {
+      if (!currentQuestion?.id) return;
 
-  const removeOption = (dropdownId: string, optionIndex: number) => {
-    const dropdown = data.dropdowns.find((d) => d.id === dropdownId);
-    if (dropdown && dropdown.options.length > 2) {
-      const newOptions = dropdown.options.filter((_, i) => i !== optionIndex);
-      const newCorrectIndex =
-        dropdown.correctIndex >= newOptions.length
-          ? newOptions.length - 1
-          : dropdown.correctIndex;
-      updateDropdown(dropdownId, {
+      const dropdowns =
+        (currentQuestion.data?.dropdowns as DropdownData[]) || [];
+      const placeholder = `{{${dropdownId}}}`;
+      const newBody = (currentQuestion.body || "").replace(placeholder, "");
+      const newDropdowns = dropdowns.filter((d) => d.id !== dropdownId);
+
+      // Remove all options with this match_id
+      const newOptions = (currentQuestion.options || []).filter(
+        (opt) => opt.match_id !== dropdownId
+      );
+
+      // Send to server and wait for response
+      const updated = await update(currentQuestion.id, {
         options: newOptions,
-        correctIndex: newCorrectIndex,
+        body: newBody,
+        data: { dropdowns: newDropdowns },
       });
-    }
-  };
+      if (updated) {
+        setCurrentQuestion(updated);
+        setEditingDropdown(null);
+      }
+    },
+    [currentQuestion, update]
+  );
+
+  const addOptionToDropdown = useCallback(
+    async (dropdownId: string) => {
+      if (!currentQuestion?.id) return;
+
+      // Get existing options for this dropdown
+      const dropdownOptions = (currentQuestion.options || []).filter(
+        (opt) => opt.match_id === dropdownId
+      );
+      const nextPosition = dropdownOptions.length;
+
+      const newOptions = [
+        ...(currentQuestion.options || []),
+        {
+          body: `Вариант ${nextPosition + 1}`,
+          image_url: null,
+          is_correct: false,
+          match_id: dropdownId,
+          group: null,
+          order: nextPosition,
+        },
+      ];
+
+      // Send to server and wait for response
+      const updated = await update(currentQuestion.id, {
+        options: newOptions,
+      });
+      if (updated) {
+        setCurrentQuestion(updated);
+      }
+    },
+    [currentQuestion, update]
+  );
+
+  const updateOptionText = useCallback(
+    async (dropdownId: string, optionId: number | undefined, text: string) => {
+      if (!currentQuestion?.id || optionId === undefined) return;
+
+      const newOptions = (currentQuestion.options || []).map((opt) =>
+        opt.id === optionId ? { ...opt, body: text.trim() } : opt
+      );
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev ? { ...prev, options: newOptions } : prev
+      );
+
+      // Send to server
+      update(currentQuestion.id, { options: newOptions });
+    },
+    [currentQuestion, update]
+  );
+
+  const removeOption = useCallback(
+    async (dropdownId: string, optionId: number | undefined) => {
+      if (!currentQuestion?.id || optionId === undefined) return;
+
+      // Get dropdown options
+      const dropdownOptions = (currentQuestion.options || []).filter(
+        (opt) => opt.match_id === dropdownId
+      );
+      if (dropdownOptions.length <= 2) return;
+
+      // Get dropdown data to update correct_index if needed
+      const dropdowns =
+        (currentQuestion.data?.dropdowns as DropdownData[]) || [];
+      const dropdown = dropdowns.find((d) => d.id === dropdownId);
+      if (!dropdown) return;
+
+      // Find option to remove
+      const optionToRemove = dropdownOptions.find((opt) => opt.id === optionId);
+      if (!optionToRemove) return;
+
+      const removedPosition = optionToRemove.order || 0;
+
+      // Remove option
+      const newOptions = (currentQuestion.options || []).filter(
+        (opt) => opt.id !== optionId
+      );
+
+      // Update positions for remaining options
+      const reorderedOptions = newOptions.map((opt) => {
+        if (
+          opt.match_id === dropdownId &&
+          opt.order !== undefined &&
+          opt.order > removedPosition
+        ) {
+          return { ...opt, order: opt.order - 1 };
+        }
+        return opt;
+      });
+
+      // Update correct_index if needed
+      let newCorrectIndex = dropdown.correct_index;
+      if (dropdown.correct_index === removedPosition) {
+        newCorrectIndex = Math.max(0, dropdown.correct_index - 1);
+      } else if (dropdown.correct_index > removedPosition) {
+        newCorrectIndex = dropdown.correct_index - 1;
+      }
+
+      const newDropdowns = dropdowns.map((d) =>
+        d.id === dropdownId ? { ...d, correct_index: newCorrectIndex } : d
+      );
+
+      // Send to server and wait for response
+      const updated = await update(currentQuestion.id, {
+        options: reorderedOptions,
+        data: { dropdowns: newDropdowns },
+      });
+      if (updated) {
+        setCurrentQuestion(updated);
+      }
+    },
+    [currentQuestion, update]
+  );
+
+  const updateCorrectIndex = useCallback(
+    async (dropdownId: string, correctIndex: number) => {
+      if (!currentQuestion?.id) return;
+
+      const dropdowns =
+        (currentQuestion.data?.dropdowns as DropdownData[]) || [];
+      const newDropdowns = dropdowns.map((d) =>
+        d.id === dropdownId ? { ...d, correct_index: correctIndex } : d
+      );
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? { ...prev, data: { ...prev.data, dropdowns: newDropdowns } }
+          : prev
+      );
+
+      // Send to server
+      update(currentQuestion.id, { data: { dropdowns: newDropdowns } });
+    },
+    [currentQuestion, update]
+  );
 
   // Render text with inline dropdowns
   const renderPreview = () => {
-    const parts = data.text.split(/(\{\{[^}]+\}\})/g);
+    if (!currentQuestion?.body) return null;
+
+    const parts = (currentQuestion.body || "").split(/(\{\{[^}]+\}\})/g);
 
     return parts.map((part, index) => {
       const match = part.match(/\{\{([^}]+)\}\}/);
       if (match) {
         const dropdownId = match[1];
-        const dropdown = data.dropdowns.find((d) => d.id === dropdownId);
+        const dropdowns =
+          (currentQuestion.data?.dropdowns as DropdownData[]) || [];
+        const dropdown = dropdowns.find((d) => d.id === dropdownId);
         if (dropdown) {
+          // Get options for this dropdown
+          const dropdownOptions = (currentQuestion.options || [])
+            .filter((opt) => opt.match_id === dropdownId)
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+          const correctOption = dropdownOptions[dropdown.correct_index];
+
           return (
             <span key={index} className="inline-block mx-1">
               <button
@@ -141,7 +319,7 @@ export default function DropDown({ value, onChange }: DropDownProps) {
                     : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200"
                 }`}
               >
-                {dropdown.options[dropdown.correctIndex] || "..."}
+                {correctOption?.body || "..."}
                 <FiChevronDown className="w-3 h-3" />
               </button>
             </span>
@@ -153,9 +331,34 @@ export default function DropDown({ value, onChange }: DropDownProps) {
   };
 
   // Get dropdown being edited
+  const dropdowns = (currentQuestion?.data?.dropdowns as DropdownData[]) || [];
   const currentDropdown = editingDropdown
-    ? data.dropdowns.find((d) => d.id === editingDropdown)
+    ? dropdowns.find((d) => d.id === editingDropdown)
     : null;
+
+  // Get options for current dropdown
+  const currentDropdownOptions = currentDropdown
+    ? (currentQuestion?.options || [])
+        .filter((opt) => opt.match_id === currentDropdown.id)
+        .sort((a, b) => (a.order || 0) - (b.order || 0))
+    : [];
+
+  // Show loading state while loading
+  if (loading) {
+    return (
+      <div className="w-full space-y-4 p-4">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="w-full space-y-4 p-4 text-gray-500">
+        Ошибка загрузки вопроса
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4">
@@ -174,8 +377,8 @@ export default function DropDown({ value, onChange }: DropDownProps) {
         </div>
 
         <textarea
-          value={data.text}
-          onChange={(e) => updateData({ ...data, text: e.target.value })}
+          value={currentQuestion.body || ""}
+          onChange={(e) => updateQuestionBody(e.target.value)}
           placeholder="Введите текст задания. Используйте кнопку 'Вставить список' чтобы добавить выпадающий список."
           className="w-full min-h-[100px] px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
         />
@@ -186,7 +389,7 @@ export default function DropDown({ value, onChange }: DropDownProps) {
       </div>
 
       {/* Preview */}
-      {data.text && (
+      {currentQuestion.body && (
         <div className="p-4 bg-white rounded-lg border border-dashed border-slate-300">
           <span className="text-xs text-slate-400 mb-2 block">
             Предпросмотр (нажмите на список для редактирования):
@@ -226,29 +429,31 @@ export default function DropDown({ value, onChange }: DropDownProps) {
             <span className="text-xs text-blue-600">
               Варианты (◉ = правильный):
             </span>
-            {currentDropdown.options.map((option, index) => (
-              <div key={index} className="flex items-center gap-2">
+            {currentDropdownOptions.map((option, index) => (
+              <div key={option.id || index} className="flex items-center gap-2">
                 <input
                   type="radio"
                   name={`correct-${currentDropdown.id}`}
-                  checked={currentDropdown.correctIndex === index}
-                  onChange={() =>
-                    updateDropdown(currentDropdown.id, { correctIndex: index })
-                  }
+                  checked={currentDropdown.correct_index === index}
+                  onChange={() => updateCorrectIndex(currentDropdown.id, index)}
                   className="w-4 h-4 text-blue-600 cursor-pointer"
                 />
                 <input
                   type="text"
-                  value={option}
+                  value={option.body || ""}
                   onChange={(e) =>
-                    updateOptionText(currentDropdown.id, index, e.target.value)
+                    updateOptionText(
+                      currentDropdown.id,
+                      option.id,
+                      e.target.value
+                    )
                   }
                   className="flex-1 px-2 py-1 text-sm bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="button"
-                  onClick={() => removeOption(currentDropdown.id, index)}
-                  disabled={currentDropdown.options.length <= 2}
+                  onClick={() => removeOption(currentDropdown.id, option.id)}
+                  disabled={currentDropdownOptions.length <= 2}
                   className="p-1 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <FiX className="w-4 h-4" />
@@ -266,28 +471,35 @@ export default function DropDown({ value, onChange }: DropDownProps) {
       )}
 
       {/* List of all dropdowns */}
-      {data.dropdowns.length > 0 && !editingDropdown && (
+      {dropdowns.length > 0 && !editingDropdown && (
         <div className="space-y-2">
           <span className="text-sm font-medium text-slate-700">
             Все списки в задании:
           </span>
-          {data.dropdowns.map((dropdown, index) => (
-            <div
-              key={dropdown.id}
-              onClick={() => setEditingDropdown(dropdown.id)}
-              className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200 hover:border-blue-400 cursor-pointer transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400">#{index + 1}</span>
-                <span className="text-sm text-slate-700">
-                  {dropdown.options.join(" / ")}
+          {dropdowns.map((dropdown, index) => {
+            const dropdownOptions = (currentQuestion.options || [])
+              .filter((opt) => opt.match_id === dropdown.id)
+              .sort((a, b) => (a.order || 0) - (b.order || 0));
+            const correctOption = dropdownOptions[dropdown.correct_index];
+
+            return (
+              <div
+                key={dropdown.id}
+                onClick={() => setEditingDropdown(dropdown.id)}
+                className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200 hover:border-blue-400 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400">#{index + 1}</span>
+                  <span className="text-sm text-slate-700">
+                    {dropdownOptions.map((opt) => opt.body).join(" / ")}
+                  </span>
+                </div>
+                <span className="text-xs text-green-600">
+                  ✓ {correctOption?.body || "..."}
                 </span>
               </div>
-              <span className="text-xs text-green-600">
-                ✓ {dropdown.options[dropdown.correctIndex]}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
