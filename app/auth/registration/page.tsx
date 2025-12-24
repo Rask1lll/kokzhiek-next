@@ -1,9 +1,10 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -58,8 +59,8 @@ export default function RegisterPage() {
         return;
       }
 
-      localStorage.setItem("token", res.data.token);
-      redirect("/books");
+      document.cookie = `token=${res.data.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      router.push("/books");
     } catch {
       setError("Ошибка сети. Попробуйте позже.");
       setLoading(false);
