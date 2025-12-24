@@ -3,11 +3,15 @@
 import { useState, useEffect } from "react";
 import { FiUsers, FiMail, FiCalendar } from "react-icons/fi";
 import { useSchoolMembers } from "@/app/hooks/useSchoolMembers";
+import { useAuth } from "@/app/hooks/useAuth";
 import { MemberRole } from "@/app/types/member";
 
 export default function MembersPage() {
+  const { user } = useAuth();
   const { members, isLoading, getMembers } = useSchoolMembers();
   const [roleFilter, setRoleFilter] = useState<MemberRole | "">("");
+
+  const isSchool = user?.role?.alias === "school";
 
   useEffect(() => {
     getMembers({
@@ -42,27 +46,31 @@ export default function MembersPage() {
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Пользователи</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isSchool ? "Пользователи" : "Ученики"}
+          </h1>
           <p className="text-gray-500 mt-1">
-            Учителя и ученики вашей школы
+            {isSchool ? "Учителя и ученики вашей школы" : "Ученики вашего класса"}
           </p>
         </div>
       </div>
 
-      {/* Фильтры */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value as MemberRole | "")}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
-          >
-            <option value="">Все роли</option>
-            <option value="teacher">Учителя</option>
-            <option value="student">Ученики</option>
-          </select>
+      {/* Фильтры - только для школы */}
+      {isSchool && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as MemberRole | "")}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
+            >
+              <option value="">Все роли</option>
+              <option value="teacher">Учителя</option>
+              <option value="student">Ученики</option>
+            </select>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Таблица пользователей */}
       <div className="bg-white rounded-xl border border-gray-200">
@@ -84,9 +92,11 @@ export default function MembersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Роль
-                  </th>
+                  {isSchool && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Роль
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Дата регистрации
                   </th>
@@ -117,9 +127,11 @@ export default function MembersPage() {
                         {member.email}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      {getRoleBadge(member.role.alias)}
-                    </td>
+                    {isSchool && (
+                      <td className="px-6 py-4">
+                        {getRoleBadge(member.role.alias)}
+                      </td>
+                    )}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-sm text-gray-600">
                         <FiCalendar className="w-4 h-4" />
