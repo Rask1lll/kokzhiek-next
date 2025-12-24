@@ -1,137 +1,106 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { FiCopy, FiCheck, FiKey, FiTrash2 } from "react-icons/fi";
-
-type Role = "student" | "teacher";
-
-type RegistrationKey = {
-  id: number;
-  name: string;
-  key: string;
-  role: string;
-  due_date: string | null;
-  created_at: string;
-};
+import { useState, useEffect } from "react";
+import {
+  FiCopy,
+  FiCheck,
+  FiKey,
+  FiTrash2,
+  FiX,
+  FiCalendar,
+  FiUser,
+  FiPlus,
+} from "react-icons/fi";
+import { useActivationKeys } from "@/app/hooks/useActivationKeys";
+import {
+  ActivationKey,
+  RoleType,
+  ActivationKeyStatus,
+  CreateActivationKeyPayload,
+} from "@/app/types/activationKey";
 
 export default function KeysPage() {
-  const [name, setName] = useState("");
-  const [role, setRole] = useState<Role>("student");
-  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  const [keys, setKeys] = useState<RegistrationKey[]>([]);
-  const [keysLoading, setKeysLoading] = useState(true);
+  const { keys, isLoading, getKeys, createKey, deleteKey } = useActivationKeys();
+  const [roleFilter, setRoleFilter] = useState<RoleType | "">("");
+  const [statusFilter, setStatusFilter] = useState<ActivationKeyStatus | "">("");
+  const [copiedId, setCopiedId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-
-  const fetchKeys = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/keys`,
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setKeys(data.data || data || []);
-      }
-    } catch {
-      console.error("Failed to fetch keys");
-    } finally {
-      setKeysLoading(false);
-    }
-  }, []);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createdKeys, setCreatedKeys] = useState<ActivationKey[]>([]);
 
   useEffect(() => {
-    fetchKeys();
-  }, [fetchKeys]);
+    getKeys({
+      role_type: roleFilter || undefined,
+      status: statusFilter || undefined,
+    });
+  }, [getKeys, roleFilter, statusFilter]);
 
-  const handleGenerate = async () => {
-    if (!name.trim()) {
-      setError("Введите название ключа");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/keys`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: name.trim(),
-            role,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Ошибка при генерации ключа");
-        return;
-      }
-
-      setGeneratedKey(data.data?.key || data.key);
-      setName("");
-      fetchKeys();
-    } catch {
-      setError("Ошибка сети. Попробуйте позже.");
-    } finally {
-      setLoading(false);
-    }
+  const handleCopy = async (key: string, id: number) => {
+    await navigator.clipboard.writeText(key);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("Удалить этот ключ?")) return;
 
     setDeletingId(id);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/keys/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const result = await deleteKey(id);
+    if (!result.success) {
+      alert(result.message);
+    }
+    setDeletingId(null);
+  };
 
-      if (res.ok) {
-        setKeys((prev) => prev.filter((k) => k.id !== id));
-      }
-    } catch {
-      console.error("Failed to delete key");
-    } finally {
-      setDeletingId(null);
+  const getKeyStatus = (key: ActivationKey): ActivationKeyStatus => {
+    if (key.is_used) return "used";
+    if (key.expires_at && new Date(key.expires_at) < new Date()) return "expired";
+    return "active";
+  };
+
+  const getStatusBadge = (key: ActivationKey) => {
+    const status = getKeyStatus(key);
+    switch (status) {
+      case "active":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+            <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+            Активен
+          </span>
+        );
+      case "used":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+            <FiCheck className="w-3 h-3" />
+            Использован
+          </span>
+        );
+      case "expired":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+            <FiX className="w-3 h-3" />
+            Истёк
+          </span>
+        );
     }
   };
 
-  const handleCopy = async (key: string) => {
-    await navigator.clipboard.writeText(key);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const getRoleBadge = (roleType: RoleType) => {
+    if (roleType === "teacher") {
+      return (
+        <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
+          Учитель
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+        Ученик
+      </span>
+    );
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "—";
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("ru-RU", {
       day: "numeric",
       month: "short",
@@ -139,105 +108,125 @@ export default function KeysPage() {
     });
   };
 
-  const getRoleLabel = (role: string) => {
-    const roles: Record<string, string> = {
-      student: "Ученик",
-      teacher: "Учитель",
-      admin: "Админ",
-    };
-    return roles[role] || role;
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("ru-RU", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const handleKeysCreated = (newKeys: ActivationKey[]) => {
+    setCreatedKeys((prev) => [...newKeys, ...prev]);
   };
 
   return (
-    <div className="max-w-4xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        Управление ключами
-      </h1>
-
-      {/* Форма генерации */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Создать новый ключ
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Название
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ключ для 5А класса"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Роль
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
-            >
-              <option value="student">Ученик</option>
-              <option value="teacher">Учитель</option>
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            <button
-              onClick={handleGenerate}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 transition-all font-medium disabled:opacity-50"
-            >
-              <FiKey className="w-5 h-5" />
-              {loading ? "..." : "Создать"}
-            </button>
-          </div>
+    <div className="max-w-6xl">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Ключи активации</h1>
+          <p className="text-gray-500 mt-1">
+            Управление ключами для регистрации учителей и учеников
+          </p>
         </div>
-
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-
-        {generatedKey && (
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-700 mb-2 font-medium">
-              Ключ создан:
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 bg-white px-3 py-2 rounded border border-green-300 text-sm font-mono text-gray-800">
-                {generatedKey}
-              </code>
-              <button
-                onClick={() => handleCopy(generatedKey)}
-                className="p-2 text-green-700 hover:bg-green-100 rounded-lg transition-colors"
-              >
-                {copied ? <FiCheck className="w-5 h-5" /> : <FiCopy className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          <FiPlus className="w-5 h-5" />
+          Создать ключ
+        </button>
       </div>
 
-      {/* Список ключей */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Существующие ключи
-          </h2>
+      {/* Показ созданных ключей */}
+      {createdKeys.length > 0 && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-green-800">
+              Созданные ключи ({createdKeys.length})
+            </h3>
+            <button
+              onClick={() => setCreatedKeys([])}
+              className="text-green-600 hover:text-green-800"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="space-y-2">
+            {createdKeys.map((key) => (
+              <div
+                key={key.id}
+                className="flex items-center justify-between bg-white rounded-lg px-4 py-2 border border-green-200"
+              >
+                <div className="flex items-center gap-3">
+                  <code className="font-mono text-sm bg-green-100 px-2 py-1 rounded">
+                    {key.key}
+                  </code>
+                  {getRoleBadge(key.role_type)}
+                </div>
+                <button
+                  onClick={() => handleCopy(key.key, key.id)}
+                  className="flex items-center gap-1 text-sm text-green-600 hover:text-green-800"
+                >
+                  {copiedId === key.id ? (
+                    <>
+                      <FiCheck className="w-4 h-4" />
+                      Скопировано
+                    </>
+                  ) : (
+                    <>
+                      <FiCopy className="w-4 h-4" />
+                      Копировать
+                    </>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
 
-        {keysLoading ? (
+      {/* Фильтры */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as RoleType | "")}
+            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
+          >
+            <option value="">Все роли</option>
+            <option value="teacher">Учитель</option>
+            <option value="student">Ученик</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as ActivationKeyStatus | "")}
+            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
+          >
+            <option value="">Все статусы</option>
+            <option value="active">Активные</option>
+            <option value="used">Использованные</option>
+            <option value="expired">Истёкшие</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Таблица ключей */}
+      <div className="bg-white rounded-xl border border-gray-200">
+        {isLoading ? (
           <div className="p-6 text-center text-gray-500">Загрузка...</div>
         ) : keys.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
-            Ключей пока нет
+          <div className="p-12 text-center">
+            <FiKey className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 mb-4">Ключей пока нет</p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Создать первый ключ
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -245,16 +234,19 @@ export default function KeysPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Название
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Ключ
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Роль
+                    Тип
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Действует до
+                    Статус
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Использован
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Срок действия
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                     Действия
@@ -264,42 +256,72 @@ export default function KeysPage() {
               <tbody className="divide-y divide-gray-200">
                 {keys.map((key) => (
                   <tr key={key.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {key.name}
-                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <code className="text-sm font-mono text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                        <code className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
                           {key.key}
                         </code>
                         <button
-                          onClick={() => handleCopy(key.key)}
-                          className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                          onClick={() => handleCopy(key.key, key.id)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="Копировать"
                         >
-                          <FiCopy className="w-4 h-4" />
+                          {copiedId === key.id ? (
+                            <FiCheck className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <FiCopy className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </td>
+                    <td className="px-6 py-4">{getRoleBadge(key.role_type)}</td>
+                    <td className="px-6 py-4">{getStatusBadge(key)}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        key.role === "teacher"
-                          ? "bg-purple-100 text-purple-700"
-                          : "bg-blue-100 text-blue-700"
-                      }`}>
-                        {getRoleLabel(key.role)}
-                      </span>
+                      {key.is_used && key.user ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-semibold">
+                              {key.user.name
+                                ? key.user.name[0].toUpperCase()
+                                : key.user.email[0].toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {key.user.name || key.user.email}
+                            </p>
+                            {key.used_at && (
+                              <p className="text-xs text-gray-500">
+                                {formatDateTime(key.used_at)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">—</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {formatDate(key.due_date)}
+                    <td className="px-6 py-4">
+                      {key.expires_at ? (
+                        <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                          <FiCalendar className="w-4 h-4" />
+                          {formatDate(key.expires_at)}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">Бессрочно</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleDelete(key.id)}
-                        disabled={deletingId === key.id}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                      >
-                        <FiTrash2 className="w-4 h-4" />
-                      </button>
+                      {!key.is_used && (
+                        <button
+                          onClick={() => handleDelete(key.id)}
+                          disabled={deletingId === key.id}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="Удалить"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -307,6 +329,154 @@ export default function KeysPage() {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Модалка создания ключа */}
+      {showCreateModal && (
+        <CreateKeyModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={handleKeysCreated}
+          createKey={createKey}
+        />
+      )}
+    </div>
+  );
+}
+
+type CreateKeyModalProps = {
+  onClose: () => void;
+  onCreated: (keys: ActivationKey[]) => void;
+  createKey: (payload: CreateActivationKeyPayload) => Promise<
+    | { success: true; data: ActivationKey[] }
+    | { success: false; errors: Record<string, string[]>; message: string }
+  >;
+};
+
+function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) {
+  const [roleType, setRoleType] = useState<RoleType>("student");
+  const [expiresAt, setExpiresAt] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleCreate = async () => {
+    setLoading(true);
+    setError("");
+
+    const payload: CreateActivationKeyPayload = {
+      role_type: roleType,
+    };
+    if (expiresAt) {
+      payload.expires_at = expiresAt;
+    }
+
+    const result = await createKey(payload);
+
+    if (result.success) {
+      onCreated(result.data);
+      onClose();
+    } else {
+      setError(result.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Создать ключ активации
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <FiX className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Тип роли
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRoleType("student")}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                  roleType === "student"
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-200 hover:border-gray-300 text-gray-600"
+                }`}
+              >
+                <FiUser className="w-5 h-5" />
+                Ученик
+              </button>
+              <button
+                type="button"
+                onClick={() => setRoleType("teacher")}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                  roleType === "teacher"
+                    ? "border-purple-500 bg-purple-50 text-purple-700"
+                    : "border-gray-200 hover:border-gray-300 text-gray-600"
+                }`}
+              >
+                <FiUser className="w-5 h-5" />
+                Учитель
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Срок действия{" "}
+              <span className="text-gray-400 font-normal">(опционально)</span>
+            </label>
+            <div className="relative">
+              <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="date"
+                value={expiresAt}
+                onChange={(e) => setExpiresAt(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-gray-500">
+              Оставьте пустым для бессрочного ключа
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+          <button
+            onClick={onClose}
+            className="px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+          >
+            Отмена
+          </button>
+          <button
+            onClick={handleCreate}
+            disabled={loading}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+          >
+            {loading ? (
+              "Создание..."
+            ) : (
+              <>
+                <FiKey className="w-5 h-5" />
+                Создать
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
