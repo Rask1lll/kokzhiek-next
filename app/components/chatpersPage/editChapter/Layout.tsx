@@ -146,7 +146,7 @@ const Column = ({ blockId, columnIndex, widgets, className }: ColumnProps) => {
   }
 
   return (
-    <div className={`flex flex-col w-29/30 gap-2 ${className || ""}`}>
+    <div className={`flex flex-col gap-2 ${className || ""}`}>
       {/* Render existing widgets */}
       {widgets.map((widget) => (
         <LayoutPlaceholder
@@ -349,7 +349,7 @@ const Layout = ({ block }: LayoutProps) => {
     return (
       <div className="flex group/block w-full">
         <div
-          className="w-full ring ring-gray-300 rounded-md p-2 transition-colors"
+          className="w-full ring ring-gray-300 rounded-md transition-colors"
           style={{ backgroundColor: blockColor || "#f3f4f6" }}
         >
           <Column
@@ -383,7 +383,7 @@ const Layout = ({ block }: LayoutProps) => {
   return (
     <div className="relative  flex group/block w-full">
       <div
-        className="w-full flex gap-4 rounded-md ring ring-gray-300 p-2 transition-colors"
+        className="w-full flex gap-4 rounded-md ring ring-gray-300 transition-colors"
         style={{ backgroundColor: blockColor || "#EDEDED" }}
       >
         {Array.from({ length: columnsCount }).map((_, colIndex) => {

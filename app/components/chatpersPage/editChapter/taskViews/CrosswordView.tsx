@@ -112,7 +112,7 @@ export default function CrosswordView({
           {questionsList.map((q, rowIndex) => {
             const userAnswer = answers[q.id] || "";
             const offset = maxKeyLetterIndex - q.keyLetterIndex;
-            const answerLength = q.answer.length;
+            const answerLength = q.answer ? q.answer.length : 0;
 
             return (
               <div key={q.id} className="flex items-center gap-0.5 mb-0.5">

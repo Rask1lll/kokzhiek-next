@@ -147,8 +147,8 @@ export function useQuestions(widgetId: number | null) {
   }, []);
 
   /** QUESTION IMAGE UPLOAD */
-  const uploadQuestionImageHandler = useCallback(
-    async (questionId: number, file: File) => {
+  const uploadQuestionImageFn = useCallback(
+    async (questionId: number, file: File): Promise<string | null> => {
       const res = await uploadQuestionImage(questionId, file);
       if (!res.success) return null;
 
@@ -162,18 +162,19 @@ export function useQuestions(widgetId: number | null) {
   );
 
   /** QUESTION IMAGE DELETE */
-  const removeQuestionImage = useCallback(async (questionId: number) => {
-    const res = await deleteQuestionImage(questionId);
-    if (!res.success) return false;
+  const removeQuestionImage = useCallback(
+    async (questionId: number): Promise<boolean> => {
+      const res = await deleteQuestionImage(questionId);
+      if (!res.success) return false;
 
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === questionId ? res.data : q))
-    );
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? res.data : q))
+      );
 
-    return true;
-  }, []);
-
-  console.log(questions);
+      return true;
+    },
+    []
+  );
 
   return {
     questions,
@@ -186,7 +187,7 @@ export function useQuestions(widgetId: number | null) {
     reorder,
     uploadImage,
     removeImage,
-    uploadQuestionImage: uploadQuestionImageHandler,
+    uploadQuestionImage: uploadQuestionImageFn,
     removeQuestionImage,
   };
 }

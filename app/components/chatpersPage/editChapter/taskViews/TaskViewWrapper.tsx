@@ -1,7 +1,7 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import { FiHelpCircle, FiX } from "react-icons/fi";
+import { ReactNode, useEffect, useState } from "react";
+import { FiHelpCircle } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 
@@ -25,6 +25,15 @@ export default function TaskViewWrapper({
   const imageUrl = currentQuestion?.image_url;
   const body = currentQuestion?.body || "";
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowHint(false);
+    }, 15000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [showHint]);
+
   if (loading) {
     return <p className="text-gray-400">Загрузка...</p>;
   }
@@ -45,8 +54,21 @@ export default function TaskViewWrapper({
     );
   }
 
+  const bgColor =
+    currentQuestion.data &&
+    typeof currentQuestion.data === "object" &&
+    "bgColor" in currentQuestion.data &&
+    typeof currentQuestion.data.bgColor === "string"
+      ? currentQuestion.data.bgColor
+      : "#ffffff";
+
   return (
-    <div className="w-full relative min-h-[200px]">
+    <div
+      className="w-full  relative min-h-[200px]"
+      style={{
+        backgroundColor: bgColor,
+      }}
+    >
       {/* Background image */}
       {imageUrl && (
         <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
@@ -54,7 +76,7 @@ export default function TaskViewWrapper({
             src={imageUrl}
             alt="Background"
             fill
-            className="object-cover opacity-20"
+            className="object-cover opacity-50"
             unoptimized
           />
         </div>
@@ -66,16 +88,14 @@ export default function TaskViewWrapper({
         <div className="flex items-start justify-between gap-4 mb-4">
           {showQuestionBody && body && (
             <div className="flex-1">
-              <div className="text-lg font-medium text-gray-800">
-                {body}
-              </div>
+              <div className="text-lg font-medium text-gray-800">{body}</div>
             </div>
           )}
           {hint && (
             <button
               type="button"
               onClick={() => setShowHint(!showHint)}
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors bg-purple-100 text-purple-700 hover:bg-purple-200 shrink-0"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-purple-700 hover:bg-purple-200 shrink-0"
               title="Показать подсказку"
             >
               <FiHelpCircle className="w-4 h-4" />
@@ -84,42 +104,28 @@ export default function TaskViewWrapper({
           )}
         </div>
 
-        {/* Hint modal */}
-        {showHint && hint && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 relative">
-              <button
-                type="button"
-                onClick={() => setShowHint(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Закрыть"
-              >
-                <FiX className="w-5 h-5" />
-              </button>
-              <div className="flex items-center gap-2 mb-4">
-                <FiHelpCircle className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Подсказка
-                </h3>
-              </div>
-              <p className="text-gray-700">{hint}</p>
-              <div className="mt-6 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowHint(false)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  Понятно
-                </button>
+        {showHint && (
+          <div className="absolute -top-16 left-0 z-5 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl shadow-lg border border-purple-400/30 p-4 max-w-md mx-auto">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <FiHelpCircle className="w-5 h-5 text-purple-100" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-purple-50 mb-1">
+                    Подсказка
+                  </div>
+                  <div className="text-base leading-relaxed text-white">
+                    {hint}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         )}
-
         {/* Task content */}
         {children}
       </div>
     </div>
   );
 }
-

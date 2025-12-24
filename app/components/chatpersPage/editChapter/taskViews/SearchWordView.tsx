@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import TaskViewWrapper from "./TaskViewWrapper";
+import { BiTrash } from "react-icons/bi";
 
 type SearchWordViewProps = {
   widgetId: number;
@@ -70,22 +71,67 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
     return { size: 3, Cells: [] };
   }, [data]);
 
-  // Проверка, являются ли две ячейки соседними (горизонтально, вертикально или по диагонали)
-  const isAdjacent = (
+  // Определить направление между двумя ячейками
+  const getDirection = (
     index1: number,
     index2: number,
     size: number
-  ): boolean => {
+  ): "horizontal" | "vertical" | "diagonal" | null => {
     const row1 = Math.floor(index1 / size);
     const col1 = index1 % size;
     const row2 = Math.floor(index2 / size);
     const col2 = index2 % size;
 
-    const rowDiff = Math.abs(row1 - row2);
-    const colDiff = Math.abs(col1 - col2);
+    const rowDiff = row2 - row1;
+    const colDiff = col2 - col1;
 
-    // Соседние если разница в строках и столбцах не больше 1
-    return rowDiff <= 1 && colDiff <= 1 && !(rowDiff === 0 && colDiff === 0);
+    // Горизонтальное направление (только по столбцам)
+    if (rowDiff === 0 && Math.abs(colDiff) === 1) {
+      return "horizontal";
+    }
+    // Вертикальное направление (только по строкам)
+    if (colDiff === 0 && Math.abs(rowDiff) === 1) {
+      return "vertical";
+    }
+    // Диагональное направление
+    if (Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 1) {
+      return "diagonal";
+    }
+
+    return null;
+  };
+
+  // Проверка, соответствует ли новая ячейка текущему направлению
+  const isValidNextCell = (
+    selectedIndices: number[],
+    newIndex: number,
+    size: number
+  ): boolean => {
+    if (selectedIndices.length === 0) {
+      return true; // Первая ячейка - всегда валидна
+    }
+
+    if (selectedIndices.length === 1) {
+      // Вторая ячейка - определяем направление
+      const direction = getDirection(selectedIndices[0], newIndex, size);
+      return direction !== null;
+    }
+
+    // Для третьей и последующих ячеек - проверяем, что направление сохраняется
+    const lastIndex = selectedIndices[selectedIndices.length - 1];
+    const newDirection = getDirection(lastIndex, newIndex, size);
+
+    if (!newDirection) return false;
+
+    // Определяем направление между первой и второй ячейкой
+    const initialDirection = getDirection(
+      selectedIndices[0],
+      selectedIndices[1],
+      size
+    );
+
+    // Новое направление должно совпадать с начальным
+    return newDirection === initialDirection;
   };
 
   // Обработка клика по ячейке
@@ -97,15 +143,12 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
         return prev.slice(0, existingIndex + 1);
       }
 
-      // Если это первая ячейка или ячейка соседняя с последней
-      if (
-        prev.length === 0 ||
-        isAdjacent(prev[prev.length - 1], index, gridData.size)
-      ) {
+      // Проверяем, валидна ли новая ячейка для текущего направления
+      if (isValidNextCell(prev, index, gridData.size)) {
         return [...prev, index];
       }
 
-      // Если не соседняя, начинаем новую последовательность
+      // Если не валидна, начинаем новую последовательность
       return [index];
     });
   };
@@ -139,6 +182,10 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
     return null;
   }
 
+  function deleteAnswer(id: string) {
+    setAnswers((prev) => prev.filter((el) => el.id !== id));
+  }
+
   return (
     <TaskViewWrapper widgetId={widgetId}>
       <>
@@ -170,7 +217,6 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
           })}
         </div>
 
-        {/* Текущее выбранное слово */}
         {selectedIndices.length > 0 && (
           <div className="w-full mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between gap-3">
@@ -198,7 +244,6 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
           </div>
         )}
 
-        {/* Список найденных слов */}
         <div className="w-full mt-3">
           <div className="flex flex-col gap-2">
             <p className="font-semibold">Найденные слова:</p>
@@ -211,6 +256,9 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
                     <span className="text-xl w-4">{i + 1}.</span>
                     <div className="ring ring-gray-300 p-2 rounded-lg bg-gray-50 font-semibold text-lg uppercase">
                       {el.answer}
+                    </div>
+                    <div onClick={() => deleteAnswer(el.id)}>
+                      <BiTrash className="bg-red-200/50 rounded-full cursor-pointer text-red-400 w-7 h-7 p-1" />
                     </div>
                   </div>
                 );

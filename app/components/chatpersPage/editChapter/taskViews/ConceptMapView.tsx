@@ -100,7 +100,9 @@ function TableView({ matrix }: { matrix: Cell[][] }) {
                   id={el.id}
                   className="relative ring-2 max-w-[20%] min-w-20 ring-slate-300 rounded-md bg-white"
                 >
-                  <div className="p-1 text-sm text-gray-800">{el.text}</div>
+                  <div className="p-1 wrap-anywhere text-wrap text-sm text-gray-800">
+                    {el.text}
+                  </div>
                 </div>
               );
             })}

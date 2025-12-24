@@ -5,6 +5,8 @@ import { FiImage, FiTrash2, FiHelpCircle } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
+import Button from "@/app/components/Button/Button";
+import { colors } from "@/app/libs/colors";
 
 type TaskBlockWrapperProps = {
   widgetId: number;
@@ -29,6 +31,11 @@ export default function TaskBlockWrapper({
   const [showHintInput, setShowHintInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hintDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showBGModal, setShowBGModal] = useState(false);
+  const [colorFilterTimeout, setColorFilterTimeout] =
+    useState<ReturnType<typeof setTimeout>>();
+  const [colorEnterTimeout, setColorEnterTimeout] =
+    useState<ReturnType<typeof setTimeout>>();
 
   // Update currentQuestion when questions change
   useEffect(() => {
@@ -74,6 +81,42 @@ export default function TaskBlockWrapper({
       );
     }
   }, [currentQuestion, removeQuestionImage]);
+
+  const handleColorUpload = (code: string) => {
+    if (!currentQuestion?.id) return;
+
+    const newData = {
+      ...currentQuestion.data,
+      bgColor: code,
+    };
+
+    setCurrentQuestion((prev) => (prev ? { ...prev, data: newData } : null));
+
+    const questionId = currentQuestion.id;
+    if (!questionId) return;
+
+    update(questionId, {
+      data: newData,
+    });
+  };
+
+  const handleColorDelete = () => {
+    if (!currentQuestion?.id) return;
+
+    const newData = {
+      ...currentQuestion.data,
+      bgColor: "",
+    };
+
+    setCurrentQuestion((prev) => (prev ? { ...prev, data: newData } : null));
+
+    const questionId = currentQuestion.id;
+    if (!questionId) return;
+
+    update(questionId, {
+      data: newData,
+    });
+  };
 
   const updateHint = useCallback(
     (hint: string) => {
@@ -124,13 +167,97 @@ export default function TaskBlockWrapper({
   }
 
   const hint = (currentQuestion.data as { hint?: string })?.hint || "";
+  const bgColor =
+    currentQuestion.data &&
+    typeof currentQuestion.data === "object" &&
+    "bgColor" in currentQuestion.data &&
+    typeof currentQuestion.data.bgColor === "string"
+      ? currentQuestion.data.bgColor
+      : "#ffffff";
 
   return (
-    <div className="w-full ">
+    <div
+      className="w-full p-1"
+      style={{
+        backgroundColor: bgColor,
+      }}
+    >
       {/* Background image and hint controls */}
       <div className="flex w-fit mb-2 items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
         {/* Background image upload */}
-        <div className="flex items-center gap-2">
+        <div className="flex relative items-center gap-2">
+          {showBGModal && (
+            <div
+              onMouseLeave={() => {
+                setColorEnterTimeout(
+                  setTimeout(() => {
+                    setShowBGModal(false);
+                  }, 3000)
+                );
+                console.log("leave");
+              }}
+              onMouseEnter={() => {
+                clearTimeout(colorEnterTimeout);
+              }}
+              className="absolute z-10 -bottom-15 p-3 ring rounded-lg ring-gray-300 left-0 bg-white"
+            >
+              <div className="w-fit flex gap-1 mb-2">
+                {colors.map((color) => {
+                  return (
+                    <div
+                      key={color.code}
+                      style={{ backgroundColor: color.code }}
+                      className="p-4 ring cursor-pointer ring-gray-300 rounded-full"
+                      onClick={() => {
+                        handleColorUpload(color.code);
+                        setShowBGModal(false);
+                      }}
+                    ></div>
+                  );
+                })}
+              </div>
+              <div className="h-fit gap-1 flex items-center">
+                <label htmlFor="colorChose">
+                  Самостоятельный выбор цвета :{" "}
+                </label>
+                <label
+                  htmlFor="colorChose"
+                  className="overflow-hidden ring-1 flex items-center relative h-8 w-8 rounded-full"
+                >
+                  <input
+                    id="colorChose"
+                    className="h-10 absolute left-10 ring-0 border-0 outline-0"
+                    type="color"
+                    defaultValue={bgColor}
+                    onInput={() => {
+                      clearTimeout(colorEnterTimeout);
+                      setColorEnterTimeout(
+                        setTimeout(() => {
+                          setShowBGModal(false);
+                        }, 5000)
+                      );
+                    }}
+                    onChange={(e) => {
+                      if (colorFilterTimeout) clearTimeout(colorFilterTimeout);
+                      setColorFilterTimeout(
+                        setTimeout(() => {
+                          handleColorUpload(e.target.value);
+                        }, 1000)
+                      );
+                    }}
+                  />
+                </label>
+              </div>
+              <div>
+                <Button
+                  color="blue"
+                  content="Загрузить изоброжение"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                />
+              </div>
+            </div>
+          )}
           <input
             type="file"
             accept="image/*"
@@ -148,7 +275,9 @@ export default function TaskBlockWrapper({
           />
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              setShowBGModal(!showBGModal);
+            }}
             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
               currentQuestion.image_url
                 ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
@@ -172,6 +301,21 @@ export default function TaskBlockWrapper({
               <button
                 type="button"
                 onClick={handleImageDelete}
+                className="absolute -top-1 -right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                title="Удалить изображение"
+              >
+                <FiTrash2 className="w-2.5 h-2.5" />
+              </button>
+            </div>
+          )}
+          {currentQuestion.data && !!currentQuestion.data.bgColor && (
+            <div
+              className="relative p-5 ring ring-gray-300 rounded-full"
+              style={{ backgroundColor: bgColor }}
+            >
+              <button
+                type="button"
+                onClick={handleColorDelete}
                 className="absolute -top-1 -right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                 title="Удалить изображение"
               >
