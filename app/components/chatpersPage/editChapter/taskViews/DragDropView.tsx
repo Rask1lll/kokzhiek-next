@@ -6,17 +6,9 @@ import TaskViewWrapper from "./TaskViewWrapper";
 
 type DragDropViewProps = {
   widgetId: number;
-  onChange?: (value: string) => void;
 };
 
-type UserAnswer = {
-  cellAnswers: Record<string, number>; // cellId (position) -> optionId
-};
-
-export default function DragDropView({
-  widgetId,
-  onChange,
-}: DragDropViewProps) {
+export default function DragDropView({ widgetId }: DragDropViewProps) {
   const { questions } = useQuestions(widgetId);
   const [chosenElement, setChosenElement] = useState<number | null>(null);
   const [usedCardIds, setUsedCardIds] = useState<Set<number>>(new Set());
@@ -35,15 +27,10 @@ export default function DragDropView({
     [currentQuestion?.options]
   );
 
-  // Get available answer options (options that are not cells)
+  // Get available answer options (options that are not used)
   const availableCards = useMemo(() => {
-    return options.filter(
-      (opt) =>
-        opt.id &&
-        !cells.includes(opt.position?.toString() || "") &&
-        !usedCardIds.has(opt.id)
-    );
-  }, [options, cells, usedCardIds]);
+    return options.filter((opt) => opt.id && !usedCardIds.has(opt.id));
+  }, [options, usedCardIds]);
 
   const handleCellClick = (cellId: string) => {
     if (!chosenElement) {
@@ -60,17 +47,6 @@ export default function DragDropView({
           newMap.delete(cellId);
           return newMap;
         });
-
-        if (onChange) {
-          const cellAnswers: Record<string, number> = {};
-          cellToCardMap.forEach((cardId, cId) => {
-            if (cId !== cellId) {
-              cellAnswers[cId] = cardId;
-            }
-          });
-          const answer: UserAnswer = { cellAnswers };
-          onChange(JSON.stringify(answer));
-        }
       }
       return;
     }
@@ -79,16 +55,6 @@ export default function DragDropView({
     setUsedCardIds((prev) => new Set(prev).add(chosenElement));
     setCellToCardMap((prev) => new Map(prev).set(cellId, chosenElement));
     setChosenElement(null);
-
-    if (onChange) {
-      const cellAnswers: Record<string, number> = {};
-      cellToCardMap.forEach((cardId, cId) => {
-        cellAnswers[cId] = cardId;
-      });
-      cellAnswers[cellId] = chosenElement;
-      const answer: UserAnswer = { cellAnswers };
-      onChange(JSON.stringify(answer));
-    }
   };
 
   // Render text with inline cell placeholders
@@ -96,7 +62,7 @@ export default function DragDropView({
     const parts = body.split(/(\{\{\{[^}]+\}\}\})/g);
 
     return (
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex bg-white flex-wrap items-center gap-2">
         {parts.map((part, index) => {
           const match = part.match(/\{\{\{([^}]+)\}\}\}/);
           if (match) {
@@ -143,10 +109,10 @@ export default function DragDropView({
 
   return (
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
-      <div className="w-full p-4 bg-white rounded-xl shadow-sm">
+      <div className="w-full p-4 bg-white/10 rounded-xl shadow-sm">
         {/* Карточки ответов */}
         <div className="mb-6">
-          <h6 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <h6 className="text-sm font-semibold bg-white w-fit p-2 ring ring-gray-300 rounded-lg text-gray-500 uppercase tracking-wide mb-3">
             Выберите ответ
           </h6>
           <div className="flex flex-wrap gap-3">
@@ -157,7 +123,7 @@ export default function DragDropView({
                   <div
                     key={option.id}
                     className={`
-                    px-4 py-2 rounded-lg cursor-pointer font-medium
+                    px-4 py-2 rounded-lg ring ring-blue-300/90 cursor-pointer font-medium
                     transition-all duration-200 select-none
                     ${
                       isChosen
@@ -185,7 +151,7 @@ export default function DragDropView({
         <div className="border-t border-gray-200 my-4"></div>
 
         {/* Область с текстом и ячейками */}
-        <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="bg-gray-50 ring-2 ring-blue-200 p-4 rounded-lg">
           <h6 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
             Заполните пропуски
           </h6>

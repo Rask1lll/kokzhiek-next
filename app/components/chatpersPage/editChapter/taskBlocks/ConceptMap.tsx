@@ -248,6 +248,10 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
       const firstQuestion = questions[0];
       // Only update if question ID changed
       if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
+        // Clear initialization ref when question changes
+        if (currentQuestion?.id && currentQuestion.id !== firstQuestion.id) {
+          initializationRef.current.delete(currentQuestion.id);
+        }
         setTimeout(() => {
           setCurrentQuestion(firstQuestion);
         }, 0);
@@ -258,6 +262,7 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const cellDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const initializationRef = useRef<Set<number>>(new Set());
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -425,6 +430,59 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
       table.Cells
     );
   }, [table.tableSize.width, table.tableSize.height, table.Cells]);
+
+  // Initialize cells if they don't exist
+  useEffect(() => {
+    if (!currentQuestion?.id) return;
+
+    const questionId = currentQuestion.id;
+    // Skip if already initialized for this question
+    if (initializationRef.current.has(questionId)) return;
+
+    // Check if Cells array is empty or doesn't match the table size
+    const expectedCellCount = table.tableSize.width * table.tableSize.height;
+    const actualCellCount = table.Cells.flat().length;
+
+    // If cells don't exist or don't match size, create and save them
+    if (actualCellCount === 0 || actualCellCount !== expectedCellCount) {
+      const newCells = createMatrix(
+        table.tableSize.width,
+        table.tableSize.height,
+        table.Cells
+      );
+
+      // Mark as initialized before updating
+      initializationRef.current.add(questionId);
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                ...prev.data,
+                Cells: newCells,
+              },
+            }
+          : null
+      );
+
+      // Send to server directly (don't use syncToServer to avoid circular updates)
+      update(questionId, {
+        data: {
+          ...currentQuestion.data,
+          tableSize: table.tableSize,
+          arrows: table.arrows,
+          Cells: newCells,
+          color: table.color,
+        },
+      });
+    } else {
+      // Mark as initialized even if cells already exist
+      initializationRef.current.add(questionId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentQuestion?.id, table.tableSize.width, table.tableSize.height]);
 
   const handleTableSizeChange = useCallback(
     (field: "width" | "height", value: number) => {
