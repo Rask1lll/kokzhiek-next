@@ -82,7 +82,10 @@ export default function ViewPlaceholder({
     // Task widgets (interactive)
     case "multiple_choice":
       content = (
-        <MultipleChoiceView widgetId={widget.id} onChange={handleAnswerChange} />
+        <MultipleChoiceView
+          widgetId={widget.id}
+          onChange={handleAnswerChange}
+        />
       );
       break;
     case "single_choice":
@@ -120,12 +123,12 @@ export default function ViewPlaceholder({
       content = <SortView widgetId={widget.id} onChange={handleAnswerChange} />;
       break;
     case "order":
-      content = <OrderView widgetId={widget.id} onChange={handleAnswerChange} />;
+      content = (
+        <OrderView widgetId={widget.id} onChange={handleAnswerChange} />
+      );
       break;
     case "drag_drop":
-      content = (
-        <DragDropView widgetId={widget.id} onChange={handleAnswerChange} />
-      );
+      content = <DragDropView widgetId={widget.id} />;
       break;
     default:
       content = (
