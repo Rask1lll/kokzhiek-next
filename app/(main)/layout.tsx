@@ -4,6 +4,7 @@ import Navbar from "../components/navigation/Navigation";
 import ModalWindow from "../components/ModalWindow/ModalWindow";
 import ProtectorGuard from "../components/security/ProtectorGuard";
 import ChapterHeader from "../components/chatpersPage/editChapter/Header";
+import AlertContainer from "../components/Alert/AlertContainer";
 
 export default function MainLayOut({
   children,
@@ -17,6 +18,7 @@ export default function MainLayOut({
       <>
         <ModalWindow></ModalWindow>
         <ChapterHeader />
+        <AlertContainer />
         {children}
       </>
     );
@@ -26,6 +28,7 @@ export default function MainLayOut({
     <>
       <ModalWindow></ModalWindow>
       <Navbar />
+      <AlertContainer />
       <ProtectorGuard element={children} />
     </>
   );

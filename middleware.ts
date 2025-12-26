@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const AUTH_PAGES = ["/auth/login", "/auth/registration"];
 // const PUBLIC_PAGES = ["/", ...AUTH_PAGES];
 
 export function middleware(request: NextRequest) {

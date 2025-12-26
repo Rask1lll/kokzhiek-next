@@ -251,11 +251,6 @@ export default function Sort({ widgetId }: SortProps) {
         },
       ];
 
-      // Update UI immediately
-      setCurrentQuestion((prev) =>
-        prev ? { ...prev, options: newOptions } : null
-      );
-
       // Send to server and wait for response to get IDs
       const updated = await update(currentQuestion.id, {
         options: newOptions,
@@ -407,7 +402,7 @@ export default function Sort({ widgetId }: SortProps) {
           {columns.map((column) => (
             <div
               key={column.id}
-              className="p-4 w-full bg-white rounded-lg border-2 border-slate-200 space-y-3"
+              className="p-2 w-full bg-white rounded-lg border-2 border-slate-200 space-y-3"
             >
               {/* Column header */}
               <div className="flex items-center w-full justify-between gap-2">
@@ -418,7 +413,7 @@ export default function Sort({ widgetId }: SortProps) {
                     updateColumnQuestion(column.id, e.target.value)
                   }
                   placeholder="Название "
-                  className="flex-1 px-3 py-2 w-full text-sm font-medium bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-1 py-2 w-full text-sm font-medium bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -436,7 +431,7 @@ export default function Sort({ widgetId }: SortProps) {
                 {column.answerCards.map((card) => (
                   <div
                     key={card.id}
-                    className="flex items-center gap-2 p-2 bg-slate-50 rounded border border-slate-200"
+                    className="flex items-center gap-2 p-0.5 bg-slate-50 rounded border border-slate-200"
                   >
                     <input
                       type="text"
@@ -445,7 +440,7 @@ export default function Sort({ widgetId }: SortProps) {
                         updateCardText(card.optionId, e.target.value)
                       }
                       placeholder="Текст..."
-                      className="flex-1 px-2 py-1 w-full text-sm bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-2 py-1 w-full text-base bg-white border border-slate-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
                       type="button"

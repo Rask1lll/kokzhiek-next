@@ -4,6 +4,8 @@ import { ReactNode, useEffect, useState } from "react";
 import { FiHelpCircle } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
+import { useActivationKeys } from "@/app/hooks/useActivationKeys";
+import { useAlert } from "@/app/hooks/useAlert";
 
 type TaskViewWrapperProps = {
   widgetId: number;
@@ -24,6 +26,7 @@ export default function TaskViewWrapper({
   const hint = (currentQuestion?.data as { hint?: string })?.hint || "";
   const imageUrl = currentQuestion?.image_url;
   const body = currentQuestion?.body || "";
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -83,7 +86,7 @@ export default function TaskViewWrapper({
       )}
 
       {/* Content */}
-      <div className={`relative z-10 ${imageUrl ? "p-4" : ""}`}>
+      <div className={`relative z-10 wrap-anywhere ${imageUrl ? "p-4" : ""}`}>
         {/* Header with question body and hint button */}
         <div className="flex items-start justify-between gap-4 mb-4">
           {showQuestionBody && body && (
@@ -94,7 +97,9 @@ export default function TaskViewWrapper({
           {hint && (
             <button
               type="button"
-              onClick={() => setShowHint(!showHint)}
+              onClick={() => {
+                showAlert(hint, "hint", 10000);
+              }}
               className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-purple-700 hover:bg-purple-200 shrink-0"
               title="Показать подсказку"
             >
@@ -104,25 +109,6 @@ export default function TaskViewWrapper({
           )}
         </div>
 
-        {showHint && (
-          <div className="absolute -top-16 left-0 z-5 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl shadow-lg border border-purple-400/30 p-4 max-w-md mx-auto">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <FiHelpCircle className="w-5 h-5 text-purple-100" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-purple-50 mb-1">
-                    Подсказка
-                  </div>
-                  <div className="text-base leading-relaxed text-white">
-                    {hint}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         {/* Task content */}
         {children}
       </div>

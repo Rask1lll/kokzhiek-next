@@ -3,7 +3,9 @@ const TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7 дней
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(?:^|; )${TOKEN_KEY}=([^;]*)`));
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${TOKEN_KEY}=([^;]*)`)
+  );
   return match ? match[1] : null;
 }
 

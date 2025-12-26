@@ -52,13 +52,11 @@ export default function MatchPairsView({
     [currentQuestion?.options]
   );
 
-  // Convert question options to pairs data structure
   const data = useMemo((): { pairs: PairItem[] } => {
     if (!options.length) {
       return { pairs: [] };
     }
 
-    // Group options by match_id
     const pairsMap = new Map<
       string,
       { left?: (typeof options)[0]; right?: (typeof options)[0] }
