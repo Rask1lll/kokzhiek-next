@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FiKey, FiBarChart2, FiUsers, FiSettings, FiShield } from "react-icons/fi";
 import { useAuth } from "@/app/hooks/useAuth";
-import { UserData } from "@/app/types/user";
+import { isAdmin as checkIsAdmin } from "@/app/libs/roles";
 
 type SidebarLink = {
   href: string;
@@ -31,8 +31,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const userData = user as unknown as UserData;
-  const isAdmin = userData?.role?.alias === "admin";
+  const isAdmin = checkIsAdmin(user);
 
   const renderLink = (link: SidebarLink) => {
     const isActive = pathname === link.href || pathname.startsWith(link.href + "/");

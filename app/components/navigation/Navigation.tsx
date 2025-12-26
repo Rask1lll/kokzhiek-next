@@ -9,7 +9,7 @@ import UserSkeletonMobile from "./UserSkeletonMobile";
 import { useAuth } from "@/app/hooks/useAuth";
 import { handleLogout as apiLogout } from "@/app/services/authorization/authApi";
 import { removeToken } from "@/app/libs/auth";
-import { UserData } from "@/app/types/user";
+import { getRoleLabel } from "@/app/libs/roles";
 
 export default function Navbar() {
   const { user, loading } = useAuth();
@@ -21,16 +21,9 @@ export default function Navbar() {
     router.push("/auth/login");
   };
 
-  const userData = user as unknown as UserData;
-  const userEmail = userData?.email;
-  const userName = userData?.name;
-
-  // Извлекаем роль правильно - может быть объектом или строкой
-  const roleData = userData?.role;
-  const userRole =
-    typeof roleData === "object" && roleData !== null
-      ? roleData.label || roleData.name || "Пользователь"
-      : roleData || "Пользователь";
+  const userEmail = user?.email;
+  const userName = user?.name;
+  const userRole = getRoleLabel(user);
   return (
     <header className="bg-white border-b border-gray-300 relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FiUsers, FiMail, FiCalendar } from "react-icons/fi";
 import { useSchoolMembers } from "@/app/hooks/useSchoolMembers";
 import { useAuth } from "@/app/hooks/useAuth";
+import { isSchool as checkIsSchool } from "@/app/libs/roles";
 import { MemberRole } from "@/app/types/member";
 
 export default function MembersPage() {
@@ -11,8 +12,8 @@ export default function MembersPage() {
   const { members, isLoading, getMembers } = useSchoolMembers();
   const [roleFilter, setRoleFilter] = useState<MemberRole | "">("");
 
-  const isSchool = user?.role?.alias === "school";
-
+  const isSchool = checkIsSchool(user);
+  
   useEffect(() => {
     getMembers({
       role: roleFilter || undefined,

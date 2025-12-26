@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { FiSearch, FiTrash2, FiEdit2, FiX, FiCheck } from "react-icons/fi";
+import { getAuthHeaders } from "@/app/libs/auth";
 
 type UserRole = {
   id: number;
@@ -35,7 +36,6 @@ export default function UsersPage() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
       const params = new URLSearchParams();
       if (search) params.append("search", search);
       if (roleFilter) params.append("role", roleFilter);
@@ -43,10 +43,7 @@ export default function UsersPage() {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/users?${params}`,
         {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
       const data = await res.json();
@@ -66,16 +63,11 @@ export default function UsersPage() {
 
   const handleUpdateRole = async (userId: number) => {
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/users/${userId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
           body: JSON.stringify({ role: editRole }),
         }
       );
@@ -100,15 +92,11 @@ export default function UsersPage() {
 
     setDeletingId(userId);
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/users/${userId}`,
         {
           method: "DELETE",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
 
