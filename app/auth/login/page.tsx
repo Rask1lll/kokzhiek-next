@@ -2,6 +2,7 @@
 
 import Loading from "@/app/components/Loading/Loading";
 import LanguageSwitcher from "@/app/components/navigation/LanguageSwitcher";
+import { setToken } from "@/app/libs/auth";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -58,8 +59,7 @@ export default function LoginPage() {
       }
 
       if (userRes.data?.token) {
-        localStorage.setItem("token", userRes.data.token);
-        // console.log(userRes);
+        setToken(userRes.data.token);
         router.push("/books");
       } else {
         setError("Неверные учетные данные");

@@ -7,14 +7,17 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import UserSkeleton from "./UserSkeleton";
 import UserSkeletonMobile from "./UserSkeletonMobile";
 import { useAuth } from "@/app/hooks/useAuth";
+import { handleLogout as apiLogout } from "@/app/services/authorization/authApi";
+import { removeToken } from "@/app/libs/auth";
 import { UserData } from "@/app/types/user";
 
 export default function Navbar() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    await apiLogout();
+    removeToken();
     router.push("/auth/login");
   };
 
@@ -71,7 +74,6 @@ export default function Navbar() {
                       {userEmail}
                     </p>
                     <p className="text-xs text-gray-500 flex items-center gap-1">
-                      {/* <span className="w-3 h-3 rounded-full bg-gray-300" /> */}
                       {userRole}
                     </p>
                   </div>

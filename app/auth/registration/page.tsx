@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { setToken } from "@/app/libs/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -59,7 +60,7 @@ export default function RegisterPage() {
         return;
       }
 
-      document.cookie = `token=${res.data.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      setToken(res.data.token);
       router.push("/books");
     } catch {
       setError("Ошибка сети. Попробуйте позже.");

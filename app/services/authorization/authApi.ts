@@ -15,3 +15,19 @@ export async function handleGetMe(): Promise<
     return undefined;
   }
 }
+
+export async function handleLogout(): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/logout`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      }
+    );
+    return res.ok;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
