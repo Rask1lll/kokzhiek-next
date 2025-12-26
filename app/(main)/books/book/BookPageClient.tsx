@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useChaptersStore } from "@/app/store/chaptersStore";
 import { Book } from "@/app/types/book";
 import { handleDeleteBook } from "@/app/services/book/booksApi";
+import { getAuthHeaders } from "@/app/libs/auth";
 
 const LANGUAGE_MAP: Record<string, string> = {
   kk: "Қазақ тілі",
@@ -51,13 +52,10 @@ export default function BookPageClient() {
     async function fetchBook() {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem("token");
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
             method: "GET",
           }
         );
