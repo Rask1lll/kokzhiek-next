@@ -3,7 +3,7 @@ import { UserData } from "@/app/types/user";
 export type RoleAlias =
   | "admin"
   | "author"
-  | "school"
+  | "school_admin"
   | "teacher"
   | "student";
 
@@ -20,7 +20,7 @@ export function isAuthor(user: UserData | null): boolean {
 }
 
 export function isSchool(user: UserData | null): boolean {
-  return getUserRole(user) === "school";
+  return getUserRole(user) === "school_admin";
 }
 
 export function isTeacher(user: UserData | null): boolean {
@@ -44,12 +44,12 @@ export function canCreateBooks(user: UserData | null): boolean {
 
 // Может управлять ключами
 export function canManageKeys(user: UserData | null): boolean {
-  return hasRole(user, ["school", "teacher"]);
+  return hasRole(user, ["school_admin", "teacher"]);
 }
 
 // Может видеть пользователей школы
 export function canViewMembers(user: UserData | null): boolean {
-  return hasRole(user, ["school", "teacher"]);
+  return hasRole(user, ["school_admin", "teacher"]);
 }
 
 // Может редактировать книги
