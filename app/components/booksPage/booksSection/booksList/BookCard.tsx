@@ -2,15 +2,26 @@ import Image from "next/image";
 import Link from "next/link";
 import { MdDelete } from "react-icons/md";
 import { ViewMode } from "../filters/BooksViewModeToggle";
+import { BookStatus } from "@/app/types/book";
 
 type BookCardProps = {
   bookId: number;
   name: string;
+  status?: BookStatus;
+  grade?: string;
   onDelete: (bookId: number, bookTitle: string) => void;
   viewMode?: ViewMode;
 };
 
-export default function BookCard({ bookId, name, onDelete, viewMode = "grid" }: BookCardProps) {
+const STATUS_CONFIG: Record<BookStatus, { label: string; bg: string; color: string }> = {
+  draft: { label: "Черновик", bg: "bg-gray-100", color: "text-gray-600" },
+  pending: { label: "На модерации", bg: "bg-yellow-100", color: "text-yellow-700" },
+  published: { label: "Опубликовано", bg: "bg-green-100", color: "text-green-700" },
+  archived: { label: "В архиве", bg: "bg-red-100", color: "text-red-700" },
+};
+
+export default function BookCard({ bookId, name, status = "draft", grade, onDelete, viewMode = "grid" }: BookCardProps) {
+  const statusConfig = STATUS_CONFIG[status];
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -40,7 +51,12 @@ export default function BookCard({ bookId, name, onDelete, viewMode = "grid" }: 
                 <h3 className="font-semibold text-gray-800 text-base mb-1 line-clamp-1">
                   {name}
                 </h3>
-                <div className="text-xs text-gray-500">11 класс</div>
+                <div className="flex items-center justify-between pr-12">
+                  {grade && <span className="text-xs text-gray-500">{grade}</span>}
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.color}`}>
+                    {statusConfig.label}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -79,8 +95,11 @@ export default function BookCard({ bookId, name, onDelete, viewMode = "grid" }: 
               {name}
             </h3>
 
-            <div className="absolute bottom-2 right-4 text-xs text-gray-500">
-              11 класс
+            <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between">
+              <span className={`text-xs px-2 py-0.5 rounded-full ${statusConfig.bg} ${statusConfig.color}`}>
+                {statusConfig.label}
+              </span>
+              {grade && <span className="text-xs text-gray-500">{grade}</span>}
             </div>
           </div>
         </Link>

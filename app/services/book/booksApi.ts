@@ -1,5 +1,5 @@
 import { getAuthHeaders } from "../../libs/auth";
-import { Book } from "../../types/book";
+import { Book, BookStatus } from "../../types/book";
 import { ConstructorResponse } from "../../types/constructorResponse";
 import { CreateBookPayload } from "../../types/CreateBookPayload";
 import { UpdateBookPayload } from "../../types/UpdateBookPayload";
@@ -118,5 +118,40 @@ export async function handleGetBook(
     return res.json();
   } catch (error) {
     console.error("Error fetching book:", error);
+  }
+}
+
+export async function handleUpdateBookStatus(
+  id: number,
+  status: BookStatus
+): Promise<ApiResult<Book>> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}/status`,
+      {
+        headers: getAuthHeaders(),
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }
+    );
+    const json = await res.json();
+
+    if (!res.ok) {
+      const errorResponse = json as ValidationErrorResponse;
+      return {
+        success: false,
+        errors: errorResponse.errors || {},
+        message: errorResponse.message || "Ошибка при обновлении статуса",
+      };
+    }
+
+    return { success: true, data: json.data };
+  } catch (error) {
+    console.error("Error updating book status:", error);
+    return {
+      success: false,
+      errors: {},
+      message: "Ошибка сети при обновлении статуса",
+    };
   }
 }

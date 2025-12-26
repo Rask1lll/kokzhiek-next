@@ -87,6 +87,7 @@ export default function BookPageClient() {
             language={LANGUAGE_MAP[book.language] ?? book.language}
             description={book.description}
             coverUrl={book.cover_image_url}
+            status={book.status}
             onDelete={onDeleteBook}
           />
         )}

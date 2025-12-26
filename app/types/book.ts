@@ -1,5 +1,7 @@
 import { Subject } from "./subject";
 
+export type BookStatus = "draft" | "pending" | "published" | "archived";
+
 export type Grade = {
   id: number;
   level: number;
@@ -16,6 +18,7 @@ export type Book = {
   id: number;
   title: string;
   language: string;
+  status?: BookStatus;
   subject?: Subject;
   grade?: Grade;
   description?: string;

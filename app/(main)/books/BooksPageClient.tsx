@@ -60,6 +60,8 @@ export default function BooksPageClient() {
             <BookCard
               bookId={el.id}
               name={el.title}
+              status={el.status}
+              grade={el.grade?.label}
               key={el.id}
               onDelete={deleteBook}
               viewMode={viewMode}
