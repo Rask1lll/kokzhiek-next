@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FiSave, FiCheck } from "react-icons/fi";
+import { getAuthHeaders } from "@/app/libs/auth";
 
 type Settings = {
   site_name: string;
@@ -32,14 +33,10 @@ export default function SettingsPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/settings`,
           {
-            headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
           }
         );
         const data = await res.json();
@@ -61,16 +58,11 @@ export default function SettingsPage() {
     setSaved(false);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/settings`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: getAuthHeaders(),
           body: JSON.stringify(settings),
         }
       );

@@ -1,6 +1,6 @@
 import { ConstructorResponse } from "@/app/types/constructorResponse";
 import { Widget, WidgetData } from "@/app/types/widget";
-import { getAuthHeaders } from "@/app/libs/auth";
+import { getAuthHeaders, getToken } from "@/app/libs/auth";
 import { API_BASE } from "./constructorApi";
 
 export async function createWidget(
@@ -51,9 +51,6 @@ export async function createWidgetWithFile(
   row: number = 0,
   column: number = 0
 ): Promise<ConstructorResponse<Widget>> {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   const formData = new FormData();
   formData.append("type", type);
   formData.append("file", file);
@@ -63,7 +60,7 @@ export async function createWidgetWithFile(
   const res = await fetch(`${API_BASE}/api/v1/blocks/${blockId}/widgets`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
       Accept: "application/json",
     },
     body: formData,
@@ -87,16 +84,13 @@ export async function updateWidgetWithFile(
   widgetId: number,
   file: File
 ): Promise<ConstructorResponse<Widget>> {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   const formData = new FormData();
   formData.append("file", file);
 
   const res = await fetch(`${API_BASE}/api/v1/widgets/${widgetId}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
       Accept: "application/json",
     },
     body: formData,

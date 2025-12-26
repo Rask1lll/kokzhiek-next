@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FiBook, FiUsers, FiKey, FiFileText } from "react-icons/fi";
+import { getAuthHeaders } from "@/app/libs/auth";
 
 type Stats = {
   total_users: number;
@@ -18,14 +19,10 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/stats`,
           {
-            headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+            headers: getAuthHeaders(),
           }
         );
         const data = await res.json();

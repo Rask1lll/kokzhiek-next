@@ -1,5 +1,5 @@
 import { ConstructorResponse } from "@/app/types/constructorResponse";
-import { getAuthHeaders } from "@/app/libs/auth";
+import { getAuthHeaders, getToken } from "@/app/libs/auth";
 import { API_BASE } from "./constructorApi";
 import {
   Question,
@@ -146,16 +146,13 @@ export async function uploadOptionImage(
   optionId: number,
   file: File
 ): Promise<ConstructorResponse<{ image_url: string; option: QuestionOption }>> {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   const formData = new FormData();
   formData.append("image", file);
 
   const res = await fetch(`${API_BASE}/api/v1/options/${optionId}/image`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
       Accept: "application/json",
     },
     body: formData,
@@ -201,16 +198,13 @@ export async function uploadQuestionImage(
   questionId: number,
   file: File
 ): Promise<ConstructorResponse<{ image_url: string; question: Question }>> {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   const formData = new FormData();
   formData.append("image", file);
 
   const res = await fetch(`${API_BASE}/api/v1/questions/${questionId}/image`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
       Accept: "application/json",
     },
     body: formData,

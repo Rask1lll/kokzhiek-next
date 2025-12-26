@@ -33,12 +33,6 @@ export const handleCreateChapter = async (
     return;
   }
 
-  const token = localStorage.getItem("token");
-  if (!token) {
-    console.error("Token is missing");
-    return;
-  }
-
   const data = JSON.stringify({ title: title.trim() });
 
   console.log("Create chapter payload:", data);
