@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Logo from "./Logo";
@@ -14,12 +15,31 @@ import { getRoleLabel } from "@/app/libs/roles";
 export default function Navbar() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     await apiLogout();
     removeToken();
+    setIsMenuOpen(false);
     router.push("/auth/login");
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const userEmail = user?.email;
   const userName = user?.name;
@@ -30,38 +50,24 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <nav className="hidden md:flex items-center space-x-1">
             <Logo />
-
-            {/* <Link
-              href="/books"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            >
-              <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>Библиотека</span>
-            </Link> */}
-
-            {/* Панель управления - для всех авторизованных */}
             <Link
               href="/dashboard"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ml-10"
             >
-              {/* <span className="w-4 h-4 rounded-full bg-gray-300" /> */}
               <span>Панель управления</span>
             </Link>
           </nav>
 
-          {/* ПРАВАЯ ЧАСТЬ */}
           <div className="flex items-center space-x-4">
-            {/* Блок пользователя */}
             {loading ? (
               <UserSkeleton />
             ) : userEmail ? (
-              <div className="relative">
-                <button className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                  {/* <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-semibold">
-                      {userName}
-                    </span>
-                  </div> */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  type="button"
+                >
                   <div className="hidden sm:block text-left">
                     <p className="text-sm font-medium text-gray-900">
                       {userEmail}
@@ -71,26 +77,34 @@ export default function Navbar() {
                     </p>
                   </div>
                 </button>
+
+                {isMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="p-2">
+                      <div className="px-3 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">
+                          {userEmail}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{userRole}</p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-2"
+                        type="button"
+                      >
+                        <span>Выйти из системы</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
             <LanguageSwitcher />
 
-            {/* Вариант кнопки "Войти" вместо юзер-меню (оставляю отдельным блоком верстки) */}
-            {/* 
-              <a
-                href="/auth/opic-login"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                Войти
-              </a>
-              */}
-
-            {/* МОБИЛЬНАЯ КНОПКА МЕНЮ */}
             <button
               className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
               type="button"
             >
-              {/* Здесь можно подставить иконки Menu / X, сейчас просто placeholder */}
               <span className="block w-5 h-0.5 bg-gray-600 mb-1" />
               <span className="block w-5 h-0.5 bg-gray-600 mb-1" />
               <span className="block w-5 h-0.5 bg-gray-600" />
@@ -98,9 +112,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* МОБИЛЬНОЕ МЕНЮ (навигация + пользователь + язык) */}
         <div className="md:hidden border-t border-gray-200 pt-4 pb-3">
-          {/* Навигация */}
           <div className="flex flex-col space-y-2 mb-4">
             <a
               href="/"
@@ -125,7 +137,6 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Инфо о пользователе (мобайл) */}
           {loading ? (
             <UserSkeletonMobile />
           ) : userEmail ? (
@@ -164,7 +175,6 @@ export default function Navbar() {
             </div>
           ) : null}
 
-          {/* Переключатель языка (мобайл) */}
           <div className="border-t pt-4 mt-4">
             <button
               className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors w-full"
