@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import {
   FiCopy,
   FiCheck,
@@ -20,6 +21,9 @@ import {
 } from "@/app/types/activationKey";
 
 export default function KeysPage() {
+  const t = useTranslations("keysPage");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { keys, isLoading, getKeys, createKey, deleteKey } = useActivationKeys();
   const [roleFilter, setRoleFilter] = useState<RoleType | "">("");
   const [statusFilter, setStatusFilter] = useState<ActivationKeyStatus | "">("");
@@ -42,7 +46,7 @@ export default function KeysPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Удалить этот ключ?")) return;
+    if (!confirm(t("deleteConfirm"))) return;
 
     setDeletingId(id);
     const result = await deleteKey(id);
@@ -65,21 +69,21 @@ export default function KeysPage() {
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-            Активен
+            {t("active")}
           </span>
         );
       case "used":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
             <FiCheck className="w-3 h-3" />
-            Использован
+            {t("used")}
           </span>
         );
       case "expired":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
             <FiX className="w-3 h-3" />
-            Истёк
+            {t("expired")}
           </span>
         );
     }
@@ -89,19 +93,19 @@ export default function KeysPage() {
     if (roleType === "teacher") {
       return (
         <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
-          Учитель
+          {t("teacher")}
         </span>
       );
     }
     return (
       <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-        Ученик
+        {t("student")}
       </span>
     );
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ru-RU", {
+    return new Date(dateString).toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -109,7 +113,7 @@ export default function KeysPage() {
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString("ru-RU", {
+    return new Date(dateString).toLocaleString(locale === "kk" ? "kk-KZ" : "ru-RU", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -126,9 +130,9 @@ export default function KeysPage() {
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ключи активации</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="text-gray-500 mt-1">
-            Управление ключами для регистрации учителей и учеников
+            {t("description")}
           </p>
         </div>
         <button
@@ -136,7 +140,7 @@ export default function KeysPage() {
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
           <FiPlus className="w-5 h-5" />
-          Создать ключ
+          {t("createKey")}
         </button>
       </div>
 
@@ -145,7 +149,7 @@ export default function KeysPage() {
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-green-800">
-              Созданные ключи ({createdKeys.length})
+              {t("createdKeys")} ({createdKeys.length})
             </h3>
             <button
               onClick={() => setCreatedKeys([])}
@@ -173,12 +177,12 @@ export default function KeysPage() {
                   {copiedId === key.id ? (
                     <>
                       <FiCheck className="w-4 h-4" />
-                      Скопировано
+                      {t("copied")}
                     </>
                   ) : (
                     <>
                       <FiCopy className="w-4 h-4" />
-                      Копировать
+                      {t("copy")}
                     </>
                   )}
                 </button>
@@ -196,19 +200,19 @@ export default function KeysPage() {
             onChange={(e) => setRoleFilter(e.target.value as RoleType | "")}
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
           >
-            <option value="">Все роли</option>
-            <option value="teacher">Учитель</option>
-            <option value="student">Ученик</option>
+            <option value="">{t("allRoles")}</option>
+            <option value="teacher">{t("teacher")}</option>
+            <option value="student">{t("student")}</option>
           </select>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as ActivationKeyStatus | "")}
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
           >
-            <option value="">Все статусы</option>
-            <option value="active">Активные</option>
-            <option value="used">Использованные</option>
-            <option value="expired">Истёкшие</option>
+            <option value="">{t("allStatuses")}</option>
+            <option value="active">{t("activeKeys")}</option>
+            <option value="used">{t("usedKeys")}</option>
+            <option value="expired">{t("expiredKeys")}</option>
           </select>
         </div>
       </div>
@@ -216,16 +220,16 @@ export default function KeysPage() {
       {/* Таблица ключей */}
       <div className="bg-white rounded-xl border border-gray-200">
         {isLoading ? (
-          <div className="p-6 text-center text-gray-500">Загрузка...</div>
+          <div className="p-6 text-center text-gray-500">{tCommon("loading")}</div>
         ) : keys.length === 0 ? (
           <div className="p-12 text-center">
             <FiKey className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">Ключей пока нет</p>
+            <p className="text-gray-500 mb-4">{t("noKeys")}</p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              Создать первый ключ
+              {t("createFirst")}
             </button>
           </div>
         ) : (
@@ -234,22 +238,22 @@ export default function KeysPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Ключ
+                    {t("keyColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Тип
+                    {t("typeColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Статус
+                    {t("statusColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Использован
+                    {t("usedByColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Срок действия
+                    {t("expiresColumn")}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    Действия
+                    {t("actionsColumn")}
                   </th>
                 </tr>
               </thead>
@@ -264,7 +268,7 @@ export default function KeysPage() {
                         <button
                           onClick={() => handleCopy(key.key, key.id)}
                           className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                          title="Копировать"
+                          title={t("copy")}
                         >
                           {copiedId === key.id ? (
                             <FiCheck className="w-4 h-4 text-green-600" />
@@ -308,7 +312,7 @@ export default function KeysPage() {
                           {formatDate(key.expires_at)}
                         </div>
                       ) : (
-                        <span className="text-gray-400 text-sm">Бессрочно</span>
+                        <span className="text-gray-400 text-sm">{t("unlimited")}</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -317,7 +321,7 @@ export default function KeysPage() {
                           onClick={() => handleDelete(key.id)}
                           disabled={deletingId === key.id}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          title="Удалить"
+                          title={tCommon("delete")}
                         >
                           <FiTrash2 className="w-4 h-4" />
                         </button>
@@ -353,6 +357,7 @@ type CreateKeyModalProps = {
 };
 
 function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) {
+  const t = useTranslations("keysPage");
   const [roleType, setRoleType] = useState<RoleType>("student");
   const [expiresAt, setExpiresAt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -385,7 +390,7 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">
-            Создать ключ активации
+            {t("createModal.title")}
           </h2>
           <button
             onClick={onClose}
@@ -404,7 +409,7 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Тип роли
+              {t("createModal.roleType")}
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -417,7 +422,7 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
                 }`}
               >
                 <FiUser className="w-5 h-5" />
-                Ученик
+                {t("student")}
               </button>
               <button
                 type="button"
@@ -429,15 +434,15 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
                 }`}
               >
                 <FiUser className="w-5 h-5" />
-                Учитель
+                {t("teacher")}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Срок действия{" "}
-              <span className="text-gray-400 font-normal">(опционально)</span>
+              {t("createModal.expiresAt")}{" "}
+              <span className="text-gray-400 font-normal">({t("createModal.optional")})</span>
             </label>
             <div className="relative">
               <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -450,7 +455,7 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
               />
             </div>
             <p className="mt-1.5 text-xs text-gray-500">
-              Оставьте пустым для бессрочного ключа
+              {t("createModal.unlimitedHint")}
             </p>
           </div>
         </div>
@@ -460,7 +465,7 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
             onClick={onClose}
             className="px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
           >
-            Отмена
+            {t("createModal.cancel")}
           </button>
           <button
             onClick={handleCreate}
@@ -468,11 +473,11 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
           >
             {loading ? (
-              "Создание..."
+              t("createModal.creating")
             ) : (
               <>
                 <FiKey className="w-5 h-5" />
-                Создать
+                {t("createModal.create")}
               </>
             )}
           </button>

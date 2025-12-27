@@ -2,26 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { FiKey, FiBarChart2, FiUsers, FiSettings, FiShield } from "react-icons/fi";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isAdmin as checkIsAdmin } from "@/app/libs/roles";
 
 type SidebarLink = {
   href: string;
-  label: string;
+  labelKey: string;
   icon: React.ComponentType<{ className?: string }>;
   adminOnly?: boolean;
 };
 
 const sidebarLinks: SidebarLink[] = [
-  { href: "/dashboard/keys", label: "Ключи", icon: FiKey },
-  { href: "/dashboard/members", label: "Пользователи", icon: FiUsers },
-  { href: "/dashboard/stats", label: "Статистика", icon: FiBarChart2 },
+  { href: "/dashboard/keys", labelKey: "keys", icon: FiKey },
+  { href: "/dashboard/members", labelKey: "members", icon: FiUsers },
+  { href: "/dashboard/stats", labelKey: "stats", icon: FiBarChart2 },
 ];
 
 const adminLinks: SidebarLink[] = [
-  { href: "/dashboard/admin/users", label: "Пользователи", icon: FiUsers, adminOnly: true },
-  { href: "/dashboard/admin/settings", label: "Настройки", icon: FiSettings, adminOnly: true },
+  { href: "/dashboard/admin/users", labelKey: "users", icon: FiUsers, adminOnly: true },
+  { href: "/dashboard/admin/settings", labelKey: "settings", icon: FiSettings, adminOnly: true },
 ];
 
 export default function DashboardLayout({
@@ -32,6 +33,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { user } = useAuth();
   const isAdmin = checkIsAdmin(user);
+  const t = useTranslations("dashboard");
 
   const renderLink = (link: SidebarLink) => {
     const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
@@ -47,7 +49,7 @@ export default function DashboardLayout({
         }`}
       >
         <Icon className="w-5 h-5" />
-        {link.label}
+        {t(link.labelKey)}
       </Link>
     );
   };
@@ -57,7 +59,7 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 p-4">
         <h2 className="text-lg font-semibold text-gray-800 mb-4 px-3">
-          Панель управления
+          {t("title")}
         </h2>
 
         {/* Основные разделы */}
@@ -71,7 +73,7 @@ export default function DashboardLayout({
             <div className="mt-6 mb-2 px-3 flex items-center gap-2">
               <FiShield className="w-4 h-4 text-gray-400" />
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Администрирование
+                {t("admin")}
               </span>
             </div>
             <nav className="space-y-1">

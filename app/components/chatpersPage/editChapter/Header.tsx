@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { BiArrowBack } from "react-icons/bi";
 import { FiDownload } from "react-icons/fi";
 
 export default function ChapterHeader() {
+  const t = useTranslations("chapterHeader");
   const param = useSearchParams();
   const path = usePathname();
   const bookId = param.get("book");
@@ -31,7 +33,7 @@ export default function ChapterHeader() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-md text-gray-700 font-medium hover:bg-gray-100 transition"
         >
           <BiArrowBack className="text-lg" />
-          <span>Назад</span>
+          <span>{t("back")}</span>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -40,7 +42,7 @@ export default function ChapterHeader() {
             className="flex items-center gap-2 px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
           >
             <FiDownload className="text-base" />
-            <span>Сохранить как PDF</span>
+            <span>{t("saveAsPdf")}</span>
           </button>
 
           <div className="flex items-center rounded-lg border border-gray-200 bg-gray-100 p-1 text-sm">
@@ -52,7 +54,7 @@ export default function ChapterHeader() {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              Редактирование
+              {t("editing")}
             </Link>
 
             <Link
@@ -63,7 +65,7 @@ export default function ChapterHeader() {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              Предпросмотр
+              {t("preview")}
             </Link>
           </div>
         </div>

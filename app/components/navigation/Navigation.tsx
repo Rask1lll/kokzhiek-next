@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Logo from "./Logo";
 import LanguageSwitcher from "./LanguageSwitcher";
 import UserSkeleton from "./UserSkeleton";
@@ -15,6 +16,7 @@ import { getRoleLabel } from "@/app/libs/roles";
 export default function Navbar() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const t = useTranslations("nav");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +56,7 @@ export default function Navbar() {
               href="/dashboard"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ml-10"
             >
-              <span>Панель управления</span>
+              <span>{t("dashboard")}</span>
             </Link>
           </nav>
 
@@ -92,7 +94,7 @@ export default function Navbar() {
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-2"
                         type="button"
                       >
-                        <span>Выйти из системы</span>
+                        <span>{t("logout")}</span>
                       </button>
                     </div>
                   </div>
@@ -119,21 +121,21 @@ export default function Navbar() {
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
             >
               <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>Главная</span>
+              <span>{t("home")}</span>
             </a>
             <a
               href="/library"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
             >
               <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>Библиотека</span>
+              <span>{t("library")}</span>
             </a>
             <Link
               href="/dashboard"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
             >
               <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>Панель управления</span>
+              <span>{t("dashboard")}</span>
             </Link>
           </div>
 
@@ -170,20 +172,11 @@ export default function Navbar() {
                 type="button"
               >
                 <span className="w-4 h-4 rounded-full bg-red-300" />
-                <span>Выйти</span>
+                <span>{t("logout")}</span>
               </button>
             </div>
           ) : null}
 
-          <div className="border-t pt-4 mt-4">
-            <button
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors w-full"
-              type="button"
-            >
-              <span className="text-xl">🇷🇺</span>
-              <span>Русский язык</span>
-            </button>
-          </div>
         </div>
       </div>
     </header>

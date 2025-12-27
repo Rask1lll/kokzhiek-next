@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { FiSearch, FiTrash2, FiEdit2, FiX, FiCheck } from "react-icons/fi";
 import { getAuthHeaders } from "@/app/libs/auth";
 
@@ -19,13 +20,17 @@ type User = {
   created_at: string;
 };
 
-const ROLES = [
-  { alias: "admin", label: "Админ" },
-  { alias: "teacher", label: "Учитель" },
-  { alias: "student", label: "Ученик" },
-];
-
 export default function UsersPage() {
+  const t = useTranslations("adminUsersPage");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
+
+  const ROLES = [
+    { alias: "admin", label: t("admin") },
+    { alias: "teacher", label: t("teacher") },
+    { alias: "student", label: t("student") },
+  ];
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -88,7 +93,7 @@ export default function UsersPage() {
   };
 
   const handleDelete = async (userId: number) => {
-    if (!confirm("Удалить этого пользователя?")) return;
+    if (!confirm(t("deleteConfirm"))) return;
 
     setDeletingId(userId);
     try {
@@ -121,7 +126,7 @@ export default function UsersPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ru-RU", {
+    return new Date(dateString).toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -144,7 +149,7 @@ export default function UsersPage() {
   return (
     <div className="max-w-6xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        Управление пользователями
+        {t("title")}
       </h1>
 
       {/* Фильтры */}
@@ -156,7 +161,7 @@ export default function UsersPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Поиск по имени или email..."
+              placeholder={t("searchPlaceholder")}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
           </div>
@@ -165,7 +170,7 @@ export default function UsersPage() {
             onChange={(e) => setRoleFilter(e.target.value)}
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
           >
-            <option value="">Все роли</option>
+            <option value="">{t("allRoles")}</option>
             {ROLES.map((role) => (
               <option key={role.alias} value={role.alias}>
                 {role.label}
@@ -178,10 +183,10 @@ export default function UsersPage() {
       {/* Таблица */}
       <div className="bg-white rounded-xl border border-gray-200">
         {loading ? (
-          <div className="p-6 text-center text-gray-500">Загрузка...</div>
+          <div className="p-6 text-center text-gray-500">{tCommon("loading")}</div>
         ) : users.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
-            Пользователи не найдены
+            {t("noUsers")}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -189,19 +194,19 @@ export default function UsersPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Пользователь
+                    {t("userColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Email
+                    {t("emailColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Роль
+                    {t("roleColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Дата регистрации
+                    {t("dateColumn")}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    Действия
+                    {t("actionsColumn")}
                   </th>
                 </tr>
               </thead>
@@ -276,7 +281,7 @@ export default function UsersPage() {
                           <button
                             onClick={() => startEditing(user)}
                             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Изменить роль"
+                            title={t("changeRole")}
                           >
                             <FiEdit2 className="w-4 h-4" />
                           </button>
@@ -285,7 +290,7 @@ export default function UsersPage() {
                           onClick={() => handleDelete(user.id)}
                           disabled={deletingId === user.id}
                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          title="Удалить"
+                          title={tCommon("delete")}
                         >
                           <FiTrash2 className="w-4 h-4" />
                         </button>

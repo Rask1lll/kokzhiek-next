@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 type BooksSortSelectProps = {
   options: ReadonlyArray<{
     id: string;
@@ -12,10 +16,12 @@ export default function BooksSortSelect({
   value,
   onChange,
 }: BooksSortSelectProps) {
+  const t = useTranslations("filters");
+
   return (
     <div className="flex items-center gap-2">
       <span className="hidden text-xs text-gray-500 md:inline">
-        Сортировать:
+        {t("sort")}:
       </span>
       <select
         className="px-3 py-1.5 rounded-xl border border-gray-300 bg-white text-xs md:text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"

@@ -3,9 +3,13 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { setToken } from "@/app/libs/auth";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/app/components/navigation/LanguageSwitcher";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -54,7 +58,7 @@ export default function RegisterPage() {
         if (res.message) {
           setError(res.message);
         } else {
-          setError("Произошла ошибка при регистрации");
+          setError(tCommon("error"));
         }
         setLoading(false);
         return;
@@ -63,7 +67,7 @@ export default function RegisterPage() {
       setToken(res.data.token);
       router.push("/books");
     } catch {
-      setError("Ошибка сети. Попробуйте позже.");
+      setError(tCommon("error"));
       setLoading(false);
     }
   };
@@ -78,6 +82,10 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-indigo-600 via-sky-600 to-sky-800 flex items-center justify-center p-4 py-8">
+      <div className="fixed top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-lg text-white rounded-full mb-3 shadow-lg">
@@ -98,12 +106,11 @@ export default function RegisterPage() {
           <h1 className="text-3xl font-bold text-white mb-1 font-display">
             Көкжиек
           </h1>
-          <p className="text-white/90 text-sm">Создайте аккаунт</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-            Регистрация
+            {t("register")}
           </h2>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -116,11 +123,10 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Имя
+                  {t("name")}
                 </label>
                 <input
                   type="text"
-                  placeholder="Введите имя"
                   className={`${getInputClassName("name")} text-sm`}
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -133,11 +139,10 @@ export default function RegisterPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Фамилия
+                  {t("surname")}
                 </label>
                 <input
                   type="text"
-                  placeholder="Введите фамилию"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-sm"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -145,10 +150,9 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Электронная почта
+                {t("email")}
               </label>
               <input
                 type="email"
@@ -164,15 +168,13 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Пароль */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Пароль
+                {t("password")}
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Минимум 8 символов"
                   className={getInputClassName("password", true)}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -203,24 +205,20 @@ export default function RegisterPage() {
                   </svg>
                 </button>
               </div>
-              {fieldErrors.password ? (
+              {fieldErrors.password && (
                 <p className="mt-1.5 text-xs text-red-600">
                   {fieldErrors.password[0]}
                 </p>
-              ) : (
-                <p className="mt-1.5 text-xs text-gray-500">
-                  Используйте буквы, цифры и специальные символы
-                </p>
               )}
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Подтвердите пароль
+                {t("confirmPassword")}
               </label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Повторите пароль"
                   className={getInputClassName("password_confirmation", true)}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -258,24 +256,23 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* Ключ регистрации */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Ключ регистрации{" "}
-                <span className="text-gray-400 font-normal">(опционально)</span>
+                {t("registrationKey")}{" "}
+                <span className="text-gray-400 font-normal">({t("optional")})</span>
               </label>
               <input
                 type="text"
-                placeholder="Введите ключ, если есть"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
                 value={registrationKey}
                 onChange={(e) => setRegistrationKey(e.target.value)}
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Издательство{" "}
-                <span className="text-gray-400 font-normal">(опционально)</span>
+                {t("publisher")}{" "}
+                <span className="text-gray-400 font-normal">({t("optional")})</span>
               </label>
               <div className="relative">
                 <select
@@ -283,7 +280,7 @@ export default function RegisterPage() {
                   value={publisher}
                   onChange={(e) => setPublisher(e.target.value)}
                 >
-                  <option value="">Выберите издательство</option>
+                  <option value="">{t("selectPublisher")}</option>
                   <option value="1">Атамұра</option>
                   <option value="2">Мектеп</option>
                   <option value="3">Алматыкітап баспасы</option>
@@ -318,53 +315,38 @@ export default function RegisterPage() {
                 htmlFor="terms"
                 className="text-sm text-gray-600 cursor-pointer leading-tight"
               >
-                Я согласен с{" "}
-                <a
-                  href="/terms"
-                  className="text-indigo-600 hover:text-indigo-800 font-medium"
-                >
-                  условиями использования
-                </a>{" "}
-                и{" "}
-                <a
-                  href="/privacy"
-                  className="text-indigo-600 hover:text-indigo-800 font-medium"
-                >
-                  политикой конфиденциальности
-                </a>
+                {t("acceptTerms")}
               </label>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-linear-to-r from-indigo-600 to-sky-600 text-white py-3.5 px-4 rounded-xl hover:from-indigo-700 hover:to-sky-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mt-2"
+              disabled={loading}
+              className="w-full bg-linear-to-r from-indigo-600 to-sky-600 text-white py-3.5 px-4 rounded-xl hover:from-indigo-700 hover:to-sky-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mt-2 disabled:opacity-50"
             >
-              Зарегистрироваться
+              {loading ? tCommon("loading") : t("register")}
             </button>
 
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">или</span>
-              </div>
             </div>
 
             <p className="text-center text-sm text-gray-600">
-              Уже есть аккаунт?{" "}
+              {t("hasAccount")}{" "}
               <a
                 href="/auth/login"
                 className="font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
               >
-                Войти
+                {t("login")}
               </a>
             </p>
           </form>
         </div>
 
         <p className="text-center text-sm text-white/70 mt-6">
-          © 2024 Көкжиек-Горизонт. Все права защищены.
+          © 2024 Көкжиек-Горизонт
         </p>
       </div>
     </div>

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { useChapters } from "@/app/hooks/useChapters";
 
 export default function CreateChapterModalWindow() {
+  const t = useTranslations("chapters");
   const [title, setTitle] = useState("");
   const searchParams = useSearchParams();
   const bookId = searchParams.get("book") ?? "";
@@ -14,11 +16,11 @@ export default function CreateChapterModalWindow() {
 
   return (
     <div className=" bg-white md:w-xs lg:w-md rounded-2xl pb-4">
-      <h1 className="border-b p-5 border-gray-300 ">Создание новой главы</h1>
+      <h1 className="border-b p-5 border-gray-300 ">{t("createTitle")}</h1>
       <div className="py-4 p-2">
         <input
           type="text"
-          placeholder="Название главы"
+          placeholder={t("titlePlaceholder")}
           className="w-full ring-1 p-2 rounded-md"
           value={title}
           onChange={(event) => {
@@ -35,7 +37,7 @@ export default function CreateChapterModalWindow() {
           }}
           className="bg-sky-500/40 p-4 py-2 rounded-lg border-2 border-blue-400 cursor-pointer"
         >
-          Создать
+          {t("create")}
         </button>
       </div>
     </div>

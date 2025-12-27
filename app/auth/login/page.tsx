@@ -3,6 +3,7 @@
 import Loading from "@/app/components/Loading/Loading";
 import LanguageSwitcher from "@/app/components/navigation/LanguageSwitcher";
 import { setToken } from "@/app/libs/auth";
+import { useTranslations } from "next-intl";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const router = useRouter();
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,11 +51,10 @@ export default function LoginPage() {
       const userRes = await userData.json();
 
       if (!userData.ok || userRes.message) {
-        // Обработка ошибок от сервера
         const errorMessage =
           userRes.message ||
           userRes.errors?.email?.[0] ||
-          "Произошла ошибка при входе";
+          t("invalidCredentials");
         setError(errorMessage);
         setLoading(false);
         return;
@@ -62,12 +64,12 @@ export default function LoginPage() {
         setToken(userRes.data.token);
         router.push("/books");
       } else {
-        setError("Неверные учетные данные");
+        setError(t("invalidCredentials"));
         setLoading(false);
       }
     } catch (e) {
       console.error(e);
-      setError("Произошла ошибка при подключении к серверу");
+      setError(tCommon("error"));
       setLoading(false);
     }
   };
@@ -79,10 +81,8 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-md">
-        {/* Логотип и заголовок */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-lg text-white rounded-full mb-4 shadow-lg">
-            {/* Иконка книги */}
             <svg
               className="w-10 h-10"
               fill="none"
@@ -100,16 +100,13 @@ export default function LoginPage() {
           <h1 className="text-4xl font-bold text-white mb-2 font-display">
             Көкжиек
           </h1>
-          <p className="text-white/90">Образовательная платформа</p>
         </div>
 
-        {/* Карточка входа */}
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-            Вход в систему
+            {t("login")}
           </h2>
 
-          {/* Блок ошибки */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
               {error}
@@ -117,10 +114,9 @@ export default function LoginPage() {
           )}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Электронная почта
+                {t("email")}
               </label>
               <input
                 type="email"
@@ -131,15 +127,14 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Пароль */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Пароль
+                {t("password")}
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Введите пароль"
+                  placeholder="••••••••"
                   className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -149,7 +144,6 @@ export default function LoginPage() {
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
-                  {/* Иконка глаза */}
                   <svg
                     className="h-5 w-5"
                     fill="none"
@@ -173,7 +167,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Запомнить меня и Забыли пароль */}
             <div className="flex items-center justify-between">
               <label className="flex items-center cursor-pointer">
                 <input
@@ -183,18 +176,17 @@ export default function LoginPage() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <span className="ml-2 text-sm text-gray-600">
-                  Запомнить меня
+                  {t("rememberMe")}
                 </span>
               </label>
               <a
                 href="/forgot-password"
                 className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
               >
-                Забыли пароль?
+                {t("forgotPassword")}
               </a>
             </div>
 
-            {/* Кнопка входа */}
             <button
               type="submit"
               className={`w-full bg-linear-to-r flex justify-center from-indigo-600 to-sky-600 text-white py-3.5 px-4 rounded-xl hover:from-indigo-700 hover:to-sky-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}
@@ -205,36 +197,30 @@ export default function LoginPage() {
                   <Loading />
                 </div>
               ) : (
-                "Войти"
+                t("login")
               )}
             </button>
 
-            {/* Разделитель */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">или</span>
-              </div>
             </div>
 
-            {/* Ссылка на регистрацию */}
             <p className="text-center text-sm text-gray-600">
-              Нет аккаунта?{" "}
+              {t("noAccount")}{" "}
               <Link
                 href="/auth/registration"
                 className="font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
               >
-                Зарегистрироваться
+                {t("register")}
               </Link>
             </p>
           </form>
         </div>
 
-        {/* Copyright */}
         <p className="text-center text-sm text-white/70 mt-8">
-          © 2024 Көкжиек-Горизонт. Все права защищены.
+          © 2024 Көкжиек-Горизонт
         </p>
       </div>
     </div>

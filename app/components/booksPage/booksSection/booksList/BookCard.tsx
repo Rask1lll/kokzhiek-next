@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { MdDelete } from "react-icons/md";
+import { useTranslations } from "next-intl";
 import { ViewMode } from "../filters/BooksViewModeToggle";
 import { BookStatus } from "@/app/types/book";
 
@@ -13,14 +16,16 @@ type BookCardProps = {
   viewMode?: ViewMode;
 };
 
-const STATUS_CONFIG: Record<BookStatus, { label: string; bg: string; color: string }> = {
-  draft: { label: "Черновик", bg: "bg-gray-100", color: "text-gray-600" },
-  pending: { label: "На модерации", bg: "bg-yellow-100", color: "text-yellow-700" },
-  published: { label: "Опубликовано", bg: "bg-green-100", color: "text-green-700" },
-  archived: { label: "В архиве", bg: "bg-red-100", color: "text-red-700" },
-};
-
 export default function BookCard({ bookId, name, status = "draft", grade, onDelete, viewMode = "grid" }: BookCardProps) {
+  const t = useTranslations("status");
+
+  const STATUS_CONFIG: Record<BookStatus, { label: string; bg: string; color: string }> = {
+    draft: { label: t("draft"), bg: "bg-gray-100", color: "text-gray-600" },
+    pending: { label: t("pending"), bg: "bg-yellow-100", color: "text-yellow-700" },
+    published: { label: t("published"), bg: "bg-green-100", color: "text-green-700" },
+    archived: { label: t("archived"), bg: "bg-red-100", color: "text-red-700" },
+  };
+
   const statusConfig = STATUS_CONFIG[status];
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,7 +44,7 @@ export default function BookCard({ bookId, name, status = "draft", grade, onDele
             <div className="relative w-20 h-28 shrink-0 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg">
               <Image
                 src="https://placehold.co/600x400@2x.png"
-                alt="Название книги"
+                alt={name}
                 width={80}
                 height={112}
                 className="w-full h-full object-cover"
@@ -83,7 +88,7 @@ export default function BookCard({ bookId, name, status = "draft", grade, onDele
           <div className="h-80 relative overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">
             <Image
               src="https://placehold.co/600x400@2x.png"
-              alt="Название книги"
+              alt={name}
               width={400}
               height={600}
               className="w-full h-full object-cover"

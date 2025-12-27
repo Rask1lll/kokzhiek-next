@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { FiSave, FiCheck } from "react-icons/fi";
 import { getAuthHeaders } from "@/app/libs/auth";
 
@@ -25,6 +26,9 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 export default function SettingsPage() {
+  const t = useTranslations("adminSettingsPage");
+  const tCommon = useTranslations("common");
+  const tRoles = useTranslations("membersPage");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -88,9 +92,9 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="max-w-3xl">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Настройки</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">{t("title")}</h1>
         <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500">
-          Загрузка...
+          {tCommon("loading")}
         </div>
       </div>
     );
@@ -99,7 +103,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-3xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Настройки системы</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <button
           onClick={handleSave}
           disabled={saving}
@@ -108,12 +112,12 @@ export default function SettingsPage() {
           {saved ? (
             <>
               <FiCheck className="w-5 h-5" />
-              Сохранено
+              {t("saved")}
             </>
           ) : (
             <>
               <FiSave className="w-5 h-5" />
-              {saving ? "Сохранение..." : "Сохранить"}
+              {saving ? t("saving") : t("save")}
             </>
           )}
         </button>
@@ -122,12 +126,12 @@ export default function SettingsPage() {
       {/* Основные настройки */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Основные настройки
+          {t("mainSettings")}
         </h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Название сайта
+              {t("siteName")}
             </label>
             <input
               type="text"
@@ -138,7 +142,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Описание сайта
+              {t("siteDescription")}
             </label>
             <textarea
               value={settings.site_description}
@@ -153,16 +157,16 @@ export default function SettingsPage() {
       {/* Регистрация */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Регистрация
+          {t("registration")}
         </h2>
         <div className="space-y-4">
           <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer">
             <div>
               <p className="font-medium text-gray-900">
-                Регистрация открыта
+                {t("registrationOpen")}
               </p>
               <p className="text-sm text-gray-500">
-                Разрешить новым пользователям регистрироваться
+                {t("registrationOpenDesc")}
               </p>
             </div>
             <input
@@ -178,10 +182,10 @@ export default function SettingsPage() {
           <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer">
             <div>
               <p className="font-medium text-gray-900">
-                Требовать ключ регистрации
+                {t("requireKey")}
               </p>
               <p className="text-sm text-gray-500">
-                Пользователи должны ввести ключ для регистрации
+                {t("requireKeyDesc")}
               </p>
             </div>
             <input
@@ -196,15 +200,15 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Роль по умолчанию
+              {t("defaultRole")}
             </label>
             <select
               value={settings.default_user_role}
               onChange={(e) => updateSetting("default_user_role", e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
             >
-              <option value="student">Ученик</option>
-              <option value="teacher">Учитель</option>
+              <option value="student">{tRoles("student")}</option>
+              <option value="teacher">{tRoles("teacher")}</option>
             </select>
           </div>
         </div>
@@ -213,12 +217,12 @@ export default function SettingsPage() {
       {/* Лимиты */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Лимиты
+          {t("limits")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Макс. книг на пользователя
+              {t("maxBooksPerUser")}
             </label>
             <input
               type="number"
@@ -233,7 +237,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Макс. глав в книге
+              {t("maxChaptersPerBook")}
             </label>
             <input
               type="number"

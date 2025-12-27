@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import CreateChapterButton from "./CreateChapterButton";
 import ChapterCard from "./ChapterCard";
 import ChapterCardSkeleton from "./ChapterCardSkeleton";
 import { useChaptersStore } from "@/app/store/chaptersStore";
-import { useBooks } from "@/app/hooks/useBooks";
 import { useChapters } from "@/app/hooks/useChapters";
 
 type ChaptersContainerProps = {
@@ -18,6 +18,7 @@ export default function ChaptersContainer({
 }: ChaptersContainerProps) {
   const { chapters } = useChaptersStore();
   const { deleteChapter } = useChapters(bookId);
+  const t = useTranslations("chapters");
 
   const handleDeleteChapter = async (chapterId: string) => {
     try {
@@ -29,7 +30,7 @@ export default function ChaptersContainer({
   };
   return (
     <section className="space-y-4 mx-10">
-      <h2 className="text-lg font-semibold text-gray-900">Главы</h2>
+      <h2 className="text-lg font-semibold text-gray-900">{t("title")}</h2>
       <div className="grid grid-cols-1 gap-4">
         {externalLoading ? (
           <>

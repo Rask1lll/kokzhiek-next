@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useBooks } from "@/app/hooks/useBooks";
 import { Book } from "@/app/types/book";
 import { UpdateBookPayload } from "@/app/types/UpdateBookPayload";
@@ -16,13 +17,18 @@ const LANGUAGE_OPTIONS = [
   { code: "en", label: "English" },
 ];
 
-const DIFFICULTY_OPTIONS = ["Начальный", "Средний", "Продвинутый"];
-
 export default function EditBookPageClient() {
+  const t = useTranslations("editBook");
   const searchParams = useSearchParams();
   const router = useRouter();
   const bookId = searchParams.get("book");
   const { getBook, editBook } = useBooks();
+
+  const DIFFICULTY_OPTIONS = [
+    { value: "Начальный", label: t("difficultyBeginner") },
+    { value: "Средний", label: t("difficultyIntermediate") },
+    { value: "Продвинутый", label: t("difficultyAdvanced") },
+  ];
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -139,17 +145,17 @@ export default function EditBookPageClient() {
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <FiArrowLeft className="w-4 h-4" />
-            <span>Назад к книге</span>
+            <span>{t("backToBook")}</span>
           </Link>
         </div>
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="px-8 py-6 border-b bg-gray-50">
             <h1 className="text-2xl font-semibold text-gray-900">
-              Редактирование книги
+              {t("title")}
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              Измените информацию о книге
+              {t("subtitle")}
             </p>
           </div>
 
@@ -163,11 +169,11 @@ export default function EditBookPageClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Название книги *
+                  {t("bookTitle")}
                 </label>
                 <input
                   type="text"
-                  placeholder="Введите название книги"
+                  placeholder={t("bookTitlePlaceholder")}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     getFieldError("title")
                       ? "border-red-500 bg-red-50"
@@ -185,11 +191,11 @@ export default function EditBookPageClient() {
 
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Автор
+                  {t("author")}
                 </label>
                 <input
                   type="text"
-                  placeholder="Имя автора"
+                  placeholder={t("authorPlaceholder")}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
@@ -200,7 +206,7 @@ export default function EditBookPageClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Предмет
+                  {t("subject")}
                 </label>
                 <select
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -209,9 +215,9 @@ export default function EditBookPageClient() {
                   disabled={subjectsLoading}
                 >
                   {subjectsLoading ? (
-                    <option value="">Загрузка...</option>
+                    <option value="">{t("loadingSubjects")}</option>
                   ) : subjects.length === 0 ? (
-                    <option value="">Нет предметов</option>
+                    <option value="">{t("noSubjects")}</option>
                   ) : (
                     subjects.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -224,7 +230,7 @@ export default function EditBookPageClient() {
 
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Класс
+                  {t("grade")}
                 </label>
                 <select
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -241,7 +247,7 @@ export default function EditBookPageClient() {
 
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Язык
+                  {t("language")}
                 </label>
                 <select
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -259,11 +265,11 @@ export default function EditBookPageClient() {
 
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700">
-                Описание
+                {t("description")}
               </label>
               <textarea
                 rows={4}
-                placeholder="Кратко опишите содержание книги"
+                placeholder={t("descriptionPlaceholder")}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -273,7 +279,7 @@ export default function EditBookPageClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Уровень сложности
+                  {t("difficulty")}
                 </label>
                 <select
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -281,8 +287,8 @@ export default function EditBookPageClient() {
                   onChange={(e) => setDifficulty(e.target.value)}
                 >
                   {DIFFICULTY_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
                     </option>
                   ))}
                 </select>
@@ -290,11 +296,11 @@ export default function EditBookPageClient() {
 
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  ISBN
+                  {t("isbn")}
                 </label>
                 <input
                   type="text"
-                  placeholder="978-0-123456-78-9"
+                  placeholder={t("isbnPlaceholder")}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     getFieldError("isbn")
                       ? "border-red-500 bg-red-50"
@@ -312,11 +318,11 @@ export default function EditBookPageClient() {
 
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Год издания
+                  {t("year")}
                 </label>
                 <input
                   type="number"
-                  placeholder="2025"
+                  placeholder={t("yearPlaceholder")}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     getFieldError("year")
                       ? "border-red-500 bg-red-50"
@@ -337,11 +343,11 @@ export default function EditBookPageClient() {
 
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700">
-                Издание
+                {t("edition")}
               </label>
               <input
                 type="text"
-                placeholder="2-е издание"
+                placeholder={t("editionPlaceholder")}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={edition}
                 onChange={(e) => setEdition(e.target.value)}
@@ -354,7 +360,7 @@ export default function EditBookPageClient() {
               href={`/books/book?book=${bookId}`}
               className="inline-flex justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Отмена
+              {t("cancel")}
             </Link>
             <button
               type="button"
@@ -362,7 +368,7 @@ export default function EditBookPageClient() {
               className="inline-flex justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleSave}
             >
-              {isSaving ? "Сохранение..." : "Сохранить изменения"}
+              {isSaving ? t("saving") : t("save")}
             </button>
           </div>
         </div>

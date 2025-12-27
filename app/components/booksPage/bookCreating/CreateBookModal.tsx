@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
+import { useTranslations } from "next-intl";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { CreateBookPayload } from "@/app/types/CreateBookPayload";
 import { useBooks } from "@/app/hooks/useBooks";
@@ -14,6 +15,7 @@ const LANGUAGE_CODE_MAP: Record<string, "kk" | "ru" | "en"> = {
 };
 
 export default function CreateBookModal() {
+  const t = useTranslations("createBookModal");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [subjectId, setSubjectId] = useState<number | null>(null);
@@ -27,6 +29,12 @@ export default function CreateBookModal() {
   const [subjectsLoading, setSubjectsLoading] = useState(true);
   const { createBook } = useBooks();
   const { removeContent } = useModalWindowStore();
+
+  const DIFFICULTY_OPTIONS = [
+    { value: "Начальный", label: t("difficultyBeginner") },
+    { value: "Средний", label: t("difficultyIntermediate") },
+    { value: "Продвинутый", label: t("difficultyAdvanced") },
+  ];
 
   useEffect(() => {
     async function loadSubjects() {
@@ -78,11 +86,10 @@ export default function CreateBookModal() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900">
-              Создать новую книгу
+              {t("title")}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              Заполните основную информацию о книге. Это можно будет изменить
-              позже.
+              {t("subtitle")}
             </p>
           </div>
           <span className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-500"></span>
@@ -95,11 +102,11 @@ export default function CreateBookModal() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Название книги *
+              {t("bookTitle")}
             </label>
             <input
               type="text"
-              placeholder="Введите название книги"
+              placeholder={t("bookTitlePlaceholder")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -108,11 +115,11 @@ export default function CreateBookModal() {
 
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Автор *
+              {t("author")}
             </label>
             <input
               type="text"
-              placeholder="Имя автора"
+              placeholder={t("authorPlaceholder")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
@@ -124,16 +131,16 @@ export default function CreateBookModal() {
         <div className="grid grid-cols-1 md:grid-cols-[180px,1fr] gap-4 items-start">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Обложка книги
+              {t("coverImage")}
             </label>
             <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-center">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700">
-                  Загрузите обложку
+                  {t("uploadCover")}
                 </p>
-                <p className="text-xs text-gray-500">JPG, PNG, до 5&nbsp;МБ</p>
+                <p className="text-xs text-gray-500">{t("coverHint")}</p>
                 <label className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors">
-                  <span>Выбрать файл</span>
+                  <span>{t("selectFile")}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -147,7 +154,7 @@ export default function CreateBookModal() {
 
           <div className="hidden md:flex items-center justify-center">
             <div className="h-40 w-28 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
-              Превью обложки
+              {t("coverPreview")}
             </div>
           </div>
         </div>
@@ -156,7 +163,7 @@ export default function CreateBookModal() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Предмет *
+              {t("subject")}
             </label>
             <select
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -165,9 +172,9 @@ export default function CreateBookModal() {
               disabled={subjectsLoading}
             >
               {subjectsLoading ? (
-                <option value="">Загрузка...</option>
+                <option value="">{t("loadingSubjects")}</option>
               ) : subjects.length === 0 ? (
-                <option value="">Нет предметов</option>
+                <option value="">{t("noSubjects")}</option>
               ) : (
                 subjects.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -180,7 +187,7 @@ export default function CreateBookModal() {
 
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Класс *
+              {t("grade")}
             </label>
             <select
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -197,7 +204,7 @@ export default function CreateBookModal() {
 
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Язык *
+              {t("language")}
             </label>
             <select
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -214,11 +221,11 @@ export default function CreateBookModal() {
         {/* Описание */}
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-700">
-            Описание
+            {t("description")}
           </label>
           <textarea
             rows={4}
-            placeholder="Кратко опишите содержание книги"
+            placeholder={t("descriptionPlaceholder")}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -229,26 +236,28 @@ export default function CreateBookModal() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              Уровень сложности
+              {t("difficulty")}
             </label>
             <select
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
             >
-              <option value="Начальный">Начальный</option>
-              <option value="Средний">Средний</option>
-              <option value="Продвинутый">Продвинутый</option>
+              {DIFFICULTY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              ISBN (необязательно)
+              {t("isbn")}
             </label>
             <input
               type="text"
-              placeholder="978-0-123456-78-9"
+              placeholder={t("isbnPlaceholder")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={isbn}
               onChange={(e) => setIsbn(e.target.value)}
@@ -266,7 +275,7 @@ export default function CreateBookModal() {
           className="w-full sm:w-auto inline-flex justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
           onClick={handleCreateBook}
         >
-          Создать книгу
+          {t("createButton")}
         </button>
       </div>
     </div>

@@ -1,27 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import BooksSearchInput from "./BooksSearchInput";
 import BooksStatusFilter from "./BooksStatusFilter";
 import BooksSortSelect from "./BooksSortSelect";
 import BooksViewModeToggle, { ViewMode } from "./BooksViewModeToggle";
 
-const FILTERS = [
-  { id: "all", label: "Все книги" },
-  { id: "drafts", label: "Черновики" },
-  { id: "inProgress", label: "В процессе" },
-  { id: "completed", label: "Завершено" },
-] as const;
-
-const SORT_OPTIONS = [
-  { id: "recent-desc", label: "Сначала новые" },
-  { id: "recent-asc", label: "Сначала старые" },
-  { id: "title-asc", label: "По названию (А-Я)" },
-  { id: "title-desc", label: "По названию (Я-А)" },
-] as const;
-
-type FilterId = (typeof FILTERS)[number]["id"];
-type SortId = (typeof SORT_OPTIONS)[number]["id"];
+type FilterId = "all" | "drafts" | "inProgress" | "completed";
+type SortId = "recent-desc" | "recent-asc" | "title-asc" | "title-desc";
 
 export type SortBy = "recent" | "title";
 export type SortOrder = "asc" | "desc";
@@ -48,10 +35,25 @@ type BooksFilterBarProps = {
 };
 
 export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
+  const t = useTranslations("filters");
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
   const [sortOption, setSortOption] = useState<SortId>("recent-desc");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+
+  const FILTERS = [
+    { id: "all", label: t("allBooks") },
+    { id: "drafts", label: t("drafts") },
+    { id: "inProgress", label: t("inProgress") },
+    { id: "completed", label: t("completed") },
+  ] as const;
+
+  const SORT_OPTIONS = [
+    { id: "recent-desc", label: t("newestFirst") },
+    { id: "recent-asc", label: t("oldestFirst") },
+    { id: "title-asc", label: t("titleAZ") },
+    { id: "title-desc", label: t("titleZA") },
+  ] as const;
 
   const emitChange = (next: Partial<BooksFilterState>) => {
     if (!onChange) return;
@@ -93,7 +95,6 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
-    // Explicitly pass the new mode to ensure it's used
     emitChange({ viewMode: mode });
   };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { FiUsers, FiMail, FiCalendar } from "react-icons/fi";
 import { useSchoolMembers } from "@/app/hooks/useSchoolMembers";
 import { useAuth } from "@/app/hooks/useAuth";
@@ -8,12 +9,15 @@ import { isSchool as checkIsSchool } from "@/app/libs/roles";
 import { MemberRole } from "@/app/types/member";
 
 export default function MembersPage() {
+  const t = useTranslations("membersPage");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { user } = useAuth();
   const { members, isLoading, getMembers } = useSchoolMembers();
   const [roleFilter, setRoleFilter] = useState<MemberRole | "">("");
 
   const isSchool = checkIsSchool(user);
-  
+
   useEffect(() => {
     getMembers({
       role: roleFilter || undefined,
@@ -24,19 +28,19 @@ export default function MembersPage() {
     if (roleAlias === "teacher") {
       return (
         <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
-          Учитель
+          {t("teacher")}
         </span>
       );
     }
     return (
       <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-        Ученик
+        {t("student")}
       </span>
     );
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ru-RU", {
+    return new Date(dateString).toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -48,10 +52,10 @@ export default function MembersPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {isSchool ? "Пользователи" : "Ученики"}
+            {isSchool ? t("title") : t("studentsTitle")}
           </h1>
           <p className="text-gray-500 mt-1">
-            {isSchool ? "Учителя и ученики вашей школы" : "Ученики вашего класса"}
+            {isSchool ? t("schoolDescription") : t("teacherDescription")}
           </p>
         </div>
       </div>
@@ -65,9 +69,9 @@ export default function MembersPage() {
               onChange={(e) => setRoleFilter(e.target.value as MemberRole | "")}
               className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
             >
-              <option value="">Все роли</option>
-              <option value="teacher">Учителя</option>
-              <option value="student">Ученики</option>
+              <option value="">{t("allRoles")}</option>
+              <option value="teacher">{t("teachers")}</option>
+              <option value="student">{t("students")}</option>
             </select>
           </div>
         </div>
@@ -76,11 +80,11 @@ export default function MembersPage() {
       {/* Таблица пользователей */}
       <div className="bg-white rounded-xl border border-gray-200">
         {isLoading ? (
-          <div className="p-6 text-center text-gray-500">Загрузка...</div>
+          <div className="p-6 text-center text-gray-500">{tCommon("loading")}</div>
         ) : members.length === 0 ? (
           <div className="p-12 text-center">
             <FiUsers className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">Пользователей пока нет</p>
+            <p className="text-gray-500">{t("noMembers")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -88,18 +92,18 @@ export default function MembersPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Пользователь
+                    {t("userColumn")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Email
+                    {t("emailColumn")}
                   </th>
                   {isSchool && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Роль
+                      {t("roleColumn")}
                     </th>
                   )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Дата регистрации
+                    {t("dateColumn")}
                   </th>
                 </tr>
               </thead>
@@ -117,7 +121,7 @@ export default function MembersPage() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
-                            {member.name || "Без имени"}
+                            {member.name || t("noName")}
                           </p>
                         </div>
                       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { FiBook, FiUsers, FiKey, FiFileText } from "react-icons/fi";
 import { getAuthHeaders } from "@/app/libs/auth";
 
@@ -13,6 +14,8 @@ type Stats = {
 };
 
 export default function StatsPage() {
+  const t = useTranslations("statsPage");
+  const tCommon = useTranslations("common");
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,38 +44,44 @@ export default function StatsPage() {
 
   const statCards = [
     {
-      label: "Пользователей",
+      labelKey: "users",
       value: stats?.total_users || 0,
       icon: FiUsers,
       color: "bg-blue-500",
     },
     {
-      label: "Книг",
+      labelKey: "books",
       value: stats?.total_books || 0,
       icon: FiBook,
       color: "bg-purple-500",
     },
     {
-      label: "Глав",
+      labelKey: "chapters",
       value: stats?.total_chapters || 0,
       icon: FiFileText,
       color: "bg-green-500",
     },
     {
-      label: "Ключей",
+      labelKey: "keys",
       value: stats?.total_keys || 0,
       icon: FiKey,
       color: "bg-orange-500",
     },
   ];
 
+  const roleLabels: Record<string, string> = {
+    admin: t("admins"),
+    teacher: t("teachers"),
+    student: t("students"),
+  };
+
   return (
     <div className="max-w-6xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Статистика</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t("title")}</h1>
 
       {loading ? (
         <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500">
-          Загрузка...
+          {tCommon("loading")}
         </div>
       ) : (
         <>
@@ -82,7 +91,7 @@ export default function StatsPage() {
               const Icon = card.icon;
               return (
                 <div
-                  key={card.label}
+                  key={card.labelKey}
                   className="bg-white rounded-xl border border-gray-200 p-6"
                 >
                   <div className="flex items-center gap-4">
@@ -95,7 +104,7 @@ export default function StatsPage() {
                       <p className="text-2xl font-bold text-gray-900">
                         {card.value}
                       </p>
-                      <p className="text-sm text-gray-500">{card.label}</p>
+                      <p className="text-sm text-gray-500">{t(card.labelKey)}</p>
                     </div>
                   </div>
                 </div>
@@ -107,17 +116,12 @@ export default function StatsPage() {
           {stats?.users_by_role && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Пользователи по ролям
+                {t("usersByRole")}
               </h2>
               <div className="space-y-3">
                 {Object.entries(stats.users_by_role).map(([role, count]) => {
                   const total = stats.total_users || 1;
                   const percent = Math.round((count / total) * 100);
-                  const roleLabels: Record<string, string> = {
-                    admin: "Админы",
-                    teacher: "Учителя",
-                    student: "Ученики",
-                  };
                   const roleColors: Record<string, string> = {
                     admin: "bg-red-500",
                     teacher: "bg-purple-500",
