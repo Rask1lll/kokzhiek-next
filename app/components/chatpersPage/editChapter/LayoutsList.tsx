@@ -1,8 +1,11 @@
+"use client";
+
 import { JSX } from "react/jsx-dev-runtime";
+import { useTranslations } from "next-intl";
 import style from "./LayoutsList.module.css";
 
 type blockType = {
-  name: string;
+  nameKey: string;
   structure: JSX.Element;
   code: string;
 };
@@ -10,7 +13,7 @@ type blockType = {
 const blocks: blockType[] = [
   // Single column
   {
-    name: "Полная страница",
+    nameKey: "fullPage",
     structure: (
       <div className="w-full bg-gray-200 flex items-center justify-center h-full p-2">
         <div className="bg-yellow-300/50 w-full h-full rounded-md"></div>
@@ -21,7 +24,7 @@ const blocks: blockType[] = [
 
   // 2 columns
   {
-    name: "2 колонки 50/50",
+    nameKey: "twoEqual",
     structure: (
       <div className="w-full h-full grid grid-cols-2 gap-2 p-2">
         <div className="bg-blue-200 rounded-md h-full"></div>
@@ -31,7 +34,7 @@ const blocks: blockType[] = [
     code: "two_equal",
   },
   {
-    name: "2 колонки (левая шире)",
+    nameKey: "leftWide",
     structure: (
       <div className="w-full h-full flex gap-2 p-2">
         <div className="bg-purple-200 rounded-md h-full flex-2"></div>
@@ -41,7 +44,7 @@ const blocks: blockType[] = [
     code: "left_wide",
   },
   {
-    name: "2 колонки (правая шире)",
+    nameKey: "rightWide",
     structure: (
       <div className="w-full h-full flex gap-2 p-2">
         <div className="bg-orange-200 rounded-md h-full flex-1"></div>
@@ -53,7 +56,7 @@ const blocks: blockType[] = [
 
   // 3 columns
   {
-    name: "3 колонки",
+    nameKey: "threeCols",
     structure: (
       <div className="w-full h-full grid grid-cols-3 gap-2 p-2">
         <div className="bg-blue-200 rounded-md h-full"></div>
@@ -64,7 +67,7 @@ const blocks: blockType[] = [
     code: "three_cols",
   },
   {
-    name: "3 колонки (центр шире)",
+    nameKey: "threeCenterWide",
     structure: (
       <div className="w-full h-full flex gap-2 p-2">
         <div className="bg-blue-200 rounded-md h-full flex-1"></div>
@@ -77,7 +80,7 @@ const blocks: blockType[] = [
 
   // 4 columns
   {
-    name: "4 колонки",
+    nameKey: "fourCols",
     structure: (
       <div className="w-full h-full grid grid-cols-4 gap-2 p-2">
         <div className="bg-blue-200 rounded-md h-full"></div>
@@ -91,7 +94,7 @@ const blocks: blockType[] = [
 
   // Sidebar layouts
   {
-    name: "Сайдбар слева",
+    nameKey: "sidebarLeft",
     structure: (
       <div className="w-full h-full flex gap-2 p-2">
         <div className="bg-purple-200 rounded-md h-full w-1/4"></div>
@@ -101,7 +104,7 @@ const blocks: blockType[] = [
     code: "sidebar_left",
   },
   {
-    name: "Сайдбар справа",
+    nameKey: "sidebarRight",
     structure: (
       <div className="w-full h-full flex gap-2 p-2">
         <div className="bg-orange-200 rounded-md h-full flex-1"></div>
@@ -117,10 +120,11 @@ type LayoutsListProps = {
 };
 
 export default function LayoutsList({ onSelect }: LayoutsListProps) {
+  const t = useTranslations("chapterEditor");
   return (
     <div className="bg-gray-100 w-sm rounded-lg p-4 sm:w-xl md:w-2xl lg:w-4xl max-h-[80vh] overflow-y-auto">
       <h1 className="lg:text-2xl md:text-xl text-lg text-gray-600 font-bold mb-4">
-        Выберите тип блока
+        {t("selectBlockType")}
       </h1>
       <div className={`gap-3 grid ${style.grid_template_columns}`}>
         {blocks.map((el) => {
@@ -132,7 +136,7 @@ export default function LayoutsList({ onSelect }: LayoutsListProps) {
             >
               <div className="w-32 h-32 sm:w-36 sm:h-36">{el.structure}</div>
               <p className="font-semibold text-sm text-center mt-1">
-                {el.name}
+                {t(el.nameKey)}
               </p>
             </div>
           );

@@ -311,6 +311,19 @@
     "editing": "Өңдеу",
     "preview": "Алдын ала қарау"
   },
+  "chapterEditor": {
+    "createBlock": "Жаңа блок құру",
+    "selectBlockType": "Блок түрін таңдаңыз",
+    "fullPage": "Толық бет",
+    "twoEqual": "2 баған 50/50",
+    "leftWide": "2 баған (сол жағы кең)",
+    "rightWide": "2 баған (оң жағы кең)",
+    "threeCols": "3 баған",
+    "threeCenterWide": "3 баған (ортасы кең)",
+    "fourCols": "4 баған",
+    "sidebarLeft": "Сол жақ панель",
+    "sidebarRight": "Оң жақ панель"
+  },
   "createBookModal": {
     "title": "Жаңа кітап құру",
     "subtitle": "Кітап туралы негізгі ақпаратты толтырыңыз. Мұны кейін өзгертуге болады.",

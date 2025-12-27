@@ -311,6 +311,19 @@
     "editing": "Редактирование",
     "preview": "Предпросмотр"
   },
+  "chapterEditor": {
+    "createBlock": "Создать новый блок",
+    "selectBlockType": "Выберите тип блока",
+    "fullPage": "Полная страница",
+    "twoEqual": "2 колонки 50/50",
+    "leftWide": "2 колонки (левая шире)",
+    "rightWide": "2 колонки (правая шире)",
+    "threeCols": "3 колонки",
+    "threeCenterWide": "3 колонки (центр шире)",
+    "fourCols": "4 колонки",
+    "sidebarLeft": "Сайдбар слева",
+    "sidebarRight": "Сайдбар справа"
+  },
   "createBookModal": {
     "title": "Создать новую книгу",
     "subtitle": "Заполните основную информацию о книге. Это можно будет изменить позже.",
