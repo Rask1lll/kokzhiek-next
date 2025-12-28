@@ -4,38 +4,56 @@ import { widgets } from "@/app/libs/widgets";
 import Button from "../../Button/Button";
 import { useState } from "react";
 import { tasks } from "@/app/libs/tasks";
+import { useTranslations } from "next-intl";
 
 type WidgetListModalProps = {
   onSelect?: (type: string) => void;
 };
 
 export default function WidgetListModal({ onSelect }: WidgetListModalProps) {
+  const t = useTranslations("widgetModal");
+  const tWidgets = useTranslations("widgetTypes");
+  const tTasks = useTranslations("taskTypes");
   const [listContent, setListContent] = useState(widgets);
   const [isWidget, setIsWidget] = useState(true);
   function typeChangeOnclick(value: string) {
     setListContent(value === "widget" ? widgets : tasks);
     setIsWidget(value === "widget");
   }
+
+  const getTitle = (type: string) => {
+    if (isWidget) {
+      return tWidgets(type);
+    }
+    return tTasks(type);
+  };
+
+  const getDescription = (type: string) => {
+    if (isWidget) {
+      return tWidgets(`${type}Desc`);
+    }
+    return tTasks(`${type}Desc`);
+  };
+
   return (
     <div className="w-full max-w-xl bg-white rounded-xl p-4 sm:p-6 space-y-4">
       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-        Выберите тип виджета
+        {t("title")}
       </h2>
       <p className="text-sm  text-gray-500">
-        Выберите элимент который вам подходит. Эти элементы можно добавлять
-        внутрь выбранного блока.
+        {t("description")}
       </p>
       <div className="flex gap-4">
         <Button
           color="slate"
-          content={"Виджеты"}
+          content={t("widgets")}
           value="widget"
           isActive={isWidget}
           onClick={typeChangeOnclick}
         />
         <Button
           color="slate"
-          content={"Задания"}
+          content={t("tasks")}
           value="task"
           isActive={!isWidget}
           onClick={typeChangeOnclick}
@@ -52,10 +70,10 @@ export default function WidgetListModal({ onSelect }: WidgetListModalProps) {
             <div className="mt-0.5 shrink-0">{widget.icon}</div>
             <div className="flex flex-col gap-1">
               <span className="font-semibold text-gray-800">
-                {widget.title}
+                {getTitle(widget.type)}
               </span>
               <span className="text-xs sm:text-sm text-gray-500">
-                {widget.description}
+                {getDescription(widget.type)}
               </span>
             </div>
           </div>

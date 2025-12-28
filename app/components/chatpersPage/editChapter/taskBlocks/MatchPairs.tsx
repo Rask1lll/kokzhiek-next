@@ -6,6 +6,7 @@ import { FiX, FiImage, FiTrash2 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type MatchPairsProps = {
   widgetId: number;
@@ -29,6 +30,7 @@ type MatchPairsData = {
 };
 
 export default function MatchPairs({ widgetId }: MatchPairsProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update, uploadImage, removeImage } =
     useQuestions(widgetId);
 
@@ -527,7 +529,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -535,7 +537,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -544,10 +546,10 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
         <input
           type="text"
-          placeholder="Вопрос к заданию"
+          placeholder={t("questionPlaceholder")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
@@ -566,7 +568,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
             className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
           />
           <span className="text-sm text-slate-600">
-            Перемешивать варианты ответа при каждом решении
+            {t("shuffleOptions")}
           </span>
         </label>
       </div>
@@ -575,11 +577,11 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-slate-700">
-            Пары (вариант ответа → ячейка):
+            {t("pairsLabel")}
           </span>
           <div className="flex gap-2">
             <Button
-              content="+ Добавить пару"
+              content={t("addPair")}
               color="green"
               size="sm"
               onClick={addPair}
@@ -589,7 +591,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
 
         {data.pairs.length === 0 && (
           <div className="text-sm text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-lg">
-            Нет пар. Нажмите «Добавить пару» чтобы создать.
+            {t("noPairs")}
           </div>
         )}
 
@@ -600,14 +602,14 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs text-slate-400 font-medium">
-                Пара #{index + 1}
+                {t("pairNumber", { number: index + 1 })}
               </span>
               <div className="flex gap-1">
                 <button
                   type="button"
                   onClick={() => removePair(pair.id)}
                   className="p-1 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors"
-                  title="Удалить пару"
+                  title={t("removePair")}
                 >
                   <FiX className="w-4 h-4" />
                 </button>
@@ -618,7 +620,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
               <div className="space-y-2">
                 <label className="block">
                   <span className="text-xs text-slate-500 mb-1 block">
-                    Вариант ответа:
+                    {t("answerVariant")}
                   </span>
                   <input
                     type="text"
@@ -626,7 +628,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                     onChange={(e) =>
                       updateAnswer(pair.id, "text", e.target.value)
                     }
-                    placeholder="Введите вариант ответа..."
+                    placeholder={t("answerPlaceholder")}
                     className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </label>
@@ -665,8 +667,8 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                 >
                   <FiImage className="w-3 h-3" />
                   {pair.answer.imageUrl
-                    ? "Удалить изображение"
-                    : "Добавить изображение"}
+                    ? t("removeImage")
+                    : t("addImage")}
                 </button>
                 {pair.answer.imageUrl && (
                   <div className="relative mt-2">
@@ -682,7 +684,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                       type="button"
                       onClick={() => handleImageDelete(pair.id, "answer")}
                       className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                      title="Удалить изображение"
+                      title={t("removeImage")}
                     >
                       <FiTrash2 className="w-3 h-3" />
                     </button>
@@ -693,7 +695,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
               <div className="space-y-2">
                 <label className="block">
                   <span className="text-xs text-slate-500 mb-1 block">
-                    Ячейка:
+                    {t("cell")}
                   </span>
                   <input
                     type="text"
@@ -701,7 +703,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                     onChange={(e) =>
                       updateCell(pair.id, "text", e.target.value)
                     }
-                    placeholder="Введите текст ячейки..."
+                    placeholder={t("cellPlaceholder")}
                     className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </label>
@@ -738,8 +740,8 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                 >
                   <FiImage className="w-3 h-3" />
                   {pair.cell.imageUrl
-                    ? "Удалить изображение"
-                    : "Добавить изображение"}
+                    ? t("removeImage")
+                    : t("addImage")}
                 </button>
                 {pair.cell.imageUrl && (
                   <div className="relative mt-2">
@@ -755,7 +757,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                       type="button"
                       onClick={() => handleImageDelete(pair.id, "cell")}
                       className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                      title="Удалить изображение"
+                      title={t("removeImage")}
                     >
                       <FiTrash2 className="w-3 h-3" />
                     </button>
