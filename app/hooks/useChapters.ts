@@ -21,8 +21,11 @@ export function useChapters(bookId: string) {
     return resData;
   }
   async function deleteChapter(chapterId: string) {
-    await handleDeleteChapter(chapterId);
-    removeChapter(chapterId);
+    const success = await handleDeleteChapter(chapterId);
+    if (success) {
+      removeChapter(Number(chapterId));
+    }
+    return success;
   }
   return { createChapter, deleteChapter };
 }

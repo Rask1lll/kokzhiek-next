@@ -7,7 +7,7 @@ import { Book } from "../../types/book";
 
 export async function handleDeleteChapter(
   chapterId: number | string
-): Promise<void> {
+): Promise<boolean> {
   const res = await fetch(`${API_BASE}/api/v1/chapters/${chapterId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
@@ -16,7 +16,9 @@ export async function handleDeleteChapter(
   if (!res.ok && res.status !== 204) {
     const errorText = await res.text();
     console.error("deleteChapter failed:", res.status, errorText);
+    return false;
   }
+  return true;
 }
 
 export const handleCreateChapter = async (
