@@ -24,14 +24,6 @@ export const useAlertStore = create<AlertStore>((set) => ({
     set((state) => ({
       alerts: [...state.alerts, newAlert],
     }));
-
-    if (duration && duration > 0) {
-      setTimeout(() => {
-        set((state) => ({
-          alerts: state.alerts.filter((alert) => alert.id !== id),
-        }));
-      }, duration);
-    }
   },
   removeAlert: (id: string) => {
     set((state) => ({

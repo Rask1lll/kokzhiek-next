@@ -248,6 +248,7 @@
   "adminUsersPage": {
     "title": "Пайдаланушыларды басқару",
     "searchPlaceholder": "Аты немесе email бойынша іздеу...",
+    "searchButton": "Іздеу",
     "allRoles": "Барлық рөлдер",
     "admin": "Әкімші",
     "teacher": "Мұғалім",
@@ -259,7 +260,8 @@
     "dateColumn": "Тіркелу күні",
     "actionsColumn": "Әрекеттер",
     "changeRole": "Рөлді өзгерту",
-    "deleteConfirm": "Бұл пайдаланушыны жою керек пе?"
+    "deleteConfirm": "Бұл пайдаланушыны жою керек пе?",
+    "roleUpdated": "Пайдаланушы рөлі жаңартылды"
   },
   "adminSettingsPage": {
     "title": "Жүйе баптаулары",

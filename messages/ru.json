@@ -248,6 +248,7 @@
   "adminUsersPage": {
     "title": "Управление пользователями",
     "searchPlaceholder": "Поиск по имени или email...",
+    "searchButton": "Найти",
     "allRoles": "Все роли",
     "admin": "Админ",
     "teacher": "Учитель",
@@ -259,7 +260,8 @@
     "dateColumn": "Дата регистрации",
     "actionsColumn": "Действия",
     "changeRole": "Изменить роль",
-    "deleteConfirm": "Удалить этого пользователя?"
+    "deleteConfirm": "Удалить этого пользователя?",
+    "roleUpdated": "Роль пользователя обновлена"
   },
   "adminSettingsPage": {
     "title": "Настройки системы",
