@@ -242,6 +242,13 @@
     "usersByRole": "Пользователи по ролям",
     "admins": "Админы",
     "teachers": "Учителя",
+    "authors": "Авторы",
+    "booksByStatus": "Книги по статусу",
+    "activationKeys": "Ключи активации",
+    "keysUsed": "Использовано",
+    "keysAvailable": "Доступно",
+    "newUsers30d": "Новых пользователей за 30 дней",
+    "newBooks30d": "Новых книг за 30 дней",
     "students": "Ученики"
   },
   "membersPage": {

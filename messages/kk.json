@@ -242,7 +242,14 @@
     "usersByRole": "Рөлдер бойынша пайдаланушылар",
     "admins": "Әкімшілер",
     "teachers": "Мұғалімдер",
-    "students": "Оқушылар"
+    "students": "Оқушылар",
+    "authors": "Авторлар",
+    "booksByStatus": "Күй бойынша кітаптар",
+    "activationKeys": "Белсендіру кілттері",
+    "keysUsed": "Қолданылған",
+    "keysAvailable": "Қол жетімді",
+    "newUsers30d": "30 күнде жаңа",
+    "newBooks30d": "30 күнде кітаптар"
   },
   "membersPage": {
     "title": "Пайдаланушылар",
