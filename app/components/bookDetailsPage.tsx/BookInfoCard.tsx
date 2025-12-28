@@ -6,9 +6,9 @@ import { useState } from "react";
 import { FiEdit2, FiTrash2, FiSend, FiCheck, FiX } from "react-icons/fi";
 import { useTranslations } from "next-intl";
 import { BookStatus } from "@/app/types/book";
-import { handleUpdateBookStatus } from "@/app/services/book/booksApi";
+import { handleUpdateBookStatus, UpdateBookStatusPayload } from "@/app/services/book/booksApi";
 import { useAuth } from "@/app/hooks/useAuth";
-import { isAdmin } from "@/app/libs/roles";
+import { isModerator, isAuthor } from "@/app/libs/roles";
 
 type BookInfoCardProps = {
   bookId: number | string;
@@ -74,10 +74,14 @@ export default function BookInfoCard({
   const { user } = useAuth();
   const [currentStatus, setCurrentStatus] = useState<BookStatus>(status);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const t = useTranslations("book");
   const tStatus = useTranslations("status");
+  const tCommon = useTranslations("common");
 
-  const isModerator = isAdmin(user);
+  const canModerate = isModerator(user);
+  const canEdit = isAuthor(user);
 
   const STATUS_CONFIG: Record<
     BookStatus,
@@ -109,19 +113,42 @@ export default function BookInfoCard({
     },
   };
 
-  const handleStatusChange = async (newStatus: BookStatus) => {
+  const handleStatusChange = async (newStatus: BookStatus, reason?: string) => {
     if (newStatus === currentStatus || isUpdating) return;
 
+    const payload: UpdateBookStatusPayload = { status: newStatus };
+    if (reason) {
+      payload.reason = reason;
+    }
+
     setIsUpdating(true);
-    const result = await handleUpdateBookStatus(Number(bookId), newStatus);
+    const result = await handleUpdateBookStatus(Number(bookId), payload);
     setIsUpdating(false);
 
     if (result.success) {
       setCurrentStatus(newStatus);
       onStatusChange?.(newStatus);
+      setShowRejectModal(false);
+      setRejectReason("");
     } else {
       alert(result.message);
     }
+  };
+
+  const handleRejectClick = () => {
+    setShowRejectModal(true);
+  };
+
+  const handleRejectConfirm = () => {
+    if (!rejectReason.trim()) {
+      return;
+    }
+    handleStatusChange("draft", rejectReason.trim());
+  };
+
+  const handleRejectCancel = () => {
+    setShowRejectModal(false);
+    setRejectReason("");
   };
 
   const statusConfig = STATUS_CONFIG[currentStatus];
@@ -161,7 +188,7 @@ export default function BookInfoCard({
               {statusConfig.label}
             </span>
 
-            {currentStatus === "draft" && (
+            {currentStatus === "draft" && canEdit && (
               <button
                 type="button"
                 onClick={() => handleStatusChange("pending")}
@@ -173,7 +200,7 @@ export default function BookInfoCard({
               </button>
             )}
 
-            {currentStatus === "pending" && isModerator && (
+            {currentStatus === "pending" && canModerate && (
               <>
                 <button
                   type="button"
@@ -186,7 +213,7 @@ export default function BookInfoCard({
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleStatusChange("draft")}
+                  onClick={handleRejectClick}
                   disabled={isUpdating}
                   className="inline-flex items-center gap-2 rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:border-red-400 transition-colors disabled:opacity-50"
                 >
@@ -196,14 +223,16 @@ export default function BookInfoCard({
               </>
             )}
 
-            <Link
-              href={`/books/book/edit?book=${bookId}`}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors"
-            >
-              <FiEdit2 className="h-4 w-4" />
-              <span>{t("edit")}</span>
-            </Link>
-            {onDelete && (
+            {canEdit && (
+              <Link
+                href={`/books/book/edit?book=${bookId}`}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors"
+              >
+                <FiEdit2 className="h-4 w-4" />
+                <span>{t("edit")}</span>
+              </Link>
+            )}
+            {canEdit && onDelete && (
               <button
                 type="button"
                 onClick={onDelete}
@@ -245,6 +274,67 @@ export default function BookInfoCard({
           </p>
         ) : null}
       </div>
+
+      {/* Reject Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={handleRejectCancel}
+          />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+            <button
+              onClick={handleRejectCancel}
+              className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              {t("rejectTitle")}
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+              {t("rejectDescription")}
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                {t("rejectReason")} *
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder={t("rejectReasonPlaceholder")}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleRejectCancel}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                {tCommon("cancel")}
+              </button>
+              <button
+                onClick={handleRejectConfirm}
+                disabled={!rejectReason.trim() || isUpdating}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isUpdating ? (
+                  tCommon("loading")
+                ) : (
+                  <>
+                    <FiX className="w-4 h-4" />
+                    {t("reject")}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

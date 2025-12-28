@@ -5,7 +5,8 @@ export type RoleAlias =
   | "author"
   | "school_admin"
   | "teacher"
-  | "student";
+  | "student"
+  | "moderator";
 
 export function getUserRole(user: UserData | null): RoleAlias | null {
   return (user?.role?.alias as RoleAlias) || null;
@@ -29,6 +30,10 @@ export function isTeacher(user: UserData | null): boolean {
 
 export function isStudent(user: UserData | null): boolean {
   return getUserRole(user) === "student";
+}
+
+export function isModerator(user: UserData | null): boolean {
+  return getUserRole(user) === "moderator";
 }
 
 // Проверка нескольких ролей

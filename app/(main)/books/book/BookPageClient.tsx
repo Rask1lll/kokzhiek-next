@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import BookInfoCard from "@/app/components/bookDetailsPage.tsx/BookInfoCard";
 import BookInfoCardSkeleton from "@/app/components/bookDetailsPage.tsx/BookInfoCardSkeleton";
 import ChaptersContainer from "@/app/components/bookDetailsPage.tsx/ChaptersContainer";
@@ -29,6 +30,7 @@ export function BookPageSkeleton() {
 export default function BookPageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const t = useTranslations("book");
   const id = searchParams.get("book");
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +40,7 @@ export default function BookPageClient() {
     if (!book) return;
 
     const confirmed = window.confirm(
-      `Вы уверены, что хотите удалить книгу "${book.title}"?`
+      t("deleteConfirm", { title: book.title })
     );
     if (!confirmed) return;
 

@@ -213,9 +213,14 @@ export async function handleDeleteBookCover(
   }
 }
 
+export type UpdateBookStatusPayload = {
+  status: BookStatus;
+  reason?: string;
+};
+
 export async function handleUpdateBookStatus(
   id: number,
-  status: BookStatus
+  payload: UpdateBookStatusPayload
 ): Promise<ApiResult<Book>> {
   try {
     const res = await fetch(
@@ -223,7 +228,7 @@ export async function handleUpdateBookStatus(
       {
         headers: getAuthHeaders(),
         method: "PATCH",
-        body: JSON.stringify({ status }),
+        body: JSON.stringify(payload),
       }
     );
     const json = await res.json();
