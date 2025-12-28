@@ -194,11 +194,11 @@ export default function CreateBookModal() {
               value={grade}
               onChange={(e) => setGrade(e.target.value)}
             >
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="5">5</option>
-              <option value="9">9</option>
-              <option value="11">11</option>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
             </select>
           </div>
 

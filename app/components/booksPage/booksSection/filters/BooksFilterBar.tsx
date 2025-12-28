@@ -47,6 +47,7 @@ const GRADES = [
   { id: 9, label: "9 класс" },
   { id: 10, label: "10 класс" },
   { id: 11, label: "11 класс" },
+  { id: 12, label: "12 класс" },
 ];
 
 type BooksFilterBarProps = {
