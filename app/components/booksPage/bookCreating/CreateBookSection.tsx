@@ -1,7 +1,7 @@
 "use client";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { useAuth } from "@/app/hooks/useAuth";
-import { canCreateBooks } from "@/app/libs/roles";
+import { canCreateBooks } from "@/app/libs/permissions";
 import { BiPlus } from "react-icons/bi";
 import { useTranslations } from "next-intl";
 import CreateBookModal from "./CreateBookModal";

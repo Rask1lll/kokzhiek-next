@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { FiKey, FiBarChart2, FiUsers, FiSettings, FiShield } from "react-icons/fi";
 import { useAuth } from "@/app/hooks/useAuth";
-import { DashboardSection, canAccessSection, isAdmin } from "@/app/libs/roles";
+import { isAdmin } from "@/app/libs/roles";
+import { DashboardSection, canAccessSection } from "@/app/libs/permissions";
 
 type SidebarLink = {
   href: string;

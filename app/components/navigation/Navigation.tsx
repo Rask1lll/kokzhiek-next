@@ -12,6 +12,7 @@ import { useAuth } from "@/app/hooks/useAuth";
 import { handleLogout as apiLogout } from "@/app/services/authorization/authApi";
 import { removeToken } from "@/app/libs/auth";
 import { getRoleLabel } from "@/app/libs/roles";
+import { canAccessDashboard } from "@/app/libs/permissions";
 
 export default function Navbar() {
   const { user, loading } = useAuth();
@@ -52,12 +53,14 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <nav className="hidden md:flex items-center space-x-1">
             <Logo />
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ml-10"
-            >
-              <span>{t("dashboard")}</span>
-            </Link>
+            {canAccessDashboard(user) && (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ml-10"
+              >
+                <span>{t("dashboard")}</span>
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -130,13 +133,15 @@ export default function Navbar() {
               <span className="w-4 h-4 rounded-full bg-gray-300" />
               <span>{t("library")}</span>
             </a>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
-            >
-              <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>{t("dashboard")}</span>
-            </Link>
+            {canAccessDashboard(user) && (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
+              >
+                <span className="w-4 h-4 rounded-full bg-gray-300" />
+                <span>{t("dashboard")}</span>
+              </Link>
+            )}
           </div>
 
           {loading ? (
