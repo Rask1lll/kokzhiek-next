@@ -5,6 +5,29 @@ import { ConstructorResponse } from "../../types/constructorResponse";
 import { CreateBookPayload } from "../../types/CreateBookPayload";
 import { Book } from "../../types/book";
 
+export async function handleUpdateChapter(
+  chapterId: number | string,
+  title: string
+): Promise<ConstructorResponse<Chapter> | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/chapters/${chapterId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ title: title.trim() }),
+    });
+
+    if (!res.ok) {
+      console.error("updateChapter failed:", res.status);
+      return null;
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error("Failed to update chapter:", error);
+    return null;
+  }
+}
+
 export async function handleDeleteChapter(
   chapterId: number | string
 ): Promise<boolean> {

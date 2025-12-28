@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { FiChevronRight, FiTrash2 } from "react-icons/fi";
+import { FiChevronRight, FiTrash2, FiEdit2 } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useModalWindowStore } from "@/app/store/modalWindowStore";
+import EditChapterModal from "./EditChapterModal";
 
 type ChapterCardProps = {
   chapterId: string;
@@ -18,7 +21,15 @@ export default function ChapterCard({
   bookid,
   onDelete,
 }: ChapterCardProps) {
+  const t = useTranslations("chapters");
+  const { addContent } = useModalWindowStore();
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addContent(<EditChapterModal chapterId={chapterId} currentTitle={title} />);
+  };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -26,7 +37,7 @@ export default function ChapterCard({
 
     if (!onDelete) return;
 
-    if (!confirm(`Вы уверены, что хотите удалить главу "${title}"?`)) {
+    if (!confirm(t("deleteConfirm", { title }))) {
       return;
     }
 
@@ -62,13 +73,22 @@ export default function ChapterCard({
         <FiChevronRight className="h-4 w-4 text-gray-400" />
       </Link>
 
+      {/* Edit button */}
+      <button
+        onClick={handleEdit}
+        className="absolute right-20 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-500"
+        title={t("edit")}
+      >
+        <FiEdit2 className="h-4 w-4" />
+      </button>
+
       {/* Delete button */}
       {onDelete && (
         <button
           onClick={handleDelete}
           disabled={isDeleting}
           className="absolute right-12 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"
-          title="Удалить главу"
+          title={t("delete")}
         >
           {isDeleting ? (
             <svg
