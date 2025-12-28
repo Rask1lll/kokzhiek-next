@@ -296,6 +296,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
 
       {/* Текстовое поле */}
       <textarea
+        spellCheck
         className="w-full resize-none border-2 border-gray-200 focus:border-blue-400 min-h-24 p-3 rounded-xl outline-none bg-white text-gray-700 transition-colors"
         placeholder={t("questionPlaceholder")}
         value={currentQuestion.body || ""}
@@ -336,6 +337,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
                       {cellId}
                     </div>
                     <input
+                      spellCheck
                       type="text"
                       placeholder={t("enterCorrectAnswer")}
                       value={option?.body || ""}

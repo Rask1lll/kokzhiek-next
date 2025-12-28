@@ -92,7 +92,6 @@ export default function AdminUsersPage() {
     }
   };
 
-
   const openUserModal = (user: User) => {
     setSelectedUser(user);
     setEditRoleId(user.role.id);
@@ -173,6 +172,7 @@ export default function AdminUsersPage() {
             <div className="flex-1 relative">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
+                spellCheck
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -359,7 +359,10 @@ export default function AdminUsersPage() {
               </button>
               <button
                 onClick={handleModalUpdateRole}
-                disabled={savingId === selectedUser.id || editRoleId === selectedUser.role.id}
+                disabled={
+                  savingId === selectedUser.id ||
+                  editRoleId === selectedUser.role.id
+                }
                 className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {savingId === selectedUser.id ? (

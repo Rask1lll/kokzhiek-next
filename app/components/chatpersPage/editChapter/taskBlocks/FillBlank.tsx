@@ -180,6 +180,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
           return (
             <input
               key={index}
+              spellCheck
               type="text"
               value={option.body || ""}
               onChange={(e) => updateBlankAnswer(blankId, e.target.value)}
@@ -227,6 +228,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
         </div>
 
         <textarea
+          spellCheck={true}
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
           placeholder={t("insertBlankPlaceholder")}

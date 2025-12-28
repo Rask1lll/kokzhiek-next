@@ -86,7 +86,9 @@ export default function TaskViewWrapper({
       )}
 
       {/* Content */}
-      <div className={`relative z-10 wrap-anywhere ${imageUrl ? "p-4" : ""}`}>
+      <div
+        className={`p-2 relative z-10 wrap-anywhere ${imageUrl ? "p-4" : ""}`}
+      >
         {/* Header with question body and hint button */}
         <div className="flex items-start justify-between gap-4 mb-4">
           {showQuestionBody && body && (

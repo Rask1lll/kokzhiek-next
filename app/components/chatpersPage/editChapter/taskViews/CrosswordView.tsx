@@ -133,6 +133,7 @@ export default function CrosswordView({
 
                   return (
                     <input
+                      spellCheck
                       key={letterIndex}
                       ref={(el) => {
                         if (el) {

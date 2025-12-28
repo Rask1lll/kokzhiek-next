@@ -24,9 +24,12 @@ export default function KeysPage() {
   const t = useTranslations("keysPage");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { keys, isLoading, getKeys, createKey, deleteKey } = useActivationKeys();
+  const { keys, isLoading, getKeys, createKey, deleteKey } =
+    useActivationKeys();
   const [roleFilter, setRoleFilter] = useState<RoleType | "">("");
-  const [statusFilter, setStatusFilter] = useState<ActivationKeyStatus | "">("");
+  const [statusFilter, setStatusFilter] = useState<ActivationKeyStatus | "">(
+    ""
+  );
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -58,7 +61,8 @@ export default function KeysPage() {
 
   const getKeyStatus = (key: ActivationKey): ActivationKeyStatus => {
     if (key.is_used) return "used";
-    if (key.expires_at && new Date(key.expires_at) < new Date()) return "expired";
+    if (key.expires_at && new Date(key.expires_at) < new Date())
+      return "expired";
     return "active";
   };
 
@@ -105,21 +109,27 @@ export default function KeysPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(locale === "kk" ? "kk-KZ" : "ru-RU", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    return new Date(dateString).toLocaleDateString(
+      locale === "kk" ? "kk-KZ" : "ru-RU",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }
+    );
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString(locale === "kk" ? "kk-KZ" : "ru-RU", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return new Date(dateString).toLocaleString(
+      locale === "kk" ? "kk-KZ" : "ru-RU",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    );
   };
 
   const handleKeysCreated = (newKeys: ActivationKey[]) => {
@@ -131,9 +141,7 @@ export default function KeysPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="text-gray-500 mt-1">
-            {t("description")}
-          </p>
+          <p className="text-gray-500 mt-1">{t("description")}</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
@@ -206,7 +214,9 @@ export default function KeysPage() {
           </select>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as ActivationKeyStatus | "")}
+            onChange={(e) =>
+              setStatusFilter(e.target.value as ActivationKeyStatus | "")
+            }
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white min-w-[150px]"
           >
             <option value="">{t("allStatuses")}</option>
@@ -220,7 +230,9 @@ export default function KeysPage() {
       {/* Таблица ключей */}
       <div className="bg-white rounded-xl border border-gray-200">
         {isLoading ? (
-          <div className="p-6 text-center text-gray-500">{tCommon("loading")}</div>
+          <div className="p-6 text-center text-gray-500">
+            {tCommon("loading")}
+          </div>
         ) : keys.length === 0 ? (
           <div className="p-12 text-center">
             <FiKey className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -312,7 +324,9 @@ export default function KeysPage() {
                           {formatDate(key.expires_at)}
                         </div>
                       ) : (
-                        <span className="text-gray-400 text-sm">{t("unlimited")}</span>
+                        <span className="text-gray-400 text-sm">
+                          {t("unlimited")}
+                        </span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -333,15 +347,15 @@ export default function KeysPage() {
             </table>
           </div>
         )}
-        </div>
+      </div>
 
-        {/* Модалка создания ключа */}
-        {showCreateModal && (
-          <CreateKeyModal
-            onClose={() => setShowCreateModal(false)}
-            onCreated={handleKeysCreated}
-            createKey={createKey}
-          />
+      {/* Модалка создания ключа */}
+      {showCreateModal && (
+        <CreateKeyModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={handleKeysCreated}
+          createKey={createKey}
+        />
       )}
     </div>
   );
@@ -350,13 +364,19 @@ export default function KeysPage() {
 type CreateKeyModalProps = {
   onClose: () => void;
   onCreated: (keys: ActivationKey[]) => void;
-  createKey: (payload: CreateActivationKeyPayload) => Promise<
+  createKey: (
+    payload: CreateActivationKeyPayload
+  ) => Promise<
     | { success: true; data: ActivationKey[] }
     | { success: false; errors: Record<string, string[]>; message: string }
   >;
 };
 
-function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) {
+function CreateKeyModal({
+  onClose,
+  onCreated,
+  createKey,
+}: CreateKeyModalProps) {
   const t = useTranslations("keysPage");
   const [roleType, setRoleType] = useState<RoleType>("student");
   const [expiresAt, setExpiresAt] = useState("");
@@ -442,11 +462,13 @@ function CreateKeyModal({ onClose, onCreated, createKey }: CreateKeyModalProps) 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("createModal.expiresAt")}{" "}
-              <span className="text-gray-400 font-normal">({t("createModal.optional")})</span>
+              <span className="text-gray-400 font-normal">
+                ({t("createModal.optional")})
+              </span>
             </label>
             <div className="relative">
               <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
+              <input spellCheck={true}
                 type="date"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}

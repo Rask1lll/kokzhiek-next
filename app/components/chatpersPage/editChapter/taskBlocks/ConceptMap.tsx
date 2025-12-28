@@ -105,6 +105,7 @@ function Table({
                     {el.id}
                   </span>
                   <textarea
+                    spellCheck={true}
                     value={el.text}
                     className="p-0.5 resize-none outline-0"
                     onChange={(e) => onCellChange?.(el.id, e.target.value)}
@@ -158,6 +159,7 @@ function Arrows({
             <div key={el.id}>
               <div className="flex items-center gap-1">
                 <input
+                  spellCheck
                   type="text"
                   value={drafts[el.id]?.from ?? el.from}
                   className="w-20 ring rounded ring-slate-400"
@@ -180,6 +182,7 @@ function Arrows({
                 />
                 <BsArrowBarRight />
                 <input
+                  spellCheck
                   type="text"
                   value={drafts[el.id]?.to ?? el.to}
                   className="w-20 ring rounded ring-slate-400"
@@ -546,6 +549,7 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
           <div className="flex gap-2 items-center">
             <label htmlFor="tableWidth">{t("width")}</label>
             <input
+              spellCheck
               id="tableWidth"
               name="tableWidth"
               type="number"
@@ -559,6 +563,7 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
           <div className="flex gap-2 items-center">
             <label htmlFor="tableHeight">{t("height")}</label>
             <input
+              spellCheck
               id="tableHeight"
               name="tableHeight"
               type="number"

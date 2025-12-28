@@ -18,6 +18,7 @@ export default function SubheadingWidget({
 
   return (
     <textarea
+      spellCheck
       className="w-full min-h-[32px] text-lg leading-snug font-semibold text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 resize-none overflow-hidden"
       placeholder="Введите подзаголовок"
       value={value}
@@ -25,4 +26,3 @@ export default function SubheadingWidget({
     />
   );
 }
-

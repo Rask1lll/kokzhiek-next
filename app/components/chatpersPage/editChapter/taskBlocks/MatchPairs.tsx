@@ -548,6 +548,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
         <div className="text-sm text-gray-600">{t("questionLabel")}</div>
         <input
+          spellCheck
           type="text"
           placeholder={t("questionPlaceholder")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
@@ -623,6 +624,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                     {t("answerVariant")}
                   </span>
                   <input
+                    spellCheck={false}
                     type="text"
                     value={pair.answer.text}
                     onChange={(e) =>
@@ -698,6 +700,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                     {t("cell")}
                   </span>
                   <input
+                    spellCheck
                     type="text"
                     value={pair.cell.text}
                     onChange={(e) =>

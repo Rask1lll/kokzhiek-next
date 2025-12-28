@@ -379,6 +379,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
         </div>
 
         <textarea
+          spellCheck
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
           placeholder={t("insertListPlaceholder")}
@@ -441,6 +442,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
                   className="w-4 h-4 text-blue-600 cursor-pointer"
                 />
                 <input
+                  spellCheck={false}
                   type="text"
                   value={option.body || ""}
                   onChange={(e) =>

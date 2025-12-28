@@ -83,6 +83,7 @@ export default function HeadingWidget({ value, onChange }: HeadingWidgetProps) {
 
       {/* Heading input */}
       <textarea
+        spellCheck
         className={`w-full min-h-[40px] leading-tight bg-transparent border-none outline-none placeholder:text-gray-400 resize-none overflow-hidden text-gray-900 ${
           headingStyles[data.level]
         }`}

@@ -60,7 +60,7 @@ export default function FillBlankView({
         if (blanks.includes(blankId)) {
           return (
             <input
-              key={index}
+              key={index} spellCheck={true}
               type="text"
               value={answers[blankId] || ""}
               onChange={(e) => handleInput(blankId, e.target.value)}

@@ -59,7 +59,11 @@ export default function ListWidget({ value, onChange }: ListWidgetProps) {
       e.preventDefault();
       addItem();
       // Focus will be handled by React re-render
-    } else if (e.key === "Backspace" && items[index].text === "" && items.length > 1) {
+    } else if (
+      e.key === "Backspace" &&
+      items[index].text === "" &&
+      items.length > 1
+    ) {
       e.preventDefault();
       removeItem(id);
     }
@@ -101,6 +105,7 @@ export default function ListWidget({ value, onChange }: ListWidgetProps) {
               {listType === "bullet" ? "•" : `${index + 1}.`}
             </span>
             <input
+              spellCheck
               type="text"
               value={item.text}
               onChange={(e) => handleItemChange(item.id, e.target.value)}
@@ -134,4 +139,3 @@ export default function ListWidget({ value, onChange }: ListWidgetProps) {
     </div>
   );
 }
-

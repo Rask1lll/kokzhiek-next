@@ -19,6 +19,7 @@ export default function CreateChapterModalWindow() {
       <h1 className="border-b p-5 border-gray-300 ">{t("createTitle")}</h1>
       <div className="py-4 p-2">
         <input
+          spellCheck
           type="text"
           placeholder={t("titlePlaceholder")}
           id="Chapter title"

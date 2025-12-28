@@ -88,9 +88,7 @@ export default function CreateBookModal() {
             <h2 className="text-2xl font-semibold text-gray-900">
               {t("title")}
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              {t("subtitle")}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{t("subtitle")}</p>
           </div>
           <span className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-500"></span>
         </div>
@@ -105,6 +103,7 @@ export default function CreateBookModal() {
               {t("bookTitle")}
             </label>
             <input
+              spellCheck
               type="text"
               placeholder={t("bookTitlePlaceholder")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -118,6 +117,7 @@ export default function CreateBookModal() {
               {t("author")}
             </label>
             <input
+              spellCheck
               type="text"
               placeholder={t("authorPlaceholder")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -225,6 +225,7 @@ export default function CreateBookModal() {
           </label>
           <textarea
             rows={4}
+            spellCheck
             placeholder={t("descriptionPlaceholder")}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
             value={description}
@@ -256,6 +257,7 @@ export default function CreateBookModal() {
               {t("isbn")}
             </label>
             <input
+              spellCheck
               type="text"
               placeholder={t("isbnPlaceholder")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

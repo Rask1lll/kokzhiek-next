@@ -118,7 +118,7 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t("email")}
               </label>
-              <input
+              <input spellCheck={true}
                 type="email"
                 placeholder="example@domain.com"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
@@ -132,7 +132,7 @@ export default function LoginPage() {
                 {t("password")}
               </label>
               <div className="relative">
-                <input
+                <input spellCheck={true}
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"

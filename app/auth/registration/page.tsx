@@ -74,7 +74,9 @@ export default function RegisterPage() {
 
   const getInputClassName = (fieldName: string, hasRightPadding = false) => {
     const hasError = fieldErrors[fieldName];
-    const baseClass = `w-full px-4 py-3 ${hasRightPadding ? "pr-12" : ""} border rounded-xl focus:ring-2 focus:border-transparent transition-all outline-none`;
+    const baseClass = `w-full px-4 py-3 ${
+      hasRightPadding ? "pr-12" : ""
+    } border rounded-xl focus:ring-2 focus:border-transparent transition-all outline-none`;
     return hasError
       ? `${baseClass} border-red-500 focus:ring-red-500 bg-red-50`
       : `${baseClass} border-gray-300 focus:ring-indigo-500`;
@@ -126,6 +128,7 @@ export default function RegisterPage() {
                   {t("name")}
                 </label>
                 <input
+                  spellCheck
                   type="text"
                   className={`${getInputClassName("name")} text-sm`}
                   value={firstName}
@@ -142,6 +145,7 @@ export default function RegisterPage() {
                   {t("surname")}
                 </label>
                 <input
+                  spellCheck
                   type="text"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-sm"
                   value={lastName}
@@ -155,6 +159,7 @@ export default function RegisterPage() {
                 {t("email")}
               </label>
               <input
+                spellCheck
                 type="email"
                 placeholder="example@domain.com"
                 className={getInputClassName("email")}
@@ -174,6 +179,7 @@ export default function RegisterPage() {
               </label>
               <div className="relative">
                 <input
+                  spellCheck
                   type={showPassword ? "text" : "password"}
                   className={getInputClassName("password", true)}
                   value={password}
@@ -218,6 +224,7 @@ export default function RegisterPage() {
               </label>
               <div className="relative">
                 <input
+                  spellCheck
                   type={showConfirmPassword ? "text" : "password"}
                   className={getInputClassName("password_confirmation", true)}
                   value={confirmPassword}
@@ -259,9 +266,12 @@ export default function RegisterPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t("registrationKey")}{" "}
-                <span className="text-gray-400 font-normal">({t("optional")})</span>
+                <span className="text-gray-400 font-normal">
+                  ({t("optional")})
+                </span>
               </label>
               <input
+                spellCheck
                 type="text"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
                 value={registrationKey}
@@ -272,7 +282,9 @@ export default function RegisterPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t("publisher")}{" "}
-                <span className="text-gray-400 font-normal">({t("optional")})</span>
+                <span className="text-gray-400 font-normal">
+                  ({t("optional")})
+                </span>
               </label>
               <div className="relative">
                 <select

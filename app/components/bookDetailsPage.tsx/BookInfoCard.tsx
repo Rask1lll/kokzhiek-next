@@ -317,7 +317,7 @@ export default function BookInfoCard({
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t("rejectReason")} *
               </label>
-              <textarea
+              <textarea spellCheck={false}
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder={t("rejectReasonPlaceholder")}

@@ -371,6 +371,7 @@ export default function Sort({ widgetId }: SortProps) {
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
         <div className="text-sm text-gray-600">{t("questionLabel")}</div>
         <input
+          spellCheck={false}
           type="text"
           placeholder={t("questionLabel")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
@@ -409,6 +410,7 @@ export default function Sort({ widgetId }: SortProps) {
               {/* Column header */}
               <div className="flex items-center w-full justify-between gap-2">
                 <input
+                  spellCheck={false}
                   type="text"
                   value={column.question}
                   onChange={(e) =>
@@ -436,6 +438,7 @@ export default function Sort({ widgetId }: SortProps) {
                     className="flex items-center gap-2 p-0.5 bg-slate-50 rounded border border-slate-200"
                   >
                     <input
+                      spellCheck={false}
                       type="text"
                       value={card.text}
                       onChange={(e) =>

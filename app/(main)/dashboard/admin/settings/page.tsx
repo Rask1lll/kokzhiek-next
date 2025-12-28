@@ -134,6 +134,7 @@ export default function SettingsPage() {
               {t("siteName")}
             </label>
             <input
+              spellCheck
               type="text"
               value={settings.site_name}
               onChange={(e) => updateSetting("site_name", e.target.value)}
@@ -145,8 +146,11 @@ export default function SettingsPage() {
               {t("siteDescription")}
             </label>
             <textarea
+              spellCheck
               value={settings.site_description}
-              onChange={(e) => updateSetting("site_description", e.target.value)}
+              onChange={(e) =>
+                updateSetting("site_description", e.target.value)
+              }
               rows={3}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
             />
@@ -181,12 +185,8 @@ export default function SettingsPage() {
 
           <label className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer">
             <div>
-              <p className="font-medium text-gray-900">
-                {t("requireKey")}
-              </p>
-              <p className="text-sm text-gray-500">
-                {t("requireKeyDesc")}
-              </p>
+              <p className="font-medium text-gray-900">{t("requireKey")}</p>
+              <p className="text-sm text-gray-500">{t("requireKeyDesc")}</p>
             </div>
             <input
               type="checkbox"
@@ -204,7 +204,9 @@ export default function SettingsPage() {
             </label>
             <select
               value={settings.default_user_role}
-              onChange={(e) => updateSetting("default_user_role", e.target.value)}
+              onChange={(e) =>
+                updateSetting("default_user_role", e.target.value)
+              }
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
             >
               <option value="student">{tRoles("student")}</option>
@@ -225,12 +227,16 @@ export default function SettingsPage() {
               {t("maxBooksPerUser")}
             </label>
             <input
+              spellCheck
               type="number"
               min={1}
               max={100}
               value={settings.max_books_per_user}
               onChange={(e) =>
-                updateSetting("max_books_per_user", parseInt(e.target.value) || 10)
+                updateSetting(
+                  "max_books_per_user",
+                  parseInt(e.target.value) || 10
+                )
               }
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
@@ -240,12 +246,16 @@ export default function SettingsPage() {
               {t("maxChaptersPerBook")}
             </label>
             <input
+              spellCheck
               type="number"
               min={1}
               max={200}
               value={settings.max_chapters_per_book}
               onChange={(e) =>
-                updateSetting("max_chapters_per_book", parseInt(e.target.value) || 50)
+                updateSetting(
+                  "max_chapters_per_book",
+                  parseInt(e.target.value) || 50
+                )
               }
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />

@@ -342,6 +342,7 @@ export default function TaskBlockWrapper({
           </button>
           {showHintInput && (
             <input
+              spellCheck={true}
               type="text"
               value={hint}
               onChange={(e) => updateHint(e.target.value)}

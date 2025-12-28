@@ -309,6 +309,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
           placeholder={t("questionPlaceholder")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
           value={currentQuestion.body || ""}
+          spellCheck={true}
           onChange={(e) => updateQuestionBody(e.target.value)}
         />
       </div>
@@ -348,6 +349,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
                 }
                 placeholder={t("optionPlaceholder", { number: index + 1 })}
                 className="flex-1 px-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                spellCheck={true}
               />
 
               {/* Image upload button */}
@@ -430,7 +432,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
                     unoptimized
                   />
                 </div>
-                {/* <input
+                {/* <input spellCheck={true}
                     type="range"
                     className="w-full absolute h-2 bottom-0 left-0"
                     max={100}

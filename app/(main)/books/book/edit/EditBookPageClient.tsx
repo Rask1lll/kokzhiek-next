@@ -191,9 +191,7 @@ export default function EditBookPageClient() {
             <h1 className="text-2xl font-semibold text-gray-900">
               {t("title")}
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              {t("subtitle")}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{t("subtitle")}</p>
           </div>
 
           <div className="px-8 py-6 space-y-6">
@@ -268,6 +266,7 @@ export default function EditBookPageClient() {
                   {t("bookTitle")}
                 </label>
                 <input
+                  spellCheck
                   type="text"
                   placeholder={t("bookTitlePlaceholder")}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
@@ -290,6 +289,7 @@ export default function EditBookPageClient() {
                   {t("author")}
                 </label>
                 <input
+                  spellCheck
                   type="text"
                   placeholder={t("authorPlaceholder")}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -365,6 +365,7 @@ export default function EditBookPageClient() {
               </label>
               <textarea
                 rows={4}
+                spellCheck
                 placeholder={t("descriptionPlaceholder")}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
                 value={description}
@@ -395,6 +396,7 @@ export default function EditBookPageClient() {
                   {t("isbn")}
                 </label>
                 <input
+                  spellCheck
                   type="text"
                   placeholder={t("isbnPlaceholder")}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
@@ -417,6 +419,7 @@ export default function EditBookPageClient() {
                   {t("year")}
                 </label>
                 <input
+                  spellCheck
                   type="number"
                   placeholder={t("yearPlaceholder")}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
@@ -442,6 +445,7 @@ export default function EditBookPageClient() {
                 {t("edition")}
               </label>
               <input
+                spellCheck
                 type="text"
                 placeholder={t("editionPlaceholder")}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

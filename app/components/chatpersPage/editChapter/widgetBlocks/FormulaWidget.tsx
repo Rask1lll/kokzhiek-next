@@ -16,6 +16,7 @@ export default function FormulaWidget({ value, onChange }: FormulaWidgetProps) {
   return (
     <div className="space-y-3">
       <textarea
+        spellCheck
         className="w-full min-h-[60px] bg-transparent border border-gray-200 rounded-md px-2 py-1 text-sm font-mono outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-300 placeholder:text-gray-400"
         placeholder="Введите формулу в формате LaTeX, например: \int_0^1 x^2 dx"
         value={value}
