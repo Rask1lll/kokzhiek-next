@@ -24,7 +24,8 @@ export default function CreateBookModal() {
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("Начальный");
   const [isbn, setIsbn] = useState("");
-  const [, setCoverFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
   const { createBook } = useBooks();
@@ -56,6 +57,16 @@ export default function CreateBookModal() {
   const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     setCoverFile(file);
+
+    if (coverPreview) {
+      URL.revokeObjectURL(coverPreview);
+    }
+
+    if (file) {
+      setCoverPreview(URL.createObjectURL(file));
+    } else {
+      setCoverPreview(null);
+    }
   };
   function handleCreateBook() {
     const languageCode = LANGUAGE_CODE_MAP[language] ?? "kk";
@@ -69,6 +80,7 @@ export default function CreateBookModal() {
       grade_id: gradeId || undefined,
       subject_id: subjectId ?? undefined,
       isbn: isbn.trim() || undefined,
+      cover: coverFile || undefined,
       settings: {
         author: author.trim() || undefined,
         difficulty,
@@ -153,9 +165,17 @@ export default function CreateBookModal() {
           </div>
 
           <div className="hidden md:flex items-center justify-center">
-            <div className="h-40 w-28 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
-              {t("coverPreview")}
-            </div>
+            {coverPreview ? (
+              <img
+                src={coverPreview}
+                alt={t("coverPreview")}
+                className="h-40 w-28 rounded-lg object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="h-40 w-28 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
+                {t("coverPreview")}
+              </div>
+            )}
           </div>
         </div>
 

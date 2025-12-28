@@ -1,4 +1,4 @@
-import { getAuthHeaders, getToken } from "../../libs/auth";
+import { getAuthHeaders, getAuthHeadersFormdata } from "../../libs/auth";
 import { Book, BookStatus } from "../../types/book";
 import { ConstructorResponse } from "../../types/constructorResponse";
 import { CreateBookPayload } from "../../types/CreateBookPayload";
@@ -12,16 +12,38 @@ export type ApiResult<T> =
 export async function handleCreateBook(
   payload: CreateBookPayload
 ): Promise<ConstructorResponse<Book> | undefined> {
-  const data = JSON.stringify(payload);
-
-  console.log(data);
   try {
+    const formData = new FormData();
+    formData.append("title", payload.title);
+
+    if (payload.description) {
+      formData.append("description", payload.description);
+    }
+    if (payload.language) {
+      formData.append("language", payload.language);
+    }
+    if (payload.grade_id) {
+      formData.append("grade_id", String(payload.grade_id));
+    }
+    if (payload.subject_id) {
+      formData.append("subject_id", String(payload.subject_id));
+    }
+    if (payload.isbn) {
+      formData.append("isbn", payload.isbn);
+    }
+    if (payload.cover) {
+      formData.append("cover", payload.cover);
+    }
+    // if (payload.settings) {
+    //   formData.append("settings", JSON.stringify(payload.settings));
+    // }
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books`,
       {
-        headers: getAuthHeaders(),
         method: "POST",
-        body: data,
+        headers: getAuthHeadersFormdata(),
+        body: formData,
       }
     );
 
@@ -145,16 +167,11 @@ export async function handleUploadBookCover(
     const formData = new FormData();
     formData.append("cover", file);
 
-    const token = getToken();
-
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}/cover`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+        headers: getAuthHeadersFormdata(),
         body: formData,
       }
     );

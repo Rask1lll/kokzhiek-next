@@ -25,3 +25,11 @@ export function getAuthHeaders() {
     Accept: "application/json",
   };
 }
+
+export function getAuthHeadersFormdata() {
+  const token = getToken();
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/json",
+  };
+}

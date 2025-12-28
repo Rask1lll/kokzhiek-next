@@ -5,6 +5,7 @@ export type CreateBookPayload = {
   grade_id?: number;
   subject_id?: number;
   isbn?: string;
+  cover?: File;
   settings: {
     author?: string;
     difficulty?: string | number;
