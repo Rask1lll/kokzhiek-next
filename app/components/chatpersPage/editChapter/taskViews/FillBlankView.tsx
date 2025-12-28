@@ -60,11 +60,15 @@ export default function FillBlankView({
         if (blanks.includes(blankId)) {
           return (
             <input
-              key={index} spellCheck={true}
+              key={index}
+              spellCheck={true}
               type="text"
               value={answers[blankId] || ""}
-              onChange={(e) => handleInput(blankId, e.target.value)}
-              placeholder={blankOptionsMap[blankId] || "..."}
+              onChange={(e) => {
+                handleInput(blankId, e.target.value);
+                e.target.style.width = `${e.target.scrollWidth}px`;
+              }}
+              placeholder={"..."}
               className="mx-1 px-2 py-0.5 w-28 text-center text-sm bg-white border-b-2 border-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
             />
           );
