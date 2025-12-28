@@ -9,18 +9,19 @@ import ViewPlaceholder from "./ViewPlaceholder";
 import { useBlocks } from "@/app/hooks/useBlocks";
 import { FiTrash2, FiDroplet } from "react-icons/fi";
 import { CgOptions } from "react-icons/cg";
+import { useTranslations } from "next-intl";
 
-// Предустановленные цвета
-const PRESET_COLORS = [
-  { name: "По умолчанию", value: "" },
-  { name: "Белый", value: "#ffffff" },
-  { name: "Светло-серый", value: "#f3f4f6" },
-  { name: "Голубой", value: "#dbeafe" },
-  { name: "Зелёный", value: "#dcfce7" },
-  { name: "Жёлтый", value: "#fef9c3" },
-  { name: "Розовый", value: "#fce7f3" },
-  { name: "Фиолетовый", value: "#ede9fe" },
-  { name: "Оранжевый", value: "#ffedd5" },
+// Color keys for translation
+const PRESET_COLOR_KEYS = [
+  { key: "colorDefault", value: "" },
+  { key: "colorWhite", value: "#ffffff" },
+  { key: "colorLightGray", value: "#f3f4f6" },
+  { key: "colorBlue", value: "#dbeafe" },
+  { key: "colorGreen", value: "#dcfce7" },
+  { key: "colorYellow", value: "#fef9c3" },
+  { key: "colorPink", value: "#fce7f3" },
+  { key: "colorPurple", value: "#ede9fe" },
+  { key: "colorOrange", value: "#ffedd5" },
 ];
 
 type LayoutProps = {
@@ -183,6 +184,7 @@ const BlockMenu = ({
   onColorChange,
   onDelete,
 }: BlockMenuProps) => {
+  const t = useTranslations("blockEditor");
   const [isOpen, setIsOpen] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [tempColor, setTempColor] = useState<string | null>(null);
@@ -226,7 +228,7 @@ const BlockMenu = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-1.5 hover:bg-gray-200 border border-gray-300 border-l-0 rounded-l-none rounded-md transition-colors"
-        title="Меню блока"
+        title={t("blockMenu")}
       >
         <CgOptions className="w-7 h-7 text-gray-500" />
       </button>
@@ -244,7 +246,7 @@ const BlockMenu = ({
               className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             >
               <FiDroplet className="w-4 h-4" />
-              Цвет фона
+              {t("backgroundColor")}
               <div
                 className="w-4 h-4 rounded border border-gray-300 ml-auto"
                 style={{
@@ -256,7 +258,7 @@ const BlockMenu = ({
             {showColorPicker && (
               <div className="absolute right-full top-0 mr-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[180px] z-30">
                 <div className="grid grid-cols-3 gap-1.5">
-                  {PRESET_COLORS.map((color) => (
+                  {PRESET_COLOR_KEYS.map((color) => (
                     <button
                       key={color.value || "default"}
                       onClick={() => {
@@ -272,14 +274,14 @@ const BlockMenu = ({
                       style={{
                         backgroundColor: color.value || "#f3f4f6",
                       }}
-                      title={color.name}
+                      title={t(color.key)}
                     />
                   ))}
                 </div>
                 {/* Custom color */}
                 <div className="mt-2 pt-2 border-t border-gray-100">
                   <label className="text-xs text-gray-500 block mb-1">
-                    Свой цвет
+                    {t("customColor")}
                   </label>
                   <input
                     type="color"
@@ -307,7 +309,7 @@ const BlockMenu = ({
           {/* Delete option */}
           <button
             onClick={() => {
-              if (confirm("Удалить этот блок?")) {
+              if (confirm(t("confirmDeleteBlock"))) {
                 onDelete();
               }
               setIsOpen(false);
@@ -315,7 +317,7 @@ const BlockMenu = ({
             className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
           >
             <FiTrash2 className="w-4 h-4" />
-            Удалить блок
+            {t("deleteBlock")}
           </button>
         </div>
       )}

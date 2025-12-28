@@ -502,5 +502,25 @@
     "word_searchDesc": "Поиск слов в сетке букв",
     "crossword": "Кроссворд",
     "crosswordDesc": "Разгадывание кроссворда по определениям"
+  },
+  "blockEditor": {
+    "blockMenu": "Меню блока",
+    "backgroundColor": "Цвет фона",
+    "customColor": "Свой цвет",
+    "deleteBlock": "Удалить блок",
+    "confirmDeleteBlock": "Удалить этот блок?",
+    "deleteWidget": "Удалить виджет",
+    "confirmDeleteWidget": "Удалить этот виджет?",
+    "widgetDeleteError": "Ошибка при удалении виджета",
+    "unknownWidgetType": "Неизвестный тип виджета:",
+    "colorDefault": "По умолчанию",
+    "colorWhite": "Белый",
+    "colorLightGray": "Светло-серый",
+    "colorBlue": "Голубой",
+    "colorGreen": "Зелёный",
+    "colorYellow": "Жёлтый",
+    "colorPink": "Розовый",
+    "colorPurple": "Фиолетовый",
+    "colorOrange": "Оранжевый"
   }
 }

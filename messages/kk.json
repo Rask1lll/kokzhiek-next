@@ -502,5 +502,25 @@
     "word_searchDesc": "Әріптер торынан сөздерді іздеу",
     "crossword": "Кроссворд",
     "crosswordDesc": "Анықтамалар бойынша кроссвордты шешу"
+  },
+  "blockEditor": {
+    "blockMenu": "Блок мәзірі",
+    "backgroundColor": "Фон түсі",
+    "customColor": "Өз түсі",
+    "deleteBlock": "Блокты жою",
+    "confirmDeleteBlock": "Бұл блокты жою керек пе?",
+    "deleteWidget": "Виджетті жою",
+    "confirmDeleteWidget": "Бұл виджетті жою керек пе?",
+    "widgetDeleteError": "Виджетті жою кезінде қате",
+    "unknownWidgetType": "Белгісіз виджет түрі:",
+    "colorDefault": "Әдепкі",
+    "colorWhite": "Ақ",
+    "colorLightGray": "Ашық сұр",
+    "colorBlue": "Көк",
+    "colorGreen": "Жасыл",
+    "colorYellow": "Сары",
+    "colorPink": "Қызғылт",
+    "colorPurple": "Күлгін",
+    "colorOrange": "Қызғылт сары"
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Widget } from "@/app/types/widget";
+import { useTranslations } from "next-intl";
 
 // View components for widgets
 import HeadingView from "./viewBlocks/HeadingView";
@@ -37,6 +38,7 @@ export default function ViewPlaceholder({
   widget,
   onAnswerChange,
 }: ViewPlaceholderProps) {
+  const t = useTranslations("blockEditor");
   const textValue = (widget.data?.text as string) || "";
   const urlValue = (widget.data?.url as string) || "";
 
@@ -133,7 +135,7 @@ export default function ViewPlaceholder({
     default:
       content = (
         <div className="p-4 bg-gray-100 w-full rounded-lg text-gray-500 text-center">
-          Неизвестный тип виджета: {widget.type}
+          {t("unknownWidgetType")} {widget.type}
         </div>
       );
   }

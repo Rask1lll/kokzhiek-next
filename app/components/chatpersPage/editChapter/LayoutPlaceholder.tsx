@@ -17,6 +17,7 @@ import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
 import { FiTrash2 } from "react-icons/fi";
 import { Widget } from "@/app/types/widget";
+import { useTranslations } from "next-intl";
 import MultipleChoice from "./taskBlocks/MultipleChoice";
 import SingleChoice from "./taskBlocks/SingleChoice";
 import DropDown from "./taskBlocks/DropDown";
@@ -45,6 +46,7 @@ const LayoutPlaceholder = ({
   column,
   widget,
 }: LayoutPlaceholderProps) => {
+  const t = useTranslations("blockEditor");
   const { addContent, removeContent } = useModalWindowStore();
   const {
     create: createWidget,
@@ -57,15 +59,15 @@ const LayoutPlaceholder = ({
 
   const handleDelete = useCallback(async () => {
     if (!widget || isDeleting) return;
-    if (!confirm("Удалить этот виджет?")) return;
+    if (!confirm(t("confirmDeleteWidget"))) return;
 
     setIsDeleting(true);
     const success = await removeWidget(blockId, widget.id);
     if (!success) {
-      alert("Ошибка при удалении виджета");
+      alert(t("widgetDeleteError"));
     }
     setIsDeleting(false);
-  }, [widget, blockId, isDeleting, removeWidget]);
+  }, [widget, blockId, isDeleting, removeWidget, t]);
 
   const handleChange = useCallback(
     (value: string) => {
@@ -255,7 +257,7 @@ const LayoutPlaceholder = ({
           onClick={handleDelete}
           disabled={isDeleting}
           className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed z-10"
-          title="Удалить виджет"
+          title={t("deleteWidget")}
         >
           {isDeleting ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
