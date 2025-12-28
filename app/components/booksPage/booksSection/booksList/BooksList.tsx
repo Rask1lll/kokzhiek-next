@@ -30,6 +30,7 @@ export default function BooksList() {
             <BookCard
               bookId={el.id}
               name={el.title}
+              coverImageUrl={el.cover_image_url}
               key={el.id}
               onDelete={deleteBook}
             />

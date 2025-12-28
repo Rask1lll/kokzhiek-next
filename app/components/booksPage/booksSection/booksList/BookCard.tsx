@@ -12,11 +12,12 @@ type BookCardProps = {
   name: string;
   status?: BookStatus;
   grade?: string;
+  coverImageUrl?: string;
   onDelete: (bookId: number, bookTitle: string) => void;
   viewMode?: ViewMode;
 };
 
-export default function BookCard({ bookId, name, status = "draft", grade, onDelete, viewMode = "grid" }: BookCardProps) {
+export default function BookCard({ bookId, name, status = "draft", grade, coverImageUrl, onDelete, viewMode = "grid" }: BookCardProps) {
   const t = useTranslations("status");
 
   const STATUS_CONFIG: Record<BookStatus, { label: string; bg: string; color: string }> = {
@@ -42,13 +43,20 @@ export default function BookCard({ bookId, name, status = "draft", grade, onDele
         >
           <div className="flex items-center gap-4 p-4 w-full">
             <div className="relative w-20 h-28 shrink-0 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg">
-              <Image
-                src="https://placehold.co/600x400@2x.png"
-                alt={name}
-                width={80}
-                height={112}
-                className="w-full h-full object-cover"
-              />
+              {coverImageUrl ? (
+                <Image
+                  src={coverImageUrl}
+                  alt={name}
+                  width={80}
+                  height={112}
+                  className="w-full h-full object-cover"
+                  unoptimized={process.env.NODE_ENV === "development"}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center p-2">
+                  {name.slice(0, 20)}
+                </div>
+              )}
             </div>
 
             <div className="flex-1 min-w-0 flex items-center justify-between">
@@ -86,13 +94,20 @@ export default function BookCard({ bookId, name, status = "draft", grade, onDele
           className="block bg-white rounded-xl shadow-lg hover:shadow-xl transform transition-all overflow-hidden cursor-pointer"
         >
           <div className="h-80 relative overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">
-            <Image
-              src="https://placehold.co/600x400@2x.png"
-              alt={name}
-              width={400}
-              height={600}
-              className="w-full h-full object-cover"
-            />
+            {coverImageUrl ? (
+              <Image
+                src={coverImageUrl}
+                alt={name}
+                width={400}
+                height={600}
+                className="w-full h-full object-cover"
+                unoptimized={process.env.NODE_ENV === "development"}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400 text-lg text-center p-4">
+                {name}
+              </div>
+            )}
           </div>
 
           <div className="p-4 h-24 relative">

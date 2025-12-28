@@ -62,6 +62,7 @@ export default function BooksPageClient() {
               name={el.title}
               status={el.status}
               grade={el.grade?.label}
+              coverImageUrl={el.cover_image_url}
               key={el.id}
               onDelete={deleteBook}
               viewMode={viewMode}
