@@ -59,9 +59,10 @@ export default function BookPrintClient() {
         const chaptersWithBlocks: ChapterWithBlocks[] = [];
 
         for (const chapter of sortedChapters) {
+          if (!bookId) return;
           try {
             const chapterState = await getChapterState(
-              bookId!,
+              bookId,
               String(chapter.id)
             );
             if (chapterState.success) {
