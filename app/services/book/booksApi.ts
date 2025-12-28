@@ -32,6 +32,10 @@ export async function handleCreateBook(
 }
 
 export type GetBooksParams = {
+  search?: string;
+  grade_id?: number;
+  subject_id?: number;
+  status?: BookStatus;
   sort_by?: "recent" | "title";
   sort_order?: "asc" | "desc";
 };
@@ -43,6 +47,18 @@ export async function handleGetBooks(
     const url = new URL(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books`
     );
+    if (params?.search) {
+      url.searchParams.set("search", params.search);
+    }
+    if (params?.grade_id) {
+      url.searchParams.set("grade_id", String(params.grade_id));
+    }
+    if (params?.subject_id) {
+      url.searchParams.set("subject_id", String(params.subject_id));
+    }
+    if (params?.status) {
+      url.searchParams.set("status", params.status);
+    }
     if (params?.sort_by) {
       url.searchParams.set("sort_by", params.sort_by);
     }

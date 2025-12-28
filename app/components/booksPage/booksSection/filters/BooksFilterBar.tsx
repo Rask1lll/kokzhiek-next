@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import BooksSearchInput from "./BooksSearchInput";
 import BooksStatusFilter from "./BooksStatusFilter";
 import BooksSortSelect from "./BooksSortSelect";
 import BooksViewModeToggle, { ViewMode } from "./BooksViewModeToggle";
+import { BookStatus } from "@/app/types/book";
+import { Subject } from "@/app/types/subject";
+import { fetchSubjects } from "@/app/services/subjectsApi";
 
-type FilterId = "all" | "drafts" | "inProgress" | "completed";
+type StatusFilterId = "all" | BookStatus;
 type SortId = "recent-desc" | "recent-asc" | "title-asc" | "title-desc";
 
 export type SortBy = "recent" | "title";
@@ -15,7 +18,9 @@ export type SortOrder = "asc" | "desc";
 
 export type BooksFilterState = {
   search: string;
-  filter: FilterId;
+  status: StatusFilterId;
+  gradeId: number | null;
+  subjectId: number | null;
   sort: SortId;
   sortBy: SortBy;
   sortOrder: SortOrder;
@@ -30,22 +35,49 @@ function parseSortOption(sortId: SortId): {
   return { sortBy, sortOrder };
 }
 
+const GRADES = [
+  { id: 1, label: "1 класс" },
+  { id: 2, label: "2 класс" },
+  { id: 3, label: "3 класс" },
+  { id: 4, label: "4 класс" },
+  { id: 5, label: "5 класс" },
+  { id: 6, label: "6 класс" },
+  { id: 7, label: "7 класс" },
+  { id: 8, label: "8 класс" },
+  { id: 9, label: "9 класс" },
+  { id: 10, label: "10 класс" },
+  { id: 11, label: "11 класс" },
+];
+
 type BooksFilterBarProps = {
   onChange?: (state: BooksFilterState) => void;
 };
 
 export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
   const t = useTranslations("filters");
+  const tStatus = useTranslations("status");
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterId>("all");
+  const [activeStatus, setActiveStatus] = useState<StatusFilterId>("all");
+  const [gradeId, setGradeId] = useState<number | null>(null);
+  const [subjectId, setSubjectId] = useState<number | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [sortOption, setSortOption] = useState<SortId>("recent-desc");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
-  const FILTERS = [
+  useEffect(() => {
+    fetchSubjects().then((res) => {
+      if (res?.data) {
+        setSubjects(res.data);
+      }
+    });
+  }, []);
+
+  const STATUS_FILTERS = [
     { id: "all", label: t("allBooks") },
-    { id: "drafts", label: t("drafts") },
-    { id: "inProgress", label: t("inProgress") },
-    { id: "completed", label: t("completed") },
+    { id: "draft", label: tStatus("draft") },
+    { id: "pending", label: tStatus("pending") },
+    { id: "published", label: tStatus("published") },
+    { id: "archived", label: tStatus("archived") },
   ] as const;
 
   const SORT_OPTIONS = [
@@ -62,11 +94,15 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
     const { sortBy, sortOrder } = parseSortOption(currentSort);
     const currentViewMode = next.viewMode ?? viewMode;
     const currentSearch = next.search ?? search;
-    const currentFilter = next.filter ?? activeFilter;
+    const currentStatus = next.status ?? activeStatus;
+    const currentGradeId = next.gradeId !== undefined ? next.gradeId : gradeId;
+    const currentSubjectId = next.subjectId !== undefined ? next.subjectId : subjectId;
 
     const fullState: BooksFilterState = {
       search: currentSearch,
-      filter: currentFilter,
+      status: currentStatus,
+      gradeId: currentGradeId,
+      subjectId: currentSubjectId,
       sort: currentSort,
       sortBy,
       sortOrder,
@@ -78,13 +114,28 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
-    emitChange({ search: value });
   };
 
-  const handleFilterChange = (id: string) => {
-    const typedId = id as FilterId;
-    setActiveFilter(typedId);
-    emitChange({ filter: typedId });
+  const handleSearch = () => {
+    emitChange({ search });
+  };
+
+  const handleStatusChange = (id: string) => {
+    const typedId = id as StatusFilterId;
+    setActiveStatus(typedId);
+    emitChange({ status: typedId });
+  };
+
+  const handleGradeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value ? Number(e.target.value) : null;
+    setGradeId(value);
+    emitChange({ gradeId: value });
+  };
+
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value ? Number(e.target.value) : null;
+    setSubjectId(value);
+    emitChange({ subjectId: value });
   };
 
   const handleSortChange = (id: string) => {
@@ -101,16 +152,41 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
   return (
     <div className="w-full px-12 py-6">
       <div className="flex flex-col gap-4">
-        <BooksSearchInput value={search} onChange={handleSearchChange} />
+        <BooksSearchInput value={search} onChange={handleSearchChange} onSearch={handleSearch} />
 
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between">
           <BooksStatusFilter
-            filters={FILTERS}
-            activeFilter={activeFilter}
-            onChange={handleFilterChange}
+            filters={STATUS_FILTERS}
+            activeFilter={activeStatus}
+            onChange={handleStatusChange}
           />
 
-          <div className="flex items-center justify-between gap-3 md:justify-end">
+          <div className="max-w-xl flex flex-wrap items-center gap-3 md:justify-end">
+            <select
+              value={gradeId ?? ""}
+              onChange={handleGradeChange}
+              className="px-2 py-1.5 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">{t("allGrades")}</option>
+              {GRADES.map((grade) => (
+                <option key={grade.id} value={grade.id}>
+                  {grade.label}
+                </option>
+              ))}
+            </select>
+            <select
+              value={subjectId ?? ""}
+              onChange={handleSubjectChange}
+              className="px-2 py-1.5 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">{t("allSubjects")}</option>
+              {subjects.map((subject) => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.name_ru}
+                </option>
+              ))}
+            </select>
+
             <BooksSortSelect
               options={SORT_OPTIONS}
               value={sortOption}

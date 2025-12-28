@@ -21,7 +21,7 @@ export default function BooksStatusFilter({
           <button
             key={filter.id}
             type="button"
-            className={`px-3 py-1.5 rounded-full text-xs md:text-sm border transition-all ${
+            className={`px-3 py-1.5 max-h-9 rounded-full text-xs md:text-sm border transition-all ${
               isActive
                 ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"

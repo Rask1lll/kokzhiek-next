@@ -29,8 +29,11 @@
     "oldestFirst": "Сначала старые",
     "titleAZ": "По названию (А-Я)",
     "titleZA": "По названию (Я-А)",
-    "searchBooks": "Поиск книг",
-    "sort": "Сортировать"
+    "searchBooks": "Поиск книг...",
+    "search": "Найти",
+    "sort": "Сортировать",
+    "allGrades": "Все классы",
+    "allSubjects": "Все предметы"
   },
   "status": {
     "draft": "Черновик",
