@@ -49,7 +49,7 @@ export function canCreateBooks(user: UserData | null): boolean {
 
 // Может управлять ключами
 export function canManageKeys(user: UserData | null): boolean {
-  return hasRole(user, ["school_admin", "teacher"]);
+  return hasRole(user, ["school_admin"]);
 }
 
 // Может видеть пользователей школы
@@ -59,7 +59,7 @@ export function canViewMembers(user: UserData | null): boolean {
 
 // Может редактировать книги
 export function canEditBooks(user: UserData | null): boolean {
-  return isAuthor(user);
+  return hasRole(user, ["author"]);
 }
 
 // Получить отображаемое имя роли
@@ -83,7 +83,7 @@ export type DashboardSection =
   | "admin_settings";
 
 const SECTION_ACCESS: Record<DashboardSection, RoleAlias[]> = {
-  keys: ["school_admin", "teacher"],
+  keys: ["school_admin"],
   members: ["school_admin", "teacher"],
   stats: ["admin", "school_admin", "teacher"],
   admin_users: ["admin"],
