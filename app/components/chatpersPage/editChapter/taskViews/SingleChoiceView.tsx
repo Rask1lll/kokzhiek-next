@@ -62,7 +62,7 @@ export default function SingleChoiceView({
             <div className="flex-1 flex flex-col gap-2">
               <span className="text-gray-800">{option.body}</span>
               {option.image_url && (
-                <div className="relative w-full max-w-xs h-48 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                <div className="relative w-full max-w-xl h-70 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                   <Image
                     src={option.image_url}
                     alt={option.body || "Изображение опции"}

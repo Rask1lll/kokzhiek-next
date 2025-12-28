@@ -12,7 +12,6 @@ import {
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
-import { TaskType } from "@/app/types/enums";
 
 type SingleChoiceProps = {
   widgetId: number;
@@ -28,6 +27,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
     new Map()
   );
   const fileInputRefs = useRef<Map<number, HTMLInputElement>>(new Map());
+  const [imgSize, setImgSize] = useState<number>(40);
 
   // Ensure questions is an array
   const questionsArray = useMemo(
@@ -109,7 +109,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
     const newOptions = [
       ...(currentQuestion.options || []),
       {
-        body: "Новый вариант",
+        body: "",
         image_url: null,
         is_correct: false,
         match_id: null,
@@ -299,6 +299,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
         <div className="text-sm text-gray-600">Вопрос к заданию</div>
         <input
           type="text"
+          name="single_choice_input"
           placeholder="Вопрос к заданию"
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
           value={currentQuestion.body || ""}
@@ -414,14 +415,26 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
             {/* Image preview */}
             {option.image_url && (
               <div className="relative ml-7 mt-2">
-                <div className="relative w-32 h-32 border border-slate-200 rounded-lg overflow-hidden">
+                <div className="relative w-full max-w-xl h-70 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                   <Image
                     src={option.image_url}
-                    alt={option.body || ""}
+                    alt={option.body || "Изображение опции"}
                     fill
-                    className="object-cover"
+                    className="object-contain"
+                    unoptimized
                   />
                 </div>
+                {/* <input
+                    type="range"
+                    className="w-full absolute h-2 bottom-0 left-0"
+                    max={100}
+                    min={10}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setImgSize(Number(e.target.value));
+                    }}
+                  /> */}
                 <button
                   type="button"
                   onClick={() => {

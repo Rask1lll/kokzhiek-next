@@ -25,6 +25,36 @@ type BookInfoCardProps = {
   onStatusChange?: (status: BookStatus) => void;
 };
 
+const STATUS_CONFIG: Record<
+  BookStatus,
+  { label: string; color: string; border: string; hoverBg: string }
+> = {
+  draft: {
+    label: "Черновик",
+    color: "text-gray-700",
+    border: "border-gray-300",
+    hoverBg: "hover:bg-gray-100",
+  },
+  pending: {
+    label: "На модерации",
+    color: "text-yellow-600",
+    border: "border-yellow-300",
+    hoverBg: "hover:bg-yellow-50",
+  },
+  published: {
+    label: "Опубликовано",
+    color: "text-green-600",
+    border: "border-green-300",
+    hoverBg: "hover:bg-green-50",
+  },
+  archived: {
+    label: "В архиве",
+    color: "text-red-600",
+    border: "border-red-300",
+    hoverBg: "hover:bg-red-50",
+  },
+};
+
 const PLACEHOLDER_COVER = "https://placehold.co/600x400@2x.png";
 
 export default function BookInfoCard({
@@ -49,11 +79,34 @@ export default function BookInfoCard({
 
   const isModerator = isAdmin(user);
 
-  const STATUS_CONFIG: Record<BookStatus, { label: string; color: string; border: string; hoverBg: string }> = {
-    draft: { label: tStatus("draft"), color: "text-gray-700", border: "border-gray-300", hoverBg: "hover:bg-gray-100" },
-    pending: { label: tStatus("pending"), color: "text-yellow-600", border: "border-yellow-300", hoverBg: "hover:bg-yellow-50" },
-    published: { label: tStatus("published"), color: "text-green-600", border: "border-green-300", hoverBg: "hover:bg-green-50" },
-    archived: { label: tStatus("archived"), color: "text-red-600", border: "border-red-300", hoverBg: "hover:bg-red-50" },
+  const STATUS_CONFIG: Record<
+    BookStatus,
+    { label: string; color: string; border: string; hoverBg: string }
+  > = {
+    draft: {
+      label: tStatus("draft"),
+      color: "text-gray-700",
+      border: "border-gray-300",
+      hoverBg: "hover:bg-gray-100",
+    },
+    pending: {
+      label: tStatus("pending"),
+      color: "text-yellow-600",
+      border: "border-yellow-300",
+      hoverBg: "hover:bg-yellow-50",
+    },
+    published: {
+      label: tStatus("published"),
+      color: "text-green-600",
+      border: "border-green-300",
+      hoverBg: "hover:bg-green-50",
+    },
+    archived: {
+      label: tStatus("archived"),
+      color: "text-red-600",
+      border: "border-red-300",
+      hoverBg: "hover:bg-red-50",
+    },
   };
 
   const handleStatusChange = async (newStatus: BookStatus) => {
@@ -94,7 +147,9 @@ export default function BookInfoCard({
               {title}
             </h1>
             {author && (
-              <p className="mt-1 text-sm text-gray-600">{t("author")}: {author}</p>
+              <p className="mt-1 text-sm text-gray-600">
+                {t("author")}: {author}
+              </p>
             )}
           </div>
 

@@ -21,6 +21,8 @@ export default function CreateChapterModalWindow() {
         <input
           type="text"
           placeholder={t("titlePlaceholder")}
+          id="Chapter title"
+          name="Chapter title"
           className="w-full ring-1 p-2 rounded-md"
           value={title}
           onChange={(event) => {
