@@ -27,21 +27,27 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
     new Map()
   );
   const fileInputRefs = useRef<Map<number, HTMLInputElement>>(new Map());
-  const [imgSize, setImgSize] = useState<number>(40);
+  // const [imgSize, setImgSize] = useState<number>(40);
 
-  // Ensure questions is an array
-  const questionsArray = useMemo(
-    () => (Array.isArray(questions) ? questions : []),
-    [questions]
-  );
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!currentQuestion) setCurrentQuestion(questions[0]);
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [questions]);
 
   // Initialize or update current question from questions array
   useEffect(() => {
     if (loading) return;
+    console.log(currentQuestion);
 
     // If we have questions, use the first one
-    if (questionsArray.length > 0) {
-      const firstQuestion = questionsArray[0];
+    if (
+      currentQuestion &&
+      currentQuestion.options &&
+      currentQuestion.options.length > 0
+    ) {
+      const firstQuestion = currentQuestion;
       // Only update if the question changed (different ID or more complete data)
       if (
         !currentQuestion ||
@@ -61,7 +67,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
     if (!hasCreatedQuestionRef.current && !currentQuestion) {
       hasCreatedQuestionRef.current = true;
     }
-  }, [questionsArray, loading, currentQuestion]);
+  }, [loading, currentQuestion]);
 
   useEffect(() => {
     const debounceTimer = debounceTimerRef.current;
@@ -94,10 +100,8 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
       const questionId = currentQuestion.id;
       debounceTimerRef.current = setTimeout(async () => {
         if (!questionId) return;
-        const trimmedBody = body;
-        if (trimmedBody.length === 0) return;
-
-        await update(questionId, { body: trimmedBody });
+        console.log(body);
+        await update(questionId, { body: body ?? "" });
       }, 500);
     },
     [currentQuestion, update]
