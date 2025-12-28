@@ -1,4 +1,5 @@
 import { Subject } from "./subject";
+import { Chapter } from "./chapter";
 
 export type BookStatus = "draft" | "pending" | "published" | "archived";
 
@@ -25,7 +26,7 @@ export type Book = {
   description?: string;
   cover_image_url?: string;
   settings?: BookSettings;
-  chapters?: unknown[];
+  chapters?: Chapter[];
   publication?: {
     is_published: boolean;
     publisher_id: number | null;

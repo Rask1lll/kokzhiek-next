@@ -205,9 +205,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="w-full space-y-4 p-4 text-gray-500">
-        {t("loadError")}
-      </div>
+      <div className="w-full space-y-4 p-4 text-gray-500">{t("loadError")}</div>
     );
   }
 

@@ -61,7 +61,7 @@ export default function BookPrintClient() {
         for (const chapter of sortedChapters) {
           try {
             const chapterState = await getChapterState(
-              bookId,
+              bookId!,
               String(chapter.id)
             );
             if (chapterState.success) {
@@ -177,9 +177,7 @@ export default function BookPrintClient() {
           ))}
 
           {chaptersData.length === 0 && (
-            <p className="text-gray-500 text-center py-10">
-              {t("noChapters")}
-            </p>
+            <p className="text-gray-500 text-center py-10">{t("noChapters")}</p>
           )}
         </div>
       </main>

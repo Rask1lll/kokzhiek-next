@@ -254,9 +254,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="w-full space-y-4 p-4 text-gray-500">
-        {t("loadError")}
-      </div>
+      <div className="w-full space-y-4 p-4 text-gray-500">{t("loadError")}</div>
     );
   }
 
@@ -391,14 +389,13 @@ export default function DragDrop({ widgetId }: DragDropProps) {
                   {/* Image preview */}
                   {option?.image_url && (
                     <div className="relative ml-12 mt-2">
-                      <div className="relative w-32 h-32 border border-slate-200 rounded-lg overflow-hidden">
-                        <Image
-                          src={option.image_url}
-                          alt={option.body || ""}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
+                      <Image
+                        src={option.image_url}
+                        alt={option.body || ""}
+                        width={100}
+                        height={100}
+                        className="w-50 h-auto"
+                      />
                       <button
                         type="button"
                         onClick={() => {
