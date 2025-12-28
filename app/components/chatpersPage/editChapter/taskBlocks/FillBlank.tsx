@@ -4,12 +4,14 @@ import Button from "@/app/components/Button/Button";
 import { useEffect, useCallback, useRef, useState } from "react";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type FillBlankProps = {
   widgetId: number;
 };
 
 export default function FillBlank({ widgetId }: FillBlankProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update } = useQuestions(widgetId);
 
   // Get first question from array
@@ -181,7 +183,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
               type="text"
               value={option.body || ""}
               onChange={(e) => updateBlankAnswer(blankId, e.target.value)}
-              placeholder="ответ"
+              placeholder={t("answerPlaceholderShort")}
               className="inline-block mx-1 px-2 py-0.5 w-28 text-center text-sm bg-white border-b-2 border-slate-400 focus:border-blue-500 focus:outline-none transition-colors"
             />
           );
@@ -195,7 +197,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -203,7 +205,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -214,10 +216,10 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-slate-700">
-            Текст задания:
+            {t("taskLabel")}
           </span>
           <Button
-            content="+ Вставить пропуск"
+            content={t("insertBlank")}
             color="blue"
             size="sm"
             onClick={insertBlank}
@@ -227,7 +229,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
         <textarea
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
-          placeholder="Введите текст. Нажмите '+ Вставить пропуск' для добавления поля ввода."
+          placeholder={t("insertBlankPlaceholder")}
           className="w-full min-h-[80px] px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
         />
       </div>
@@ -236,7 +238,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
       {currentQuestion.body && (
         <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
           <span className="text-xs text-slate-400 mb-3 block">
-            Заполните правильные ответы:
+            {t("fillCorrectAnswers")}
           </span>
           <div className="text-base text-slate-800 leading-loose">
             {renderPreview()}

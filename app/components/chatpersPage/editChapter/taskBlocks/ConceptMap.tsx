@@ -6,6 +6,7 @@ import { BsArrowBarRight } from "react-icons/bs";
 import Xarrow, { Xwrapper } from "react-xarrows";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type ConceptMapProps = {
   widgetId: number;
@@ -128,12 +129,14 @@ function Arrows({
   editArrow,
   removeArrow,
   cells,
+  t,
 }: {
   arrows: Arrow[];
   addArrow: () => void;
   editArrow: (a: Arrow) => void;
   removeArrow: (id: string) => void;
   cells: Cell[][];
+  t: (key: string) => string;
 }) {
   const [drafts, setDrafts] = useState<
     Record<string, { from: string; to: string }>
@@ -141,13 +144,13 @@ function Arrows({
   const [errors, setErrors] = useState<string[]>();
   return (
     <div>
-      <h3 className="font-medium text-xl mb-2">Стрелки между ячейками</h3>
+      <h3 className="font-medium text-xl mb-2">{t("arrowsBetweenCells")}</h3>
       <button
         color="green"
         className="bg-green-200/90 font-semibold text-green-900 opacity-80 cursor-pointer rounded-lg p-2 py-1"
         onClick={addArrow}
       >
-        Добавить стрелку +
+        {t("addArrow")}
       </button>
       <div className="flex flex-col gap-2 mt-4 justify-center">
         {arrows.map((el) => {
@@ -216,7 +219,7 @@ function Arrows({
                 <button
                   className="ml-2 text-red-500 hover:text-red-700 font-bold"
                   onClick={() => removeArrow(el.id)}
-                  title="Удалить стрелку"
+                  title={t("deleteArrow")}
                 >
                   <BiTrash className="text-red-500" />
                 </button>
@@ -224,7 +227,7 @@ function Arrows({
 
               {errors?.includes(el.id) && (
                 <div className="text-red-400 text-sm mt-1">
-                  Неприменимый id элемента
+                  {t("invalidCellId")}
                 </div>
               )}
             </div>
@@ -236,6 +239,7 @@ function Arrows({
 }
 
 export default function ConceptMap({ widgetId }: ConceptMapProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update } = useQuestions(widgetId);
 
   // Get first question from array
@@ -519,7 +523,7 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -527,7 +531,7 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -536,11 +540,11 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
     <div className="w-full max-w-full">
       <div className="flex items-center justify-between">
         <span className="text-lg text-stone-700 font-semibold">
-          Размеры таблицы
+          {t("tableSize")}
         </span>
         <div className="flex gap-12 mr-20">
           <div className="flex gap-2 items-center">
-            <label htmlFor="tableWidth">Ширина:</label>
+            <label htmlFor="tableWidth">{t("width")}</label>
             <input
               id="tableWidth"
               name="tableWidth"
@@ -553,7 +557,7 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
             />
           </div>
           <div className="flex gap-2 items-center">
-            <label htmlFor="tableHeight">Высота:</label>
+            <label htmlFor="tableHeight">{t("height")}</label>
             <input
               id="tableHeight"
               name="tableHeight"
@@ -607,6 +611,7 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
           editArrow={editArrow}
           removeArrow={removeArrow}
           cells={tableMatrix}
+          t={t}
         />
       </div>
     </div>

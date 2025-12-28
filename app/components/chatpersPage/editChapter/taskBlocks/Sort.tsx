@@ -6,6 +6,7 @@ import { FiX, FiPlus } from "react-icons/fi";
 import style from "./Sort.module.css";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type SortProps = {
   widgetId: number;
@@ -17,6 +18,7 @@ type Column = {
 };
 
 export default function Sort({ widgetId }: SortProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update } = useQuestions(widgetId);
 
   // Get first question from array
@@ -350,7 +352,7 @@ export default function Sort({ widgetId }: SortProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -358,7 +360,7 @@ export default function Sort({ widgetId }: SortProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -367,10 +369,10 @@ export default function Sort({ widgetId }: SortProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
         <input
           type="text"
-          placeholder="Вопрос к заданию"
+          placeholder={t("questionLabel")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
@@ -380,10 +382,10 @@ export default function Sort({ widgetId }: SortProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-slate-700">
-          Столбцы для сортировки:
+          {t("sortColumns")}
         </span>
         <Button
-          content="+ Добавить столбец"
+          content={t("addColumn")}
           color="green"
           size="sm"
           onClick={addColumn}
@@ -392,7 +394,7 @@ export default function Sort({ widgetId }: SortProps) {
 
       {columns.length === 0 && (
         <div className="text-sm text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-lg">
-          Нет столбцов. Нажмите «Добавить столбец» чтобы создать.
+          {t("noColumns")}
         </div>
       )}
 
@@ -412,7 +414,7 @@ export default function Sort({ widgetId }: SortProps) {
                   onChange={(e) =>
                     updateColumnQuestion(column.id, e.target.value)
                   }
-                  placeholder="Название "
+                  placeholder={t("columnName")}
                   className="flex-1 px-1 py-2 w-full text-sm font-medium bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
@@ -420,7 +422,7 @@ export default function Sort({ widgetId }: SortProps) {
                   onClick={() => removeColumn(column.id)}
                   disabled={columns.length <= 2}
                   className="p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="Удалить столбец"
+                  title={t("deleteColumn")}
                 >
                   <FiX className="w-4 h-4" />
                 </button>
@@ -439,14 +441,14 @@ export default function Sort({ widgetId }: SortProps) {
                       onChange={(e) =>
                         updateCardText(card.optionId, e.target.value)
                       }
-                      placeholder="Текст..."
+                      placeholder={t("textPlaceholder")}
                       className="flex-1 px-2 py-1 w-full text-base bg-white border border-slate-200 rounded outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
                       type="button"
                       onClick={() => removeCardFromColumn(card.optionId)}
                       className="p-1 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors"
-                      title="Удалить карточку"
+                      title={t("deleteCard")}
                     >
                       <FiX className="w-3 h-3" />
                     </button>
@@ -460,7 +462,7 @@ export default function Sort({ widgetId }: SortProps) {
                   className="w-full flex items-center justify-center gap-1 px-3 py-2 text-sm text-slate-500 border-2 border-dashed border-slate-300 rounded hover:border-blue-400 hover:text-blue-500 transition-colors"
                 >
                   <FiPlus className="w-4 h-4" />
-                  Добавить карточку
+                  {t("addCard")}
                 </button>
               </div>
             </div>

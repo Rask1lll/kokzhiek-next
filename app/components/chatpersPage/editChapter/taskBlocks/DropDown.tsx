@@ -5,6 +5,7 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import { FiX, FiChevronDown } from "react-icons/fi";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type DropDownProps = {
   widgetId: number;
@@ -16,6 +17,7 @@ type DropdownData = {
 };
 
 export default function DropDown({ widgetId }: DropDownProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update } = useQuestions(widgetId);
 
   // Get first question from array
@@ -347,7 +349,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -355,7 +357,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -366,10 +368,10 @@ export default function DropDown({ widgetId }: DropDownProps) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-slate-700">
-            Текст задания:
+            {t("taskLabel")}
           </span>
           <Button
-            content="+ Вставить список"
+            content={t("insertList")}
             color="blue"
             size="sm"
             onClick={insertDropdown}
@@ -379,12 +381,12 @@ export default function DropDown({ widgetId }: DropDownProps) {
         <textarea
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
-          placeholder="Введите текст задания. Используйте кнопку 'Вставить список' чтобы добавить выпадающий список."
+          placeholder={t("insertListPlaceholder")}
           className="w-full min-h-[100px] px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
         />
 
         <p className="text-xs text-slate-400">
-          Подсказка: {"{{id}}"} в тексте — это место для выпадающего списка
+          {t("hintDropdown", { placeholder: "{{id}}" })}
         </p>
       </div>
 
@@ -392,7 +394,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       {currentQuestion.body && (
         <div className="p-4 bg-white rounded-lg border border-dashed border-slate-300">
           <span className="text-xs text-slate-400 mb-2 block">
-            Предпросмотр (нажмите на список для редактирования):
+            {t("previewClick")}
           </span>
           <div className="text-base text-slate-800 leading-relaxed">
             {renderPreview()}
@@ -405,11 +407,11 @@ export default function DropDown({ widgetId }: DropDownProps) {
         <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-blue-800">
-              Редактирование списка:
+              {t("editingList")}
             </span>
             <div className="flex gap-2">
               <Button
-                content="Удалить список"
+                content={t("deleteList")}
                 color="red"
                 size="sm"
                 onClick={() => removeDropdown(currentDropdown.id)}
@@ -427,7 +429,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
           {/* Options */}
           <div className="space-y-2">
             <span className="text-xs text-blue-600">
-              Варианты (◉ = правильный):
+              {t("optionsCorrect")}
             </span>
             {currentDropdownOptions.map((option, index) => (
               <div key={option.id || index} className="flex items-center gap-2">
@@ -461,7 +463,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
               </div>
             ))}
             <Button
-              content="+ Добавить вариант"
+              content={t("addVariant")}
               color="slate"
               size="sm"
               onClick={() => addOptionToDropdown(currentDropdown.id)}
@@ -474,7 +476,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       {dropdowns.length > 0 && !editingDropdown && (
         <div className="space-y-2">
           <span className="text-sm font-medium text-slate-700">
-            Все списки в задании:
+            {t("allLists")}
           </span>
           {dropdowns.map((dropdown, index) => {
             const dropdownOptions = (currentQuestion.options || [])

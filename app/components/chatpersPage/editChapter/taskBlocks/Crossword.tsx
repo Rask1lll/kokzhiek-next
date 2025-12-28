@@ -5,6 +5,7 @@ import { useEffect, useCallback, useRef, useState, useMemo } from "react";
 import { FiAlertCircle, FiPlus, FiX } from "react-icons/fi";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type CrosswordProps = {
   widgetId: number;
@@ -23,6 +24,7 @@ type CrosswordData = {
 };
 
 export default function Crossword({ widgetId }: CrosswordProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update } = useQuestions(widgetId);
 
   // Get first question from array
@@ -136,12 +138,12 @@ export default function Crossword({ widgetId }: CrosswordProps) {
     const keyword = data.keyword.toUpperCase().trim();
 
     if (!keyword) {
-      return { isValid: false, errors: ["Введите ключевое слово"] };
+      return { isValid: false, errors: [t("enterKeyword")] };
     }
 
     if (data.questions.length !== keyword.length) {
       errors.push(
-        `Нужно ${keyword.length} вопросов для слова "${data.keyword}" (сейчас ${data.questions.length})`
+        `${t("needQuestions", { count: keyword.length })} "${data.keyword}" (${data.questions.length})`
       );
     }
 
@@ -152,19 +154,17 @@ export default function Crossword({ widgetId }: CrosswordProps) {
         const answer = (q.answer || "").toUpperCase();
 
         if (!q.answer) {
-          errors.push(`Вопрос ${index + 1}: введите ответ`);
+          errors.push(`${t("questionNumber", { number: index + 1 })}: ${t("questionEnterAnswer")}`);
         } else if (!answer.includes(requiredLetter)) {
           errors.push(
-            `Вопрос ${index + 1}: ответ "${
-              q.answer || ""
-            }" не содержит букву "${requiredLetter}"`
+            `${t("questionNumber", { number: index + 1 })}: ${t("questionNoLetter", { answer: q.answer || "", letter: requiredLetter })}`
           );
         }
       }
     });
 
     return { isValid: errors.length === 0, errors };
-  }, [data]);
+  }, [data, t]);
 
   const updateQuestionBody = useCallback(
     (body: string) => {
@@ -384,7 +384,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -392,7 +392,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -401,10 +401,10 @@ export default function Crossword({ widgetId }: CrosswordProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
         <input
           type="text"
-          placeholder="Вопрос к заданию"
+          placeholder={t("questionLabel")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
@@ -430,20 +430,19 @@ export default function Crossword({ widgetId }: CrosswordProps) {
       <div className="space-y-2">
         <label className="block">
           <span className="text-sm font-medium text-slate-700">
-            Ключевое слово (финальный ответ):
+            {t("keywordLabel")}
           </span>
           <input
             type="text"
             value={data.keyword}
             onChange={(e) => updateKeyword(e.target.value.toUpperCase())}
-            placeholder="Например: ВЕСНА"
+            placeholder={t("keywordPlaceholder")}
             className="mt-1 w-full px-3 py-2 text-lg font-bold tracking-widest text-center bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 uppercase"
           />
         </label>
         {data.keyword && (
           <p className="text-xs text-slate-500">
-            Нужно {data.keyword.length} вопросов. Каждый ответ должен содержать
-            соответствующую букву.
+            {t("needQuestions", { count: data.keyword.length })}
           </p>
         )}
       </div>
@@ -452,10 +451,10 @@ export default function Crossword({ widgetId }: CrosswordProps) {
       {data.keyword && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-700">Вопросы:</span>
+            <span className="text-sm font-medium text-slate-700">{t("questionsLabel")}</span>
             {data.questions.length < data.keyword.length && (
               <Button
-                content="+ Добавить вопрос"
+                content={t("addQuestion")}
                 color="green"
                 size="sm"
                 onClick={addQuestion}
@@ -483,8 +482,8 @@ export default function Crossword({ widgetId }: CrosswordProps) {
                     {requiredLetter}
                   </span>
                   <span className="text-sm text-slate-500">
-                    Вопрос {index + 1} — ответ должен содержать &quot
-                    {requiredLetter}&quot
+                    {t("questionNumber", { number: index + 1 })} — {t("answerMustContain")} &quot;
+                    {requiredLetter}&quot;
                   </span>
                   <button
                     type="button"
@@ -504,7 +503,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
                   onBlur={(e) =>
                     updateQuestion(q.id, { question: e.target.value.trim() })
                   }
-                  placeholder="Введите вопрос..."
+                  placeholder={t("enterQuestion")}
                   className="w-full px-3 py-1.5 mb-2 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
 
@@ -516,7 +515,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
                       answer: e.target.value.toUpperCase(),
                     })
                   }
-                  placeholder="Ответ..."
+                  placeholder={t("answerLabel")}
                   className={`w-full px-3 py-1.5 text-sm font-medium tracking-wider uppercase border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 ${
                     q.answer && !hasLetter
                       ? "bg-red-100 border-red-300"
@@ -533,7 +532,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
               className="w-full p-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-400 hover:border-purple-400 hover:text-purple-500 transition-colors flex items-center justify-center gap-2"
             >
               <FiPlus className="w-4 h-4" />
-              Добавить вопрос ({data.questions.length}/{data.keyword.length})
+              {t("addQuestionCount", { current: data.questions.length, total: data.keyword.length })}
             </button>
           )}
         </div>
@@ -543,7 +542,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
       {validation.isValid && data.questions.length > 0 && (
         <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
           <span className="text-xs text-slate-400 mb-3 block">
-            Предпросмотр кроссворда:
+            {t("crosswordPreview")}
           </span>
 
           <div className="inline-block font-mono">
@@ -582,7 +581,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
           </div>
 
           <div className="mt-3 text-sm text-purple-600 font-medium">
-            Ключевое слово: {data.keyword}
+            {t("keywordResult")} {data.keyword}
           </div>
         </div>
       )}

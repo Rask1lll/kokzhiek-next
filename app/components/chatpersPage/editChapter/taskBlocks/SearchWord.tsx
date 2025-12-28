@@ -4,6 +4,7 @@ import { useEffect, useCallback, useRef, useState, useMemo } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type SearchWordProps = {
   widgetId: number;
@@ -52,6 +53,7 @@ function generateCells(grid: Cell[], size: number): Cell[] {
 }
 
 export default function SearchWord({ widgetId }: SearchWordProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update } = useQuestions(widgetId);
 
   // Get first question from array
@@ -281,7 +283,7 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -289,7 +291,7 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -298,10 +300,10 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
         <input
           type="text"
-          placeholder="Вопрос к заданию"
+          placeholder={t("questionLabel")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
@@ -311,7 +313,7 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
       {/* Grid size controls */}
       <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
         <label className="text-sm font-medium text-slate-700">
-          Размер сетки:
+          {t("gridSize")}
         </label>
         <div className="flex items-center gap-2">
           <button
@@ -319,7 +321,7 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
             onClick={decreaseSize}
             disabled={validatedData.size <= 3}
             className="flex items-center justify-center w-8 h-8 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            title="Уменьшить размер"
+            title={t("decreaseSize")}
           >
             <FiMinus className="w-4 h-4" />
           </button>
@@ -331,13 +333,13 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
             onClick={increaseSize}
             disabled={validatedData.size >= 10}
             className="flex items-center justify-center w-8 h-8 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            title="Увеличить размер"
+            title={t("increaseSize")}
           >
             <FiPlus className="w-4 h-4" />
           </button>
         </div>
         <span className="text-xs text-slate-500 ml-auto">
-          {validatedData.size * validatedData.size} ячеек
+          {t("cellsCount", { count: validatedData.size * validatedData.size })}
         </span>
       </div>
 

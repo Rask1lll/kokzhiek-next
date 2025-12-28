@@ -6,12 +6,14 @@ import { FiImage, FiTrash2 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type DragDropProps = {
   widgetId: number;
 };
 
 export default function DragDrop({ widgetId }: DragDropProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update, uploadImage, removeImage } =
     useQuestions(widgetId);
 
@@ -245,7 +247,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -253,7 +255,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -265,7 +267,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
       {/* Заголовок с кнопкой */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <p className="text-gray-700 font-semibold">Текст задания</p>
+          <p className="text-gray-700 font-semibold">{t("taskText")}</p>
           <span
             className="relative inline-flex items-center justify-center w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs font-bold rounded-full cursor-help transition-colors"
             onMouseEnter={() => {
@@ -278,9 +280,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
             ?
             {showHint && (
               <div className="absolute top-8 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-3 text-sm text-gray-600 font-normal">
-                При создании контейнеров в тексте появятся метки{" "}
-                <code className="bg-gray-100 px-1 rounded">{"{{{id}}}"}</code> —
-                это позиции для ответов
+                {t("hintContainers", { placeholder: "{{{id}}}" })}
               </div>
             )}
           </span>
@@ -290,14 +290,14 @@ export default function DragDrop({ widgetId }: DragDropProps) {
           className="flex items-center gap-2 text-sm bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg cursor-pointer font-medium transition-colors shadow-sm"
         >
           <span>+</span>
-          Добавить контейнер
+          {t("addContainer")}
         </button>
       </div>
 
       {/* Текстовое поле */}
       <textarea
         className="w-full resize-none border-2 border-gray-200 focus:border-blue-400 min-h-24 p-3 rounded-xl outline-none bg-white text-gray-700 transition-colors"
-        placeholder="Введите текст задания..."
+        placeholder={t("questionPlaceholder")}
         value={currentQuestion.body || ""}
         onChange={(e) => {
           updateQuestionBody(e.target.value);
@@ -310,13 +310,13 @@ export default function DragDrop({ widgetId }: DragDropProps) {
         <div className="flex items-center gap-2 mb-4">
           <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
           <h3 className="text-lg font-semibold text-gray-700">
-            Контейнеры ответов
+            {t("answerContainers")}
           </h3>
         </div>
 
         {cells.length === 0 ? (
           <p className="text-gray-400 text-sm italic text-center py-4">
-            Нет контейнеров. Нажмите «Добавить контейнер» чтобы создать.
+            {t("noContainers")}
           </p>
         ) : (
           <div className="flex flex-col gap-3">
@@ -337,7 +337,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
                     </div>
                     <input
                       type="text"
-                      placeholder="Введите правильный ответ..."
+                      placeholder={t("enterCorrectAnswer")}
                       value={option?.body || ""}
                       className="flex-1 p-2 px-3 border border-gray-200 focus:border-blue-400 rounded-lg text-gray-700 bg-gray-50 focus:bg-white outline-none transition-colors"
                       onChange={(e) => {
@@ -373,7 +373,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
                         input?.click();
                       }}
                       className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded transition-colors"
-                      title="Добавить изображение"
+                      title={t("addImage")}
                     >
                       <FiImage className="w-4 h-4" />
                     </button>
@@ -405,7 +405,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
                           }
                         }}
                         className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                        title="Удалить изображение"
+                        title={t("removeImage")}
                       >
                         <FiTrash2 className="w-3 h-3" />
                       </button>
