@@ -24,6 +24,16 @@ export default function MainLayOut({
     );
   }
 
+  if (pathname.startsWith("/books/book/print")) {
+    return (
+      <>
+        <ModalWindow></ModalWindow>
+        <AlertContainer />
+        {children}
+      </>
+    );
+  }
+
   return (
     <>
       <ModalWindow></ModalWindow>

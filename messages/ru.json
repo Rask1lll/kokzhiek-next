@@ -61,7 +61,15 @@
     "title": "Название",
     "deleteConfirm": "Вы уверены, что хотите удалить книгу \"{title}\"?",
     "coverImage": "Обложка",
-    "settings": "Настройки книги"
+    "settings": "Настройки книги",
+    "downloadPdf": "Скачать PDF",
+    "back": "Назад",
+    "loadingBook": "Загрузка книги...",
+    "notFound": "Книга не найдена",
+    "loadError": "Ошибка загрузки",
+    "noBookId": "Не указан идентификатор книги",
+    "emptyChapter": "Глава пуста",
+    "noChapters": "В книге нет глав"
   },
   "chapters": {
     "title": "Главы",

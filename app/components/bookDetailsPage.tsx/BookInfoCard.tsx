@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { FiEdit2, FiTrash2, FiSend, FiCheck, FiX, FiAlertCircle } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiSend, FiCheck, FiX, FiAlertCircle, FiDownload } from "react-icons/fi";
 import { useTranslations } from "next-intl";
 import { BookStatus } from "@/app/types/book";
 import { handleUpdateBookStatus, UpdateBookStatusPayload } from "@/app/services/book/booksApi";
@@ -24,36 +24,6 @@ type BookInfoCardProps = {
   rejectionReason?: string | null;
   onDelete?: () => void;
   onStatusChange?: (status: BookStatus) => void;
-};
-
-const STATUS_CONFIG: Record<
-  BookStatus,
-  { label: string; color: string; border: string; hoverBg: string }
-> = {
-  draft: {
-    label: "Черновик",
-    color: "text-gray-700",
-    border: "border-gray-300",
-    hoverBg: "hover:bg-gray-100",
-  },
-  pending: {
-    label: "На модерации",
-    color: "text-yellow-600",
-    border: "border-yellow-300",
-    hoverBg: "hover:bg-yellow-50",
-  },
-  published: {
-    label: "Опубликовано",
-    color: "text-green-600",
-    border: "border-green-300",
-    hoverBg: "hover:bg-green-50",
-  },
-  archived: {
-    label: "В архиве",
-    color: "text-red-600",
-    border: "border-red-300",
-    hoverBg: "hover:bg-red-50",
-  },
 };
 
 const PLACEHOLDER_COVER = "https://placehold.co/600x400@2x.png";
@@ -244,6 +214,15 @@ export default function BookInfoCard({
                 <span>{t("delete")}</span>
               </button>
             )}
+
+            {/* TODO: refactor IT!!!! */}
+            <Link
+              href={`/books/book/print?book=${bookId}`}
+              className="inline-flex items-center gap-2 rounded-lg border border-blue-300 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-colors"
+            >
+              <FiDownload className="h-4 w-4" />
+              <span>{t("downloadPdf")}</span>
+            </Link>
           </div>
         </div>
 
