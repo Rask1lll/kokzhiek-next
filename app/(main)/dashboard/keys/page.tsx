@@ -333,15 +333,15 @@ export default function KeysPage() {
             </table>
           </div>
         )}
-      </div>
+        </div>
 
-      {/* Модалка создания ключа */}
-      {showCreateModal && (
-        <CreateKeyModal
-          onClose={() => setShowCreateModal(false)}
-          onCreated={handleKeysCreated}
-          createKey={createKey}
-        />
+        {/* Модалка создания ключа */}
+        {showCreateModal && (
+          <CreateKeyModal
+            onClose={() => setShowCreateModal(false)}
+            onCreated={handleKeysCreated}
+            createKey={createKey}
+          />
       )}
     </div>
   );

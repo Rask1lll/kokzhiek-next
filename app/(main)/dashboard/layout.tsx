@@ -5,24 +5,24 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { FiKey, FiBarChart2, FiUsers, FiSettings, FiShield } from "react-icons/fi";
 import { useAuth } from "@/app/hooks/useAuth";
-import { isAdmin as checkIsAdmin } from "@/app/libs/roles";
+import { DashboardSection, canAccessSection, isAdmin } from "@/app/libs/roles";
 
 type SidebarLink = {
   href: string;
   labelKey: string;
   icon: React.ComponentType<{ className?: string }>;
-  adminOnly?: boolean;
+  section: DashboardSection;
 };
 
-const sidebarLinks: SidebarLink[] = [
-  { href: "/dashboard/keys", labelKey: "keys", icon: FiKey },
-  { href: "/dashboard/members", labelKey: "members", icon: FiUsers },
-  { href: "/dashboard/stats", labelKey: "stats", icon: FiBarChart2 },
+const mainLinks: SidebarLink[] = [
+  { href: "/dashboard/keys", labelKey: "keys", icon: FiKey, section: "keys" },
+  { href: "/dashboard/members", labelKey: "members", icon: FiUsers, section: "members" },
+  { href: "/dashboard/stats", labelKey: "stats", icon: FiBarChart2, section: "stats" },
 ];
 
 const adminLinks: SidebarLink[] = [
-  { href: "/dashboard/admin/users", labelKey: "users", icon: FiUsers, adminOnly: true },
-  { href: "/dashboard/admin/settings", labelKey: "settings", icon: FiSettings, adminOnly: true },
+  { href: "/dashboard/admin/users", labelKey: "users", icon: FiUsers, section: "admin_users" },
+  { href: "/dashboard/admin/settings", labelKey: "settings", icon: FiSettings, section: "admin_settings" },
 ];
 
 export default function DashboardLayout({
@@ -32,8 +32,17 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const isAdmin = checkIsAdmin(user);
   const t = useTranslations("dashboard");
+
+  const accessibleMainLinks = mainLinks.filter((link) =>
+    canAccessSection(user, link.section)
+  );
+
+  const accessibleAdminLinks = adminLinks.filter((link) =>
+    canAccessSection(user, link.section)
+  );
+
+  const showAdminSection = isAdmin(user) && accessibleAdminLinks.length > 0;
 
   const renderLink = (link: SidebarLink) => {
     const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
@@ -63,12 +72,14 @@ export default function DashboardLayout({
         </h2>
 
         {/* Основные разделы */}
-        <nav className="space-y-1">
-          {sidebarLinks.map(renderLink)}
-        </nav>
+        {accessibleMainLinks.length > 0 && (
+          <nav className="space-y-1">
+            {accessibleMainLinks.map(renderLink)}
+          </nav>
+        )}
 
         {/* Админ раздел */}
-        {/* {isAdmin && ( */}
+        {showAdminSection && (
           <>
             <div className="mt-6 mb-2 px-3 flex items-center gap-2">
               <FiShield className="w-4 h-4 text-gray-400" />
@@ -77,10 +88,10 @@ export default function DashboardLayout({
               </span>
             </div>
             <nav className="space-y-1">
-              {adminLinks.map(renderLink)}
+              {accessibleAdminLinks.map(renderLink)}
             </nav>
           </>
-        {/* )} */}
+        )}
       </aside>
 
       {/* Content */}

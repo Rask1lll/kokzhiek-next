@@ -68,3 +68,34 @@ export function getRoleLabel(user: UserData | null): string {
 
   return String(roleData) || "Пользователь";
 }
+
+// Dashboard разделы по ролям
+export type DashboardSection =
+  | "keys"
+  | "members"
+  | "stats"
+  | "admin_users"
+  | "admin_settings";
+
+const SECTION_ACCESS: Record<DashboardSection, RoleAlias[]> = {
+  keys: ["school_admin", "teacher"],
+  members: ["school_admin", "teacher"],
+  stats: ["admin", "school_admin", "teacher"],
+  admin_users: ["admin"],
+  admin_settings: ["admin"],
+};
+
+export function canAccessSection(user: UserData | null, section: DashboardSection): boolean {
+  const userRole = getUserRole(user);
+  if (!userRole) return false;
+  return SECTION_ACCESS[section].includes(userRole);
+}
+
+export function getAccessibleSections(user: UserData | null): DashboardSection[] {
+  const userRole = getUserRole(user);
+  if (!userRole) return [];
+
+  return (Object.keys(SECTION_ACCESS) as DashboardSection[]).filter(
+    (section) => SECTION_ACCESS[section].includes(userRole)
+  );
+}
