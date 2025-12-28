@@ -3,10 +3,18 @@ import { useTranslations } from "next-intl";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { PiPlus } from "react-icons/pi";
 import CreateChapterModalWindow from "./CreateChapterModalWindow";
+import { useAuth } from "@/app/hooks/useAuth";
+import { isAuthor } from "@/app/libs/roles";
 
 export default function CreateChapterButton() {
   const t = useTranslations("chapters");
   const { addContent } = useModalWindowStore();
+  const { user } = useAuth();
+
+  if (!user || !isAuthor(user)) {
+    return null;
+  }
+
   return (
     <button
       onClick={() => {
