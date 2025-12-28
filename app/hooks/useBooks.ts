@@ -4,9 +4,11 @@ import {
   GetBooksParams,
   handleCreateBook,
   handleDeleteBook,
+  handleDeleteBookCover,
   handleGetBook,
   handleGetBooks,
   handleUpdateBook,
+  handleUploadBookCover,
 } from "../services/book/booksApi";
 import { useBooksStore } from "../store/booksStore";
 import { Book } from "../types/book";
@@ -74,5 +76,24 @@ export function useBooks() {
     return result;
   };
 
-  return { createBook, deleteBook, editBook, getBook, getBooks, isLoading };
+  const uploadCover = async (
+    bookId: number,
+    file: File
+  ): Promise<ApiResult<Book>> => {
+    const result = await handleUploadBookCover(bookId, file);
+    if (result.success) {
+      updateBook(bookId, result.data);
+    }
+    return result;
+  };
+
+  const deleteCover = async (bookId: number): Promise<ApiResult<Book>> => {
+    const result = await handleDeleteBookCover(bookId);
+    if (result.success) {
+      updateBook(bookId, result.data);
+    }
+    return result;
+  };
+
+  return { createBook, deleteBook, deleteCover, editBook, getBook, getBooks, isLoading, uploadCover };
 }

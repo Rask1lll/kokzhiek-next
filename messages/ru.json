@@ -303,7 +303,14 @@
     "editionPlaceholder": "2-е издание",
     "cancel": "Отмена",
     "save": "Сохранить изменения",
-    "saving": "Сохранение..."
+    "saving": "Сохранение...",
+    "coverImage": "Обложка книги",
+    "uploadCover": "Загрузить обложку",
+    "changeCover": "Изменить",
+    "deleteCover": "Удалить",
+    "coverHint": "JPG, PNG, до 5 МБ",
+    "uploadingCover": "Загрузка...",
+    "noCover": "Нет обложки"
   },
   "chapterHeader": {
     "back": "Назад",

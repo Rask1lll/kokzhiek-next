@@ -1,15 +1,15 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useBooks } from "@/app/hooks/useBooks";
-import { Book } from "@/app/types/book";
 import { UpdateBookPayload } from "@/app/types/UpdateBookPayload";
 import { Subject } from "@/app/types/subject";
 import { fetchSubjects } from "@/app/services/subjectsApi";
 import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import Image from "next/image";
+import { FiArrowLeft, FiUpload, FiTrash2 } from "react-icons/fi";
 
 const LANGUAGE_OPTIONS = [
   { code: "kk", label: "Қазақ тілі" },
@@ -22,7 +22,8 @@ export default function EditBookPageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const bookId = searchParams.get("book");
-  const { getBook, editBook } = useBooks();
+  const { getBook, editBook, uploadCover, deleteCover } = useBooks();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const DIFFICULTY_OPTIONS = [
     { value: "Начальный", label: t("difficultyBeginner") },
@@ -32,6 +33,7 @@ export default function EditBookPageClient() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -47,6 +49,7 @@ export default function EditBookPageClient() {
   const [year, setYear] = useState<number | undefined>();
   const [edition, setEdition] = useState("");
   const [difficulty, setDifficulty] = useState("Начальный");
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadSubjects() {
@@ -77,6 +80,7 @@ export default function EditBookPageClient() {
         setYear(book.publication?.year ?? undefined);
         setEdition(book.publication?.edition || "");
         setDifficulty(book.settings?.difficulty || "Начальный");
+        setCoverImageUrl(book.cover_image_url || null);
       }
       setIsLoading(false);
     }
@@ -118,6 +122,39 @@ export default function EditBookPageClient() {
   };
 
   const getFieldError = (field: string) => errors[field]?.[0];
+
+  const handleCoverUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !bookId) return;
+
+    setIsUploadingCover(true);
+    const result = await uploadCover(Number(bookId), file);
+    setIsUploadingCover(false);
+
+    if (result.success) {
+      setCoverImageUrl(result.data.cover_image_url || null);
+    } else {
+      setGeneralError(result.message);
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleCoverDelete = async () => {
+    if (!bookId) return;
+
+    setIsUploadingCover(true);
+    const result = await deleteCover(Number(bookId));
+    setIsUploadingCover(false);
+
+    if (result.success) {
+      setCoverImageUrl(null);
+    } else {
+      setGeneralError(result.message);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -165,6 +202,65 @@ export default function EditBookPageClient() {
                 <p className="text-sm text-red-600">{generalError}</p>
               </div>
             )}
+
+            {/* Cover Image */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                {t("coverImage")}
+              </label>
+              <div className="flex items-start gap-4">
+                <div className="w-32 h-44 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden">
+                  {coverImageUrl ? (
+                    <Image
+                      src={coverImageUrl}
+                      alt="Cover"
+                      width={128}
+                      height={176}
+                      className="w-full h-full object-cover"
+                      unoptimized={process.env.NODE_ENV === "development"}
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-400 text-center px-2">
+                      {t("noCover")}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingCover}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <FiUpload className="w-4 h-4" />
+                    {isUploadingCover
+                      ? t("uploadingCover")
+                      : coverImageUrl
+                      ? t("changeCover")
+                      : t("uploadCover")}
+                  </button>
+                  {coverImageUrl && (
+                    <button
+                      type="button"
+                      onClick={handleCoverDelete}
+                      disabled={isUploadingCover}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                      {t("deleteCover")}
+                    </button>
+                  )}
+                  <p className="text-xs text-gray-500">{t("coverHint")}</p>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">

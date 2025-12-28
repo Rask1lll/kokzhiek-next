@@ -303,7 +303,14 @@
     "editionPlaceholder": "2-ші басылым",
     "cancel": "Болдырмау",
     "save": "Өзгерістерді сақтау",
-    "saving": "Сақталуда..."
+    "saving": "Сақталуда...",
+    "coverImage": "Кітап мұқабасы",
+    "uploadCover": "Мұқаба жүктеу",
+    "changeCover": "Өзгерту",
+    "deleteCover": "Жою",
+    "coverHint": "JPG, PNG, 5 МБ дейін",
+    "uploadingCover": "Жүктелуде...",
+    "noCover": "Мұқаба жоқ"
   },
   "chapterHeader": {
     "back": "Артқа",

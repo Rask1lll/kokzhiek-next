@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
         hostname: "api.next.shaqyrym.online",
         pathname: "/storage/**",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/storage/**",
+      },
     ],
   },
 };

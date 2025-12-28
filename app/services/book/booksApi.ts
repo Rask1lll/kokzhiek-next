@@ -1,4 +1,4 @@
-import { getAuthHeaders } from "../../libs/auth";
+import { getAuthHeaders, getToken } from "../../libs/auth";
 import { Book, BookStatus } from "../../types/book";
 import { ConstructorResponse } from "../../types/constructorResponse";
 import { CreateBookPayload } from "../../types/CreateBookPayload";
@@ -118,6 +118,82 @@ export async function handleGetBook(
     return res.json();
   } catch (error) {
     console.error("Error fetching book:", error);
+  }
+}
+
+export async function handleUploadBookCover(
+  id: number,
+  file: File
+): Promise<ApiResult<Book>> {
+  try {
+    const formData = new FormData();
+    formData.append("cover", file);
+
+    const token = getToken();
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}/cover`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: formData,
+      }
+    );
+    const json = await res.json();
+
+    if (!res.ok) {
+      const errorResponse = json as ValidationErrorResponse;
+      return {
+        success: false,
+        errors: errorResponse.errors || {},
+        message: errorResponse.message || "Ошибка при загрузке обложки",
+      };
+    }
+
+    return { success: true, data: json.data };
+  } catch (error) {
+    console.error("Error uploading book cover:", error);
+    return {
+      success: false,
+      errors: {},
+      message: "Ошибка сети при загрузке обложки",
+    };
+  }
+}
+
+export async function handleDeleteBookCover(
+  id: number
+): Promise<ApiResult<Book>> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}/cover`,
+      {
+        headers: getAuthHeaders(),
+        method: "DELETE",
+      }
+    );
+    const json = await res.json();
+
+    if (!res.ok) {
+      const errorResponse = json as ValidationErrorResponse;
+      return {
+        success: false,
+        errors: errorResponse.errors || {},
+        message: errorResponse.message || "Ошибка при удалении обложки",
+      };
+    }
+
+    return { success: true, data: json.data };
+  } catch (error) {
+    console.error("Error deleting book cover:", error);
+    return {
+      success: false,
+      errors: {},
+      message: "Ошибка сети при удалении обложки",
+    };
   }
 }
 
