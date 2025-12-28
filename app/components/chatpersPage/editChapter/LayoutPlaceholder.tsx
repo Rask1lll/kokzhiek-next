@@ -135,8 +135,9 @@ const LayoutPlaceholder = ({
       case "image":
         widgetContent = (
           <ImageWidget
-            value={urlValue}
+            value={widget.data}
             onChange={handleMediaChange}
+            onTextChange={handleChange}
             onFileUpload={handleFileUpload}
           />
         );
@@ -144,8 +145,9 @@ const LayoutPlaceholder = ({
       case "video":
         widgetContent = (
           <VideoWidget
-            value={urlValue}
+            value={widget.data}
             onChange={handleMediaChange}
+            onTextChange={handleChange}
             onFileUpload={handleFileUpload}
           />
         );

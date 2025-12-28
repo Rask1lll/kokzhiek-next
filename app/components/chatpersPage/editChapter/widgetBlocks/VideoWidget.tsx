@@ -1,19 +1,23 @@
 "use client";
 
+import { WidgetData } from "@/app/types/widget";
 import { useState } from "react";
 
 type VideoWidgetProps = {
-  value: string; // URL of the video
+  value: WidgetData; // URL of the video
   onChange: (value: string) => void;
   onFileUpload?: (file: File) => Promise<string | null>;
+  onTextChange?: (text: string) => void;
 };
 
 export default function VideoWidget({
   value,
   onChange,
   onFileUpload,
+  onTextChange,
 }: VideoWidgetProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [fileTitle, setFileTitle] = useState<string>(String(value.text ?? " "));
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,13 +40,27 @@ export default function VideoWidget({
     }
   };
 
+  const videoUrl =
+    value?.url && typeof value.url === "string" ? value.url : null;
+
   return (
-    <div className="w-full space-y-3">
-      {/* Video preview */}
-      {value && (
+    <div className="w-full p-2 space-y-3">
+      {onTextChange && (
+        <input
+          type="text"
+          className="p-1 text-lg w-4/5 ring-1 rounded-md ring-gray-300 bg-white"
+          placeholder="Заголовок к видео"
+          onChange={(e) => {
+            onTextChange(e.target.value);
+            setFileTitle(e.target.value);
+          }}
+          value={fileTitle}
+        />
+      )}
+      {videoUrl && (
         <div className="relative w-full">
           <video
-            src={value}
+            src={videoUrl}
             controls
             className="w-full max-h-[400px] rounded-lg border border-gray-200 bg-black"
           >

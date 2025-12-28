@@ -26,7 +26,6 @@ import SearchWordView from "./taskViews/SearchWordView";
 import ConceptMapView from "./taskViews/ConceptMapView";
 import SortView from "./taskViews/SortView";
 import OrderView from "./taskViews/OrderView";
-import DragDrop from "./taskBlocks/DragDrop";
 import DragDropView from "./taskViews/DragDropView";
 
 type ViewPlaceholderProps = {
@@ -66,10 +65,10 @@ export default function ViewPlaceholder({
       content = <ListView value={textValue} />;
       break;
     case "image":
-      content = <ImageView value={urlValue} />;
+      content = <ImageView value={urlValue} text={textValue} />;
       break;
     case "video":
-      content = <VideoView value={urlValue} />;
+      content = <VideoView value={urlValue} text={textValue} />;
       break;
     case "audio":
       content = <AudioView value={urlValue} />;

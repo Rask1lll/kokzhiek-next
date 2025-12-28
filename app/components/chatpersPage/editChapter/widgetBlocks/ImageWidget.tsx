@@ -2,22 +2,27 @@
 
 import { useState, useRef } from "react";
 import ImageCropModal from "./ImageCropModal";
+import { WidgetData } from "@/app/types/widget";
 
 type ImageWidgetProps = {
-  value: string; // URL of the image
+  value: WidgetData; // URL of the image
   onChange: (value: string) => void;
   onFileUpload?: (file: File) => Promise<string | null>; // Returns new URL or null on error
+  onTextChange?: (text: string) => void;
 };
 
 export default function ImageWidget({
   value,
   onChange,
   onFileUpload,
+  onTextChange,
 }: ImageWidgetProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [showCrop, setShowCrop] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileTitle, setFileTitle] = useState<string>(String(value.text ?? ""));
+  console.log(onTextChange);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,7 +31,6 @@ export default function ImageWidget({
     setSelectedFile(file);
     setShowCrop(true);
 
-    console.log("test");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -60,20 +64,32 @@ export default function ImageWidget({
     setShowCrop(false);
     setSelectedFile(null);
   };
+  const imageUrl =
+    value?.url && typeof value.url === "string" ? value.url : null;
 
   return (
-    <div className="w-full space-y-3">
-      {/* Image preview */}
-      {value && (
+    <div className="w-full space-y-3 p-2">
+      {onTextChange && (
+        <input
+          type="text"
+          className="p-1 text-lg w-4/5 ring-1 rounded-md ring-gray-300 bg-white"
+          placeholder="Заголовок к картинке"
+          onChange={(e) => {
+            onTextChange(e.target.value);
+            setFileTitle(e.target.value);
+          }}
+          value={fileTitle}
+        />
+      )}
+      {imageUrl && (
         <div className="relative w-full">
           <img
-            src={value}
+            src={imageUrl}
             alt="Uploaded image"
             className="w-full h-auto max-h-[400px] object-contain rounded-lg border border-gray-200"
           />
         </div>
       )}
-
       {/* Upload button */}
       <label
         className={`inline-flex items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors duration-100 ${
@@ -133,7 +149,6 @@ export default function ImageWidget({
           disabled={isUploading}
         />
       </label>
-
       {showCrop && selectedFile && (
         <ImageCropModal
           imageFile={selectedFile}
