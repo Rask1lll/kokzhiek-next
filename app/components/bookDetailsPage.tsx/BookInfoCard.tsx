@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { FiEdit2, FiTrash2, FiSend, FiCheck, FiX } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiSend, FiCheck, FiX, FiAlertCircle } from "react-icons/fi";
 import { useTranslations } from "next-intl";
 import { BookStatus } from "@/app/types/book";
 import { handleUpdateBookStatus, UpdateBookStatusPayload } from "@/app/services/book/booksApi";
@@ -21,6 +21,7 @@ type BookInfoCardProps = {
   description?: string;
   coverUrl?: string;
   status?: BookStatus;
+  rejectionReason?: string | null;
   onDelete?: () => void;
   onStatusChange?: (status: BookStatus) => void;
 };
@@ -68,6 +69,7 @@ export default function BookInfoCard({
   description,
   coverUrl,
   status = "draft",
+  rejectionReason,
   onDelete,
   onStatusChange,
 }: BookInfoCardProps) {
@@ -273,6 +275,20 @@ export default function BookInfoCard({
             {description}
           </p>
         ) : null}
+
+        {rejectionReason && currentStatus === "draft" && (
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <FiAlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-700">
+                  {t("rejectionReasonLabel")}
+                </p>
+                <p className="text-sm text-red-600 mt-1">{rejectionReason}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Reject Modal */}

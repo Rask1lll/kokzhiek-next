@@ -19,6 +19,7 @@ export type Book = {
   title: string;
   language: string;
   status?: BookStatus;
+  rejection_reason?: string | null;
   subject?: Subject;
   grade?: Grade;
   description?: string;

@@ -90,6 +90,7 @@ export default function BookPageClient() {
             description={book.description}
             coverUrl={book.cover_image_url}
             status={book.status}
+            rejectionReason={book.rejection_reason}
             onDelete={onDeleteBook}
           />
         )}

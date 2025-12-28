@@ -51,6 +51,7 @@
     "rejectDescription": "Автор қателерді түзете алуы үшін қабылдамау себебін көрсетіңіз",
     "rejectReason": "Қабылдамау себебі",
     "rejectReasonPlaceholder": "Нені түзету керектігін сипаттаңыз...",
+    "rejectionReasonLabel": "Модератордың қабылдамау себебі",
     "author": "Автор",
     "grade": "Сынып",
     "subject": "Пән",

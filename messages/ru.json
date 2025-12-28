@@ -51,6 +51,7 @@
     "rejectDescription": "Укажите причину отклонения, чтобы автор мог исправить ошибки",
     "rejectReason": "Причина отклонения",
     "rejectReasonPlaceholder": "Опишите, что нужно исправить...",
+    "rejectionReasonLabel": "Причина отклонения модератором",
     "author": "Автор",
     "grade": "Класс",
     "subject": "Предмет",
