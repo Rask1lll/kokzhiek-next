@@ -136,6 +136,7 @@ export default function BookInfoCard({
             width={200}
             height={280}
             className="h-full w-full object-cover"
+            unoptimized={process.env.NODE_ENV === "development"}
           />
         </div>
       </div>
