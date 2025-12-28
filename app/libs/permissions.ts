@@ -31,7 +31,7 @@ export type DashboardSection =
 const SECTION_ACCESS: Record<DashboardSection, RoleAlias[]> = {
   keys: ["school_admin"],
   members: ["school_admin", "teacher"],
-  stats: ["admin", "school_admin"],
+  stats: ["admin"],
   admin_users: ["admin"],
   admin_settings: ["admin"],
 };
