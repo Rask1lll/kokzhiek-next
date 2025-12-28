@@ -12,12 +12,14 @@ import {
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
+import { useTranslations } from "next-intl";
 
 type MultipleChoiceProps = {
   widgetId: number;
 };
 
 export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
+  const t = useTranslations("taskEditor");
   const { questions, loading, update, uploadImage, removeImage } =
     useQuestions(widgetId);
 
@@ -253,7 +255,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
   if (loading) {
     return (
       <div className="w-full space-y-4 p-4">
-        <div className="animate-pulse">Загрузка...</div>
+        <div className="animate-pulse">{t("loading")}</div>
       </div>
     );
   }
@@ -261,7 +263,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
   if (!currentQuestion) {
     return (
       <div className="w-full space-y-4 p-4 text-gray-500">
-        Ошибка загрузки вопроса
+        {t("loadError")}
       </div>
     );
   }
@@ -272,10 +274,10 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
     <div className="w-full space-y-4">
       {/* Settings bar */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
         <input
           type="text"
-          placeholder="Вопрос к заданию"
+          placeholder={t("questionPlaceholder")}
           className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
@@ -285,9 +287,9 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
       {/* Options list */}
       <div className="space-y-2">
         <span className="text-sm font-medium flex justify-between text-slate-700">
-          Варианты ответа:
+          {t("answerOptions")}
           <Button
-            content="Добавить +"
+            content={t("addOption")}
             color="green"
             onClick={addOption}
           ></Button>
@@ -318,7 +320,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
                 onChange={(e) =>
                   updateOption(option.id, { body: e.target.value })
                 }
-                placeholder={`Вариант ${index + 1}`}
+                placeholder={t("optionPlaceholder", { number: index + 1 })}
                 className="flex-1 px-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
 
@@ -351,7 +353,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
                   input?.click();
                 }}
                 className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded transition-colors"
-                title="Добавить изображение"
+                title={t("addImage")}
               >
                 <FiImage className="w-4 h-4" />
               </button>
@@ -362,7 +364,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
                 onClick={() => moveOption(option.id, "up")}
                 disabled={index === 0}
                 className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Переместить вверх"
+                title={t("moveUp")}
               >
                 <FiChevronUp className="w-4 h-4" />
               </button>
@@ -373,7 +375,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
                 onClick={() => moveOption(option.id, "down")}
                 disabled={index === options.length - 1}
                 className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Переместить вниз"
+                title={t("moveDown")}
               >
                 <FiChevronDown className="w-4 h-4" />
               </button>
@@ -384,7 +386,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
                 onClick={() => removeOption(option.id)}
                 disabled={options.length <= 2}
                 className="p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Удалить вариант"
+                title={t("removeOption")}
               >
                 <FiX className="w-4 h-4" />
               </button>
@@ -409,7 +411,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
                     }
                   }}
                   className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                  title="Удалить изображение"
+                  title={t("removeImage")}
                 >
                   <FiTrash2 className="w-3 h-3" />
                 </button>

@@ -367,5 +367,19 @@
     "isbn": "ISBN (необязательно)",
     "isbnPlaceholder": "978-0-123456-78-9",
     "createButton": "Создать книгу"
+  },
+  "taskEditor": {
+    "loading": "Загрузка...",
+    "loadError": "Ошибка загрузки вопроса",
+    "questionLabel": "Вопрос к заданию",
+    "questionPlaceholder": "Введите вопрос",
+    "answerOptions": "Варианты ответа:",
+    "addOption": "Добавить +",
+    "optionPlaceholder": "Вариант {number}",
+    "addImage": "Добавить изображение",
+    "removeImage": "Удалить изображение",
+    "moveUp": "Переместить вверх",
+    "moveDown": "Переместить вниз",
+    "removeOption": "Удалить вариант"
   }
 }

@@ -367,5 +367,19 @@
     "isbn": "ISBN (міндетті емес)",
     "isbnPlaceholder": "978-0-123456-78-9",
     "createButton": "Кітап құру"
+  },
+  "taskEditor": {
+    "loading": "Жүктелуде...",
+    "loadError": "Сұрақты жүктеу қатесі",
+    "questionLabel": "Тапсырмаға сұрақ",
+    "questionPlaceholder": "Сұрақты енгізіңіз",
+    "answerOptions": "Жауап нұсқалары:",
+    "addOption": "Қосу +",
+    "optionPlaceholder": "Нұсқа {number}",
+    "addImage": "Сурет қосу",
+    "removeImage": "Суретті жою",
+    "moveUp": "Жоғары жылжыту",
+    "moveDown": "Төмен жылжыту",
+    "removeOption": "Нұсқаны жою"
   }
 }
