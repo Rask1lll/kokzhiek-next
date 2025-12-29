@@ -7,6 +7,7 @@ import {
   FiMusic,
   FiCode,
   FiMinus,
+  FiGlobe,
 } from "react-icons/fi";
 export const widgets = [
   {
@@ -68,5 +69,11 @@ export const widgets = [
     title: "Разделитель",
     description: "Тонкая линия для разделения смысловых блоков",
     icon: <FiMinus className="w-5 h-5 text-gray-400" />,
+  },
+  {
+    type: "embed",
+    title: "Встраивание",
+    description: "Встраивание внешнего контента через iframe",
+    icon: <FiGlobe className="w-5 h-5 text-cyan-500" />,
   },
 ];

@@ -25,6 +25,7 @@ export enum WidgetType {
   AUDIO = "audio",
   FORMULA = "formula",
   DIVIDER = "divider",
+  EMBED = "embed",
 }
 
 // Общий тип блока (задание или виджет)

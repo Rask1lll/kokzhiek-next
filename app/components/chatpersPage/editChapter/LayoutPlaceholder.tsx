@@ -15,6 +15,7 @@ import VideoWidget from "./widgetBlocks/VideoWidget";
 import AudioWidget from "./widgetBlocks/AudioWidget";
 import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
+import EmbedWidget from "./widgetBlocks/EmbedWidget";
 import { FiTrash2 } from "react-icons/fi";
 import { Widget } from "@/app/types/widget";
 import { useTranslations } from "next-intl";
@@ -169,6 +170,11 @@ const LayoutPlaceholder = ({
       case "divider":
         widgetContent = (
           <DividerWidget value={textValue} onChange={handleChange} />
+        );
+        break;
+      case "embed":
+        widgetContent = (
+          <EmbedWidget value={textValue} onChange={handleChange} />
         );
         break;
       case "multiple_choice":

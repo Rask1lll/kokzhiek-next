@@ -495,7 +495,13 @@
     "formula": "Формула",
     "formulaDesc": "Математическая формула в формате LaTeX",
     "divider": "Разделитель",
-    "dividerDesc": "Тонкая линия для разделения смысловых блоков"
+    "dividerDesc": "Тонкая линия для разделения смысловых блоков",
+    "embed": "Встраивание",
+    "embedDesc": "Встраивание внешнего контента через iframe",
+    "embedLabel": "Вставьте код iframe",
+    "embedPlaceholder": "<iframe src=\"...\" width=\"100%\" height=\"400\"></iframe>",
+    "embedSave": "Сохранить",
+    "embedEdit": "Редактировать"
   },
   "taskTypes": {
     "multiple_choice": "Несколько из списка",

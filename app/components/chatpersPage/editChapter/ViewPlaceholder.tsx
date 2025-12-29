@@ -14,6 +14,7 @@ import VideoView from "./viewBlocks/VideoView";
 import AudioView from "./viewBlocks/AudioView";
 import FormulaView from "./viewBlocks/FormulaView";
 import DividerView from "./viewBlocks/DividerView";
+import EmbedView from "./viewBlocks/EmbedView";
 
 // View components for tasks
 import MultipleChoiceView from "./taskViews/MultipleChoiceView";
@@ -78,6 +79,9 @@ export default function ViewPlaceholder({
       break;
     case "divider":
       content = <DividerView value={textValue} />;
+      break;
+    case "embed":
+      content = <EmbedView value={textValue} />;
       break;
 
     // Task widgets (interactive)
