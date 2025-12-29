@@ -67,7 +67,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       const questionId = currentQuestion.id;
       debounceTimerRef.current = setTimeout(() => {
         if (!questionId) return;
-        const trimmedBody = body.trim();
+        const trimmedBody = body;
         if (trimmedBody.length === 0) return;
 
         update(questionId, { body: trimmedBody });
@@ -182,19 +182,21 @@ export default function DropDown({ widgetId }: DropDownProps) {
 
   const updateOptionText = useCallback(
     async (dropdownId: string, optionId: number | undefined, text: string) => {
+      console.log(text);
       if (!currentQuestion?.id || optionId === undefined) return;
 
       const newOptions = (currentQuestion.options || []).map((opt) =>
-        opt.id === optionId ? { ...opt, body: text.trim() } : opt
+        opt.id === optionId ? { ...opt, body: text } : opt
       );
 
       // Update UI immediately
-      setCurrentQuestion((prev) =>
-        prev ? { ...prev, options: newOptions } : prev
-      );
 
       // Send to server
       update(currentQuestion.id, { options: newOptions });
+
+      setCurrentQuestion((prev) =>
+        prev ? { ...prev, options: newOptions } : prev
+      );
     },
     [currentQuestion, update]
   );
@@ -356,9 +358,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="w-full space-y-4 p-4 text-gray-500">
-        {t("loadError")}
-      </div>
+      <div className="w-full space-y-4 p-4 text-gray-500">{t("loadError")}</div>
     );
   }
 
@@ -493,7 +493,9 @@ export default function DropDown({ widgetId }: DropDownProps) {
                 className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200 hover:border-blue-400 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm md:text-base lg:text-lg text-slate-400">#{index + 1}</span>
+                  <span className="text-sm md:text-base lg:text-lg text-slate-400">
+                    #{index + 1}
+                  </span>
                   <span className="text-base md:text-lg lg:text-xl text-slate-700">
                     {dropdownOptions.map((opt) => opt.body).join(" / ")}
                   </span>
