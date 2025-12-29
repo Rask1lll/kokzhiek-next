@@ -20,6 +20,7 @@ export default function Navbar() {
   const t = useTranslations("nav");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isBurgerOpen, setIsBurgerOpen] = useState<boolean>(false);
 
   const handleLogout = async () => {
     await apiLogout();
@@ -70,10 +71,10 @@ export default function Navbar() {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="flex hidden sm:block  items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                   type="button"
                 >
-                  <div className="hidden sm:block text-left">
+                  <div className="text-left">
                     <p className="text-sm font-medium text-gray-900">
                       {userEmail}
                     </p>
@@ -116,33 +117,20 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-
-        <div className="md:hidden border-t border-gray-200 pt-4 pb-3">
-          <div className="flex flex-col space-y-2 mb-4">
-            <a
-              href="/"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
-            >
-              <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>{t("home")}</span>
-            </a>
-            <a
-              href="/library"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
-            >
-              <span className="w-4 h-4 rounded-full bg-gray-300" />
-              <span>{t("library")}</span>
-            </a>
-            {canAccessDashboard(user) && (
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
-              >
-                <span className="w-4 h-4 rounded-full bg-gray-300" />
-                <span>{t("dashboard")}</span>
-              </Link>
-            )}
-          </div>
+        <div className="md:hidden border-gray-200 pt-4 pb-3">
+          {isBurgerOpen && (
+            <div className="flex flex-col space-y-2 mb-4">
+              {canAccessDashboard(user) && (
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
+                >
+                  <span className="w-4 h-4 rounded-full bg-gray-300" />
+                  <span>{t("dashboard")}</span>
+                </Link>
+              )}
+            </div>
+          )}
 
           {loading ? (
             <UserSkeletonMobile />
@@ -181,7 +169,6 @@ export default function Navbar() {
               </button>
             </div>
           ) : null}
-
         </div>
       </div>
     </header>

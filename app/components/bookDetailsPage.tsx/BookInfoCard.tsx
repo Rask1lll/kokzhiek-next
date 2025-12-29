@@ -137,8 +137,8 @@ export default function BookInfoCard({
   const statusConfig = STATUS_CONFIG[currentStatus];
 
   return (
-    <section className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6 flex gap-5 mx-10">
-      <div className="relative shrink-0">
+    <section className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6 md:flex not-md:justify-center gap-5 mx-10">
+      <div className="relative flex justify-center shrink-0">
         <div className="overflow-hidden rounded-xl bg-gray-100 w-[150px] h-[200px] md:w-[180px] md:h-[240px]">
           <Image
             src={coverUrl || PLACEHOLDER_COVER}
@@ -152,7 +152,7 @@ export default function BookInfoCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-3">
-        <div className="flex items-start justify-between gap-3">
+        <div className="sm:flex-row flex flex-col gap-2 items-start justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
               {title}
