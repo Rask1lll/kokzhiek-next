@@ -369,7 +369,7 @@ export default function Sort({ widgetId }: SortProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
         <input
           spellCheck={false}
           type="text"
@@ -382,7 +382,7 @@ export default function Sort({ widgetId }: SortProps) {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-700">
+        <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
           {t("sortColumns")}
         </span>
         <Button
@@ -394,7 +394,7 @@ export default function Sort({ widgetId }: SortProps) {
       </div>
 
       {columns.length === 0 && (
-        <div className="text-sm text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-lg">
+        <div className="text-base md:text-lg lg:text-xl text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-lg">
           {t("noColumns")}
         </div>
       )}
@@ -417,7 +417,7 @@ export default function Sort({ widgetId }: SortProps) {
                     updateColumnQuestion(column.id, e.target.value)
                   }
                   placeholder={t("columnName")}
-                  className="flex-1 px-1 py-2 w-full text-sm font-medium bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-1 py-2 w-full text-base md:text-lg lg:text-xl font-medium bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -462,7 +462,7 @@ export default function Sort({ widgetId }: SortProps) {
                 <button
                   type="button"
                   onClick={() => addCardToColumn(column.id)}
-                  className="w-full flex items-center justify-center gap-1 px-3 py-2 text-sm text-slate-500 border-2 border-dashed border-slate-300 rounded hover:border-blue-400 hover:text-blue-500 transition-colors"
+                  className="w-full flex items-center justify-center gap-1 px-3 py-2 text-base md:text-lg lg:text-xl text-slate-500 border-2 border-dashed border-slate-300 rounded hover:border-blue-400 hover:text-blue-500 transition-colors"
                 >
                   <FiPlus className="w-4 h-4" />
                   {t("addCard")}

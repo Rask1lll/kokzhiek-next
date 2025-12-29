@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { useActivationKeys } from "@/app/hooks/useActivationKeys";
 import { useAlert } from "@/app/hooks/useAlert";
+import { useTranslations } from "next-intl";
+import Button from "@/app/components/Button/Button";
 
 type TaskViewWrapperProps = {
   widgetId: number;
@@ -20,6 +22,7 @@ export default function TaskViewWrapper({
 }: TaskViewWrapperProps) {
   const { questions, loading, error } = useQuestions(widgetId);
   const [showHint, setShowHint] = useState(false);
+  const t = useTranslations();
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
@@ -86,7 +89,9 @@ export default function TaskViewWrapper({
       )}
 
       {/* Content */}
-      <div className={`relative z-10 wrap-anywhere ${imageUrl ? "p-4" : ""}`}>
+      <div
+        className={`relative mb-2 z-10 wrap-anywhere ${imageUrl ? "p-4" : ""}`}
+      >
         {/* Header with question body and hint button */}
         <div className="flex items-start justify-between gap-4 mb-4">
           {showQuestionBody && body && (

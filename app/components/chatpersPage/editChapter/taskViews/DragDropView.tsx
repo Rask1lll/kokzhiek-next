@@ -80,6 +80,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
                   key={`placeholder-${index}`}
                   className={`
                     px-4 py-2 min-w-[80px] text-center rounded-lg cursor-pointer
+                    text-base md:text-lg lg:text-xl
                     transition-all duration-200 font-medium
                     ${
                       hasAnswer
@@ -106,7 +107,10 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
             }
           }
           return (
-            <span className="text-lg text-gray-700" key={`text-${index}`}>
+            <span
+              className="text-lg md:text-xl lg:text-2xl text-gray-700"
+              key={`text-${index}`}
+            >
               {part}
             </span>
           );
@@ -123,7 +127,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
       <div className="w-full p-4 bg-white/10 rounded-xl shadow-sm">
         <div className="mb-6">
-          <h6 className="text-sm font-semibold bg-white w-fit p-2 ring ring-gray-300 rounded-lg text-gray-500 uppercase tracking-wide mb-3">
+          <h6 className="text-base md:text-lg lg:text-xl font-semibold bg-white w-fit p-2 ring ring-gray-300 rounded-lg text-gray-500 uppercase tracking-wide mb-3">
             Выберите ответ
           </h6>
           <div className="flex flex-wrap gap-3">
@@ -135,6 +139,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
                     key={option.id}
                     className={`
                     px-4 py-2 h-fit rounded-lg ring ring-blue-300/90 cursor-pointer font-medium
+                    text-base md:text-lg lg:text-xl
                     transition-all duration-200 select-none
                     ${
                       isChosen
@@ -162,7 +167,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
                 );
               })
             ) : (
-              <p className="text-gray-400 text-sm italic">
+              <p className="text-gray-400 text-base md:text-lg lg:text-xl italic">
                 Все ответы использованы
               </p>
             )}
@@ -174,7 +179,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
 
         {/* Область с текстом и ячейками */}
         <div className="bg-gray-50 ring-2 ring-blue-200 p-4 rounded-lg">
-          <h6 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <h6 className="text-base md:text-lg lg:text-xl font-semibold text-gray-500 uppercase tracking-wide mb-3">
             Заполните пропуски
           </h6>
           {renderContent()}
@@ -183,7 +188,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
         {/* Подсказка */}
         {chosenElement && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-700 text-sm">
+            <p className="text-blue-700 text-base md:text-lg lg:text-xl">
               💡 Выбрано:{" "}
               <strong>
                 {options.find((opt) => opt.id === chosenElement)?.body}

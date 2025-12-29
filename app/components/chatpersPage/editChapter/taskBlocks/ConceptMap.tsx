@@ -101,7 +101,7 @@ function Table({
                   id={el.id}
                   className="min-w-10 relative ring-2 ring-slate-300 rounded-md"
                 >
-                  <span className="absolute -top-5 left-0 opacity-50 text-sm">
+                  <span className="absolute -top-5 left-0 opacity-50 text-base md:text-lg lg:text-xl">
                     {el.id}
                   </span>
                   <textarea
@@ -229,7 +229,7 @@ function Arrows({
               </div>
 
               {errors?.includes(el.id) && (
-                <div className="text-red-400 text-sm mt-1">
+                <div className="text-red-400 text-base md:text-lg lg:text-xl mt-1">
                   {t("invalidCellId")}
                 </div>
               )}

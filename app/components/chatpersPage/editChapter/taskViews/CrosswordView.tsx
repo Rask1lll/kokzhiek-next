@@ -116,7 +116,7 @@ export default function CrosswordView({
 
             return (
               <div key={q.id} className="flex items-center gap-0.5 mb-0.5">
-                <span className="w-6 text-xs text-slate-400 text-right mr-2">
+                <span className="w-6 text-sm md:text-base lg:text-lg text-slate-400 text-right mr-2">
                   {rowIndex + 1}.
                 </span>
 
@@ -184,7 +184,7 @@ export default function CrosswordView({
                           if (prevRef) prevRef.focus();
                         }
                       }}
-                      className={`w-7 h-7 text-center text-sm font-bold border focus:outline-none focus:ring-2 focus:ring-purple-500 uppercase ${
+                      className={`w-7 h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 text-center text-base md:text-lg lg:text-xl font-bold border focus:outline-none focus:ring-2 focus:ring-purple-500 uppercase ${
                         isKeyLetter
                           ? "bg-purple-100 border-purple-400 text-purple-700"
                           : "bg-white border-slate-300 text-slate-700"
@@ -200,7 +200,7 @@ export default function CrosswordView({
         {/* Questions */}
         <div className="space-y-2 pt-4 border-t border-gray-200">
           {questionsList.map((q, index) => (
-            <div key={q.id} className="text-sm text-gray-700">
+            <div key={q.id} className="text-base md:text-lg lg:text-xl text-gray-700">
               <span className="font-medium">{index + 1}.</span> {q.question}
             </div>
           ))}

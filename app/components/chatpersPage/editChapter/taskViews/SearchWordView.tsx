@@ -203,7 +203,7 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
               <div
                 key={i}
                 onClick={() => handleCellClick(i)}
-                className={`text-2xl h-full min-h-7 text-center uppercase ring ring-gray-300 py-2 cursor-pointer transition-colors select-none ${
+                className={`text-xl md:text-2xl lg:text-3xl h-full min-h-7 text-center uppercase ring ring-gray-300 py-2 cursor-pointer transition-colors select-none ${
                   isSelected
                     ? isLastSelected
                       ? "bg-blue-400 ring-blue-500 ring-2"
@@ -221,8 +221,8 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
           <div className="w-full mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
-                <p className="text-sm text-gray-600 mb-1">Выбранное слово:</p>
-                <p className="text-2xl font-bold text-blue-700 uppercase">
+                <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-1">Выбранное слово:</p>
+                <p className="text-xl md:text-2xl lg:text-3xl font-bold text-blue-700 uppercase">
                   {getCurrentWord()}
                 </p>
               </div>
@@ -246,15 +246,15 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
 
         <div className="w-full mt-3">
           <div className="flex flex-col gap-2">
-            <p className="font-semibold">Найденные слова:</p>
+            <p className="text-base md:text-lg lg:text-xl font-semibold">Найденные слова:</p>
             {answers.length === 0 ? (
-              <p className="text-gray-400 text-sm">Пока не найдено слов</p>
+              <p className="text-gray-400 text-base md:text-lg lg:text-xl">Пока не найдено слов</p>
             ) : (
               answers.map((el, i) => {
                 return (
                   <div className="flex gap-2 items-center" key={el.id}>
-                    <span className="text-xl w-4">{i + 1}.</span>
-                    <div className="ring ring-gray-300 p-2 rounded-lg bg-gray-50 font-semibold text-lg uppercase">
+                    <span className="text-lg md:text-xl lg:text-2xl w-4">{i + 1}.</span>
+                    <div className="ring ring-gray-300 p-2 rounded-lg bg-gray-50 font-semibold text-lg md:text-xl lg:text-2xl uppercase">
                       {el.answer}
                     </div>
                     <div onClick={() => deleteAnswer(el.id)}>

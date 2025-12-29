@@ -367,7 +367,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       {/* Text editor */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {t("taskLabel")}
           </span>
           <Button
@@ -383,10 +383,10 @@ export default function DropDown({ widgetId }: DropDownProps) {
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
           placeholder={t("insertListPlaceholder")}
-          className="w-full min-h-[100px] px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+          className="w-full min-h-[100px] px-3 py-2 text-base md:text-lg lg:text-xl bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
         />
 
-        <p className="text-xs text-slate-400">
+        <p className="text-sm md:text-base lg:text-lg text-slate-400">
           {t("hintDropdown", { placeholder: "{{id}}" })}
         </p>
       </div>
@@ -394,10 +394,10 @@ export default function DropDown({ widgetId }: DropDownProps) {
       {/* Preview */}
       {currentQuestion.body && (
         <div className="p-4 bg-white rounded-lg border border-dashed border-slate-300">
-          <span className="text-xs text-slate-400 mb-2 block">
+          <span className="text-sm md:text-base lg:text-lg text-slate-400 mb-2 block">
             {t("previewClick")}
           </span>
-          <div className="text-base text-slate-800 leading-relaxed">
+          <div className="text-lg md:text-xl lg:text-2xl text-slate-800 leading-relaxed">
             {renderPreview()}
           </div>
         </div>
@@ -407,7 +407,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       {currentDropdown && (
         <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-800">
+            <span className="text-base md:text-lg lg:text-xl font-medium text-blue-800">
               {t("editingList")}
             </span>
             <div className="flex gap-2">
@@ -429,7 +429,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
 
           {/* Options */}
           <div className="space-y-2">
-            <span className="text-xs text-blue-600">
+            <span className="text-sm md:text-base lg:text-lg text-blue-600">
               {t("optionsCorrect")}
             </span>
             {currentDropdownOptions.map((option, index) => (
@@ -452,7 +452,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
                       e.target.value
                     )
                   }
-                  className="flex-1 px-2 py-1 text-sm bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-2 py-1 text-base md:text-lg lg:text-xl bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -477,7 +477,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       {/* List of all dropdowns */}
       {dropdowns.length > 0 && !editingDropdown && (
         <div className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {t("allLists")}
           </span>
           {dropdowns.map((dropdown, index) => {
@@ -493,12 +493,12 @@ export default function DropDown({ widgetId }: DropDownProps) {
                 className="flex items-center justify-between p-2 bg-white rounded-lg border border-slate-200 hover:border-blue-400 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">#{index + 1}</span>
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm md:text-base lg:text-lg text-slate-400">#{index + 1}</span>
+                  <span className="text-base md:text-lg lg:text-xl text-slate-700">
                     {dropdownOptions.map((opt) => opt.body).join(" / ")}
                   </span>
                 </div>
-                <span className="text-xs text-green-600">
+                <span className="text-sm md:text-base lg:text-lg text-green-600">
                   ✓ {correctOption?.body || "..."}
                 </span>
               </div>

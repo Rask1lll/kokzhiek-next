@@ -183,7 +183,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
               value={option.body || ""}
               onChange={(e) => updateBlankAnswer(blankId, e.target.value)}
               placeholder={t("answerPlaceholderShort")}
-              className="inline-block mx-1 px-2 py-0.5 w-28 text-center text-sm bg-white border-b-2 border-slate-400 focus:border-blue-500 focus:outline-none transition-colors"
+              className="inline-block mx-1 px-2 py-0.5 w-28 text-center text-base md:text-lg lg:text-xl bg-white border-b-2 border-slate-400 focus:border-blue-500 focus:outline-none transition-colors"
             />
           );
         }
@@ -212,7 +212,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
       {/* Text editor */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {t("taskLabel")}
           </span>
           <Button
@@ -228,17 +228,17 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
           value={currentQuestion.body || ""}
           onChange={(e) => updateQuestionBody(e.target.value)}
           placeholder={t("insertBlankPlaceholder")}
-          className="w-full min-h-[80px] px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+          className="w-full min-h-[80px] px-3 py-2 text-base md:text-lg lg:text-xl bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
         />
       </div>
 
       {/* Preview with inputs */}
       {currentQuestion.body && (
         <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-          <span className="text-xs text-slate-400 mb-3 block">
+          <span className="text-sm md:text-base lg:text-lg text-slate-400 mb-3 block">
             {t("fillCorrectAnswers")}
           </span>
-          <div className="text-base text-slate-800 leading-loose">
+          <div className="text-lg md:text-xl lg:text-2xl text-slate-800 leading-loose">
             {renderPreview()}
           </div>
         </div>

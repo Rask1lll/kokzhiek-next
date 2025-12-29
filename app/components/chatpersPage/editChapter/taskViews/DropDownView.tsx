@@ -70,7 +70,7 @@ export default function DropDownView({
               key={index}
               value={answers[dropdownId] ?? ""}
               onChange={(e) => handleSelect(dropdownId, Number(e.target.value))}
-              className="mx-1 px-2 py-1 text-sm bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mx-1 px-2 py-1 text-base md:text-lg lg:text-xl bg-white border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="" disabled>
                 Выберите...
@@ -94,7 +94,7 @@ export default function DropDownView({
 
   return (
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
-      <div className="text-base text-gray-800 leading-relaxed">
+      <div className="text-lg md:text-xl lg:text-2xl text-gray-800 leading-relaxed">
         {renderContent()}
       </div>
     </TaskViewWrapper>

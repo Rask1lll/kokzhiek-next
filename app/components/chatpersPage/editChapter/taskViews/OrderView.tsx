@@ -101,7 +101,7 @@ export default function OrderView({ widgetId, onChange }: OrderViewProps) {
     <TaskViewWrapper widgetId={widgetId}>
       <div className="w-full space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-600">
+          <p className="text-base md:text-lg lg:text-xl text-slate-600">
             Расположите ответы в правильном порядке:
           </p>
         </div>
@@ -132,7 +132,7 @@ export default function OrderView({ widgetId, onChange }: OrderViewProps) {
 
                 {/* Content */}
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">
+                  <p className="text-base md:text-lg lg:text-xl font-medium text-gray-800">
                     {option.body || "Пусто"}
                   </p>
                 </div>

@@ -299,9 +299,9 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
 
-        <div className="text-sm text-gray-600">Вопрос к заданию</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">Вопрос к заданию</div>
         <input
           spellCheck={false}
           type="text"
@@ -314,7 +314,7 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
 
       {/* Grid size controls */}
       <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
           {t("gridSize")}
         </label>
         <div className="flex items-center gap-2">
@@ -340,7 +340,7 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
             <FiPlus className="w-4 h-4" />
           </button>
         </div>
-        <span className="text-xs text-slate-500 ml-auto">
+        <span className="text-sm md:text-base lg:text-lg text-slate-500 ml-auto">
           {t("cellsCount", { count: validatedData.size * validatedData.size })}
         </span>
       </div>

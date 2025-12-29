@@ -132,7 +132,7 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
       <div className="w-full space-y-6">
         {/* Available cards */}
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-slate-700">
+          <h3 className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {selectedCardId !== null
               ? "Карточка вопроса. Нажмите на ответы ниже:"
               : "Карточки (нажмите на карточку, затем выберите ответ):"}
@@ -168,7 +168,7 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
                         />
                       </div>
                     )}
-                    <span className="text-sm font-medium text-gray-800">
+                    <span className="text-base md:text-lg lg:text-xl font-medium text-gray-800">
                       {card.text || "Пусто"}
                     </span>
                   </div>
@@ -180,7 +180,7 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
 
         {/* Columns grid */}
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-slate-700">
+          <h3 className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {selectedCardId !== null
               ? "Нажмите на ответ, чтобы переместить карточку:"
               : "Ответы:"}
@@ -205,14 +205,14 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
                   }`}
                 >
                   {/* Column header */}
-                  <h4 className="text-sm font-semibold text-slate-700 mb-3">
+                  <h4 className="text-base md:text-lg lg:text-xl font-semibold text-slate-700 mb-3">
                     {columnData?.question || `Столбец ${Number(col.id) + 1}`}
                   </h4>
 
                   {/* Cards in column */}
                   <div className="space-y-2">
                     {cardsInColumn.length === 0 ? (
-                      <p className="text-xs text-slate-400 text-center py-4">
+                      <p className="text-sm md:text-base lg:text-lg text-slate-400 text-center py-4">
                         Перетащите карточки сюда
                       </p>
                     ) : (
@@ -233,7 +233,7 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
                                 />
                               </div>
                             )}
-                            <span className="text-sm text-wrap wrap-anywhere text-gray-800">
+                            <span className="text-base md:text-lg lg:text-xl text-wrap wrap-anywhere text-gray-800">
                               {card.text}
                             </span>
                           </div>

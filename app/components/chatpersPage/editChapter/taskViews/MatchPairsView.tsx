@@ -166,18 +166,18 @@ export default function MatchPairsView({
     <TaskViewWrapper widgetId={widgetId}>
       <div className="w-full space-y-4">
         {/* Header */}
-        <div className="text-sm text-slate-600 text-center">
+        <div className="text-base md:text-lg lg:text-xl text-slate-600 text-center">
           Перетащите варианты ответа в соответствующие ячейки
         </div>
 
         {/* Grid layout: each row = answer + arrow + cell */}
         <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
           {/* Header row */}
-          <div className="text-sm font-medium text-slate-700">
+          <div className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             Варианты ответа:
           </div>
           <div></div>
-          <div className="text-sm font-medium text-slate-700">Ячейки:</div>
+          <div className="text-base md:text-lg lg:text-xl font-medium text-slate-700">Ячейки:</div>
 
           {/* Content rows */}
           {data.pairs.map((pair, index) => {
@@ -218,7 +218,7 @@ export default function MatchPairsView({
                             />
                           </div>
                         )}
-                        <span className="text-sm font-medium text-gray-800 wrap-break-word">
+                        <span className="text-base md:text-lg lg:text-xl font-medium text-gray-800 wrap-break-word">
                           {answerForRow.text || "Пусто"}
                         </span>
                       </div>
@@ -265,7 +265,7 @@ export default function MatchPairsView({
                               />
                             </div>
                           )}
-                          <span className="text-sm font-medium text-gray-800 wrap-break-word">
+                          <span className="text-base md:text-lg lg:text-xl font-medium text-gray-800 wrap-break-word">
                             {matchedAnswer.text}
                           </span>
                         </div>
@@ -284,7 +284,7 @@ export default function MatchPairsView({
                               />
                             </div>
                           )}
-                          <p className="text-sm text-slate-500">
+                          <p className="text-base md:text-lg lg:text-xl text-slate-500">
                             {pair.cell.text || "Перетащите сюда"}
                           </p>
                         </div>

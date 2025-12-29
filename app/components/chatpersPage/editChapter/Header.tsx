@@ -44,13 +44,15 @@ export default function ChapterHeader() {
         </Link>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleSaveAsPdf}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
-          >
-            <FiDownload className="text-base" />
-            <span>{t("saveAsPdf")}</span>
-          </button>
+          {!isEdit && (
+            <button
+              onClick={handleSaveAsPdf}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
+            >
+              <FiDownload className="text-base" />
+              <span>{t("saveAsPdf")}</span>
+            </button>
+          )}
 
           {canEdit && (
             <div className="flex items-center rounded-lg border border-gray-200 bg-gray-100 p-1 text-sm">

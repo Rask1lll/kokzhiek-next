@@ -546,7 +546,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
         <input
           spellCheck
           type="text"
@@ -568,7 +568,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
             }
             className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
           />
-          <span className="text-sm text-slate-600">
+          <span className="text-base md:text-lg lg:text-xl text-slate-600">
             {t("shuffleOptions")}
           </span>
         </label>
@@ -577,7 +577,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       {/* Pairs list */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {t("pairsLabel")}
           </span>
           <div className="flex gap-2">
@@ -591,7 +591,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         </div>
 
         {data.pairs.length === 0 && (
-          <div className="text-sm text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-lg">
+          <div className="text-base md:text-lg lg:text-xl text-slate-400 text-center py-8 border border-dashed border-slate-200 rounded-lg">
             {t("noPairs")}
           </div>
         )}
@@ -602,7 +602,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
             className="p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-sm md:text-base lg:text-lg text-slate-400 font-medium">
                 {t("pairNumber", { number: index + 1 })}
               </span>
               <div className="flex gap-1">
@@ -620,7 +620,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="block">
-                  <span className="text-xs text-slate-500 mb-1 block">
+                  <span className="text-sm md:text-base lg:text-lg text-slate-500 mb-1 block">
                     {t("answerVariant")}
                   </span>
                   <input
@@ -631,7 +631,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                       updateAnswer(pair.id, "text", e.target.value)
                     }
                     placeholder={t("answerPlaceholder")}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-base md:text-lg lg:text-xl bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </label>
                 <input
@@ -661,7 +661,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                     );
                     input?.click();
                   }}
-                  className={`flex items-center gap-2 px-2 py-1 text-xs rounded transition-colors ${
+                  className={`flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors ${
                     pair.answer.imageUrl
                       ? "bg-pink-100 text-pink-600"
                       : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
@@ -696,7 +696,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
 
               <div className="space-y-2">
                 <label className="block">
-                  <span className="text-xs text-slate-500 mb-1 block">
+                  <span className="text-sm md:text-base lg:text-lg text-slate-500 mb-1 block">
                     {t("cell")}
                   </span>
                   <input
@@ -707,7 +707,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                       updateCell(pair.id, "text", e.target.value)
                     }
                     placeholder={t("cellPlaceholder")}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-base md:text-lg lg:text-xl bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </label>
                 <input
@@ -735,7 +735,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                     const input = fileInputRefs.current.get(`cell-${pair.id}`);
                     input?.click();
                   }}
-                  className={`flex items-center gap-2 px-2 py-1 text-xs rounded transition-colors ${
+                  className={`flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors ${
                     pair.cell.imageUrl
                       ? "bg-pink-100 text-pink-600"
                       : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"

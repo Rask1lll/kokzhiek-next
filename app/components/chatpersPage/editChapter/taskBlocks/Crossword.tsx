@@ -401,7 +401,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-sm text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
         <input
           spellCheck
           type="text"
@@ -418,7 +418,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
             <FiAlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
             <div className="space-y-1">
               {validation.errors.map((error, i) => (
-                <p key={i} className="text-sm">
+                <p key={i} className="text-base md:text-lg lg:text-xl">
                   {error}
                 </p>
               ))}
@@ -430,7 +430,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
       {/* Keyword input */}
       <div className="space-y-2">
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {t("keywordLabel")}
           </span>
           <input
@@ -443,7 +443,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
           />
         </label>
         {data.keyword && (
-          <p className="text-xs text-slate-500">
+          <p className="text-sm md:text-base lg:text-lg text-slate-500">
             {t("needQuestions", { count: data.keyword.length })}
           </p>
         )}
@@ -453,7 +453,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
       {data.keyword && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-700">{t("questionsLabel")}</span>
+            <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">{t("questionsLabel")}</span>
             {data.questions.length < data.keyword.length && (
               <Button
                 content={t("addQuestion")}
@@ -483,7 +483,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
                   <span className="w-8 h-8 flex items-center justify-center bg-purple-100 text-purple-700 font-bold rounded">
                     {requiredLetter}
                   </span>
-                  <span className="text-sm text-slate-500">
+                  <span className="text-base md:text-lg lg:text-xl text-slate-500">
                     {t("questionNumber", { number: index + 1 })} — {t("answerMustContain")} &quot;
                     {requiredLetter}&quot;
                   </span>
@@ -507,7 +507,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
                     updateQuestion(q.id, { question: e.target.value.trim() })
                   }
                   placeholder={t("enterQuestion")}
-                  className="w-full px-3 py-1.5 mb-2 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-1.5 mb-2 text-base md:text-lg lg:text-xl bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
 
                 <input
@@ -520,7 +520,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
                     })
                   }
                   placeholder={t("answerLabel")}
-                  className={`w-full px-3 py-1.5 text-sm font-medium tracking-wider uppercase border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                  className={`w-full px-3 py-1.5 text-base md:text-lg lg:text-xl font-medium tracking-wider uppercase border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 ${
                     q.answer && !hasLetter
                       ? "bg-red-100 border-red-300"
                       : "bg-white border-slate-200"
@@ -545,7 +545,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
       {/* Crossword preview */}
       {validation.isValid && data.questions.length > 0 && (
         <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-          <span className="text-xs text-slate-400 mb-3 block">
+          <span className="text-sm md:text-base lg:text-lg text-slate-400 mb-3 block">
             {t("crosswordPreview")}
           </span>
 
@@ -557,7 +557,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
               return (
                 <div key={q.id} className="flex items-center gap-0.5 mb-0.5">
                   {/* Row number */}
-                  <span className="w-6 text-xs text-slate-400 text-right mr-2">
+                  <span className="w-6 text-sm md:text-base lg:text-lg text-slate-400 text-right mr-2">
                     {rowIndex + 1}.
                   </span>
 
@@ -570,7 +570,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
                   {letters.map((letter, letterIndex) => (
                     <div
                       key={letterIndex}
-                      className={`w-7 h-7 flex items-center justify-center text-sm font-bold border ${
+                      className={`w-7 h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 flex items-center justify-center text-base md:text-lg lg:text-xl font-bold border ${
                         letterIndex === q.keyLetterIndex
                           ? "bg-purple-500 text-white border-purple-600"
                           : "bg-white text-slate-700 border-slate-300"
@@ -584,7 +584,7 @@ export default function Crossword({ widgetId }: CrosswordProps) {
             })}
           </div>
 
-          <div className="mt-3 text-sm text-purple-600 font-medium">
+          <div className="mt-3 text-base md:text-lg lg:text-xl text-purple-600 font-medium">
             {t("keywordResult")} {data.keyword}
           </div>
         </div>

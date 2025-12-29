@@ -267,7 +267,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
         <div className="flex items-center gap-3">
           <p className="text-gray-700 font-semibold">{t("taskText")}</p>
           <span
-            className="relative inline-flex items-center justify-center w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs font-bold rounded-full cursor-help transition-colors"
+            className="relative inline-flex items-center justify-center w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-600 text-sm md:text-base lg:text-lg font-bold rounded-full cursor-help transition-colors"
             onMouseEnter={() => {
               setShowHint(true);
             }}
@@ -277,7 +277,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
           >
             ?
             {showHint && (
-              <div className="absolute top-8 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-3 text-sm text-gray-600 font-normal">
+              <div className="absolute top-8 left-0 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-3 text-base md:text-lg lg:text-xl text-gray-600 font-normal">
                 {t("hintContainers", { placeholder: "{{{id}}}" })}
               </div>
             )}
@@ -285,7 +285,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
         </div>
         <button
           onClick={addCell}
-          className="flex items-center gap-2 text-sm bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg cursor-pointer font-medium transition-colors shadow-sm"
+          className="flex items-center gap-2 text-base md:text-lg lg:text-xl bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg cursor-pointer font-medium transition-colors shadow-sm"
         >
           <span>+</span>
           {t("addContainer")}
@@ -314,7 +314,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
         </div>
 
         {cells.length === 0 ? (
-          <p className="text-gray-400 text-sm italic text-center py-4">
+          <p className="text-gray-400 text-base md:text-lg lg:text-xl italic text-center py-4">
             {t("noContainers")}
           </p>
         ) : (
@@ -331,7 +331,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
                   className="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 font-bold rounded-lg text-sm">
+                    <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 font-bold rounded-lg text-base md:text-lg lg:text-xl">
                       {cellId}
                     </div>
                     <input

@@ -60,7 +60,7 @@ export default function SingleChoiceView({
               className="w-5 h-5 mt-0.5 border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
             />
             <div className="flex-1 flex flex-col gap-2">
-              <span className="text-gray-800">{option.body}</span>
+              <span className="text-lg md:text-xl lg:text-2xl text-gray-800">{option.body}</span>
               {option.image_url && (
                 <div className="relative w-full max-w-xl h-70 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                   <Image

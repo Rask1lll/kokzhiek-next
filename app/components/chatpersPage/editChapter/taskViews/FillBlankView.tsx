@@ -7,6 +7,7 @@ import TaskViewWrapper from "./TaskViewWrapper";
 type FillBlankViewProps = {
   widgetId: number;
   onChange?: (value: string) => void;
+  onAnswerChange?: (value: unknown) => void;
 };
 
 type UserAnswer = {
@@ -16,6 +17,7 @@ type UserAnswer = {
 export default function FillBlankView({
   widgetId,
   onChange,
+  onAnswerChange,
 }: FillBlankViewProps) {
   const { questions } = useQuestions(widgetId);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -43,8 +45,15 @@ export default function FillBlankView({
     const newAnswers = { ...answers, [blankId]: userInput };
     setAnswers(newAnswers);
 
+    const answer: UserAnswer = { answers: newAnswers };
+
+    // Вызываем onAnswerChange для TaskViewWrapper
+    if (onAnswerChange) {
+      onAnswerChange(answer);
+    }
+
+    // Сохраняем обратную совместимость с onChange
     if (onChange) {
-      const answer: UserAnswer = { answers: newAnswers };
       onChange(JSON.stringify(answer));
     }
   };
@@ -69,7 +78,7 @@ export default function FillBlankView({
                 e.target.style.width = `${e.target.scrollWidth}px`;
               }}
               placeholder={"..."}
-              className="mx-1 px-2 py-0.5 w-28 text-center text-sm bg-white border-b-2 border-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
+              className="mx-1 px-2 py-0.5 w-28 text-center text-base md:text-lg lg:text-xl bg-white border-b-2 border-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
             />
           );
         }
@@ -84,7 +93,7 @@ export default function FillBlankView({
 
   return (
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
-      <div className="text-base text-gray-800 leading-loose">
+      <div className="sm:text-lg text-sm md:text-xl text-gray-800 leading-loose">
         {renderContent()}
       </div>
     </TaskViewWrapper>
