@@ -5,6 +5,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BiArrowBack } from "react-icons/bi";
 import { FiDownload } from "react-icons/fi";
+import { useMemo } from "react";
+import { useAuth } from "@/app/hooks/useAuth";
+import { isAuthor } from "@/app/libs/roles";
 
 export default function ChapterHeader() {
   const t = useTranslations("chapterHeader");
@@ -13,6 +16,10 @@ export default function ChapterHeader() {
   const bookId = param.get("book");
   const chapter = param.get("chapter");
   const isEdit = param.get("edit");
+  const { user } = useAuth();
+  const canEdit = useMemo(() => {
+    return isAuthor(user);
+  }, [user]);
 
   const handleSaveAsPdf = () => {
     const header = document.querySelector("header");
@@ -45,29 +52,31 @@ export default function ChapterHeader() {
             <span>{t("saveAsPdf")}</span>
           </button>
 
-          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-100 p-1 text-sm">
-            <Link
-              href={`${path}?chapter=${chapter}&book=${bookId}&edit=1`}
-              className={`px-4 py-1.5 rounded-md transition ${
-                isEdit
-                  ? "bg-white text-sky-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("editing")}
-            </Link>
+          {canEdit && (
+            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-100 p-1 text-sm">
+              <Link
+                href={`${path}?chapter=${chapter}&book=${bookId}&edit=1`}
+                className={`px-4 py-1.5 rounded-md transition ${
+                  isEdit
+                    ? "bg-white text-sky-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {t("editing")}
+              </Link>
 
-            <Link
-              href={`${path}?chapter=${chapter}&book=${bookId}`}
-              className={`px-4 py-1.5 rounded-md transition ${
-                !isEdit
-                  ? "bg-white text-sky-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("preview")}
-            </Link>
-          </div>
+              <Link
+                href={`${path}?chapter=${chapter}&book=${bookId}`}
+                className={`px-4 py-1.5 rounded-md transition ${
+                  !isEdit
+                    ? "bg-white text-sky-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {t("preview")}
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

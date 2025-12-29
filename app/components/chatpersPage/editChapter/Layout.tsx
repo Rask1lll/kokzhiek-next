@@ -10,6 +10,7 @@ import { useBlocks } from "@/app/hooks/useBlocks";
 import { FiTrash2, FiDroplet } from "react-icons/fi";
 import { CgOptions } from "react-icons/cg";
 import { useTranslations } from "next-intl";
+import { PiDotsNine } from "react-icons/pi";
 
 // Color keys for translation
 const PRESET_COLOR_KEYS = [
@@ -26,6 +27,9 @@ const PRESET_COLOR_KEYS = [
 
 type LayoutProps = {
   block: Block;
+  handleDrop?: (targetId: number) => void;
+  handleDragStart?: (id: number, e: React.DragEvent<HTMLDivElement>) => void;
+  handleDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
 function getColumnsCount(layoutCode: string): number {
@@ -58,6 +62,7 @@ function getColumnsCount(layoutCode: string): number {
 function getColumnClasses(layoutCode: string, columnIndex: number): string {
   switch (layoutCode) {
     case "left_wide":
+
     case "hero":
       return columnIndex === 0 ? "w-[70%] flex-none" : "w-[30%] flex-none";
 
@@ -325,13 +330,42 @@ const BlockMenu = ({
   );
 };
 
-const Layout = ({ block }: LayoutProps) => {
+const Layout = ({
+  block,
+  handleDrop,
+  handleDragStart,
+  handleDragOver,
+}: LayoutProps) => {
   const { layout_type, widgets, id, style } = block;
   const columnsCount = getColumnsCount(layout_type);
   const groupedWidgets = groupWidgetsByColumn(widgets, columnsCount);
   const params = useSearchParams();
   const isEdit = params.get("edit");
   const { remove: removeBlock, updateStyle } = useBlocks();
+  const layOurRef = useRef<HTMLDivElement | null>(null);
+  // const [scrollHeight, setScrollHeight] = useState<number>(0);
+
+  // useEffect(() => {
+  //   const updateScrollHeight = () => {
+  //     if (layOurRef.current) {
+  //       setScrollHeight(layOurRef.current.scrollHeight);
+  //     }
+  //   };
+
+  //   updateScrollHeight();
+
+  //   const resizeObserver = new ResizeObserver(() => {
+  //     updateScrollHeight();
+  //   });
+
+  //   if (layOurRef.current) {
+  //     resizeObserver.observe(layOurRef.current);
+  //   }
+
+  //   return () => {
+  //     resizeObserver.disconnect();
+  //   };
+  // }, [widgets, layout_type]);
 
   const blockColor = style?.color || "";
 
@@ -349,7 +383,7 @@ const Layout = ({ block }: LayoutProps) => {
   if (columnsCount === 1) {
     const columnWidgets = groupedWidgets.get(0) || [];
     return (
-      <div className="flex group/block w-full">
+      <div className="flex group/block w-full" ref={layOurRef}>
         <div
           className="w-full ring ring-gray-300 rounded-md transition-colors"
           style={{ backgroundColor: blockColor || "#f3f4f6" }}
@@ -362,7 +396,15 @@ const Layout = ({ block }: LayoutProps) => {
           />
         </div>
         {isEdit && (
-          <div className=" top-2 right-[-40px] opacity-100 transition-opacity">
+          <div
+            draggable
+            onDragStart={(e) => {
+              handleDragStart && handleDragStart(block.id, e);
+            }}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop && handleDrop(block.id)}
+            className=" top-2 right-[-40px] opacity-100 transition-opacity"
+          >
             <BlockMenu
               currentColor={blockColor}
               onColorChange={handleColorChange}
@@ -370,10 +412,7 @@ const Layout = ({ block }: LayoutProps) => {
             />
             <div className="flex flex-col justify-between items-center gap-1">
               <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
-                <p className="h-3 leading-none">::</p>
-                <p className="h-3 leading-none">::</p>
-                <p className="h-3 leading-none">::</p>
-                <p className="leading-none">::</p>
+                <PiDotsNine />
               </div>
             </div>
           </div>
@@ -383,17 +422,16 @@ const Layout = ({ block }: LayoutProps) => {
   }
 
   return (
-    <div className="relative  flex group/block w-full">
+    <div className="relative  flex group/block w-full" ref={layOurRef}>
       <div
-        className="w-full flex gap-4 rounded-md ring ring-gray-300 transition-colors"
+        className="w-full flex rounded-md ring ring-gray-300 transition-colors"
         style={{ backgroundColor: blockColor || "#EDEDED" }}
       >
         {Array.from({ length: columnsCount }).map((_, colIndex) => {
           const columnWidgets = groupedWidgets.get(colIndex) || [];
           const columnClass = getColumnClasses(layout_type, colIndex);
-
           return (
-            <div key={colIndex} className={`${columnClass} mb-2`}>
+            <div key={colIndex} className={`${columnClass} p-0.5 mb-2`}>
               <Column
                 blockId={id}
                 columnIndex={colIndex}
@@ -404,18 +442,30 @@ const Layout = ({ block }: LayoutProps) => {
         })}
       </div>
       {isEdit && (
-        <div className=" top-2 right-[-40px] opacity-100 transition-opacity">
+        <div className="absolute top-2 -right-[40px] opacity-100 transition-opacity">
           <BlockMenu
             currentColor={blockColor}
             onColorChange={handleColorChange}
             onDelete={handleDelete}
           />
-          <div className="flex flex-col justify-between items-center gap-1">
-            <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
-              <p className="h-3 leading-none">::</p>
-              <p className="h-3 leading-none">::</p>
-              <p className="h-3 leading-none">::</p>
-              <p className="leading-none">::</p>
+          <div
+            draggable={true}
+            onDragStart={(e) => {
+              e.stopPropagation();
+              if (handleDragStart) {
+                handleDragStart(block.id, e);
+              }
+            }}
+            className="flex p-2 flex-col justify-between cursor-move items-center"
+          >
+            <div className="flex flex-col gap-0 justify-center text-gray-400 hover:text-gray-600">
+              {/* {scrollHeight > 0 &&
+                Array.from({
+                  length: Math.floor((scrollHeight - 90) / 28),
+                }).map((_, i) => {
+                  return <PiDotsNine key={i} className="h-full w-7" />;
+                })} */}
+              <PiDotsNine className="h-full w-7" />
             </div>
           </div>
         </div>

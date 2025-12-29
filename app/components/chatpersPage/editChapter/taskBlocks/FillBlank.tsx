@@ -102,7 +102,6 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
       body: newBody,
       data: { blanks: newBlanks },
     };
-    console.log("Payload:", JSON.stringify(payload, null, 2));
 
     const updated = await update(currentQuestion.id, payload);
     console.log("Response:", updated);
@@ -175,7 +174,6 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
           (opt) => opt.match_id === blankId
         );
 
-        console.log(currentQuestion);
         if (option) {
           return (
             <input

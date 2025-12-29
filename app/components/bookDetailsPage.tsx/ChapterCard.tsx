@@ -60,7 +60,11 @@ export default function ChapterCard({
   return (
     <div className="relative group">
       <Link
-        href={`/books/book/chapter?chapter=${chapterId}&book=${bookid}`}
+        href={
+          canEdit
+            ? `/books/book/chapter?chapter=${chapterId}&book=${bookid}&edit=1`
+            : `/books/book/chapter?chapter=${chapterId}&book=${bookid}`
+        }
         className={`flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50/60 ${
           isDeleting ? "opacity-50 pointer-events-none" : ""
         }`}

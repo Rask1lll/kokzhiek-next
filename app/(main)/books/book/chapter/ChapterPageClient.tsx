@@ -35,13 +35,11 @@ export default function ChapterPageClient() {
 
   const { addContent, removeContent } = useModalWindowStore();
   const { blocks, isLoading } = useConstructor({ bookId, chapterId });
-  const {
-    create: createBlock,
-    remove: deleteBlock,
-    swap: swapBlocks,
-  } = useBlocks();
+  const { create: createBlock, swap: swapBlocks } = useBlocks();
 
   const [draggedId, setDraggedId] = useState<number | null>(null);
+
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleCreate = () => {
     addContent(
@@ -56,10 +54,13 @@ export default function ChapterPageClient() {
 
   const handleDragStart = (id: number, e: React.DragEvent<HTMLDivElement>) => {
     if (!isEditMode) {
+      console.log("eeee");
       e.preventDefault();
       return;
     }
+    setIsDragging(true);
     setDraggedId(id);
+    console.log(id);
     e.dataTransfer.effectAllowed = "move";
   };
 
@@ -77,12 +78,7 @@ export default function ChapterPageClient() {
 
     swapBlocks(draggedId, targetId);
     setDraggedId(null);
-  };
-
-  const handleDeleteBlock = (blockId: number) => {
-    if (confirm("Вы уверены, что хотите удалить этот блок?")) {
-      deleteBlock(blockId);
-    }
+    setIsDragging(false);
   };
 
   if (!bookId || !chapterId) {
@@ -102,21 +98,25 @@ export default function ChapterPageClient() {
   return (
     <div className="min-h-screen w-screen mt-20 flex flex-col items-center py-10">
       {/* <div className="w-5/6 space-y-6"> */}
-      <div className="2xl:w-5/6 w-[95%] space-y-1">
+      <div className="2xl:w-5/6 w-[100%] space-y-1">
         {blocks.map((block) => (
           <div
             key={block.id}
-            draggable={isEditMode}
-            onDragStart={
-              isEditMode ? (e) => handleDragStart(block.id, e) : undefined
-            }
-            onDragOver={isEditMode ? handleDragOver : undefined}
-            onDrop={isEditMode ? () => handleDrop(block.id) : undefined}
-            className={`bg-white flex gap-2 rounded-lg p-1 ${
-              isEditMode ? "cursor-move" : "cursor-default"
-            } group`}
+            draggable={isDragging}
+            onDragOver={handleDragOver}
+            onDrop={() => {
+              console.log(!!draggedId);
+              console.log("droped");
+              handleDrop(block.id);
+            }}
+            className={`bg-white flex w-full gap-2 rounded-lg p-1 cursor-default group`}
           >
-            <Layout block={block} />
+            <Layout
+              block={block}
+              handleDrop={handleDrop}
+              handleDragStart={handleDragStart}
+              handleDragOver={handleDragOver}
+            />
           </div>
         ))}
         {isEditMode && <CreateBlock onClick={handleCreate} />}
