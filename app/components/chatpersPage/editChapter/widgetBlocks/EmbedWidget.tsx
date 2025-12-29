@@ -33,7 +33,7 @@ export default function EmbedWidget({ value, onChange }: EmbedWidgetProps) {
           disabled={!value.trim()}
           className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
-          {t("embedSave")}
+          {t("embedRun")}
         </button>
       </div>
     );

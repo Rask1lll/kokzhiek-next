@@ -500,7 +500,7 @@
     "embedDesc": "Сыртқы контентті iframe арқылы ендіру",
     "embedLabel": "iframe кодын қойыңыз",
     "embedPlaceholder": "<iframe src=\"...\" width=\"100%\" height=\"400\"></iframe>",
-    "embedSave": "Сақтау",
+    "embedRun": "Іске қосу",
     "embedEdit": "Өңдеу"
   },
   "taskTypes": {

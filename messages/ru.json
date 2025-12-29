@@ -500,7 +500,7 @@
     "embedDesc": "Встраивание внешнего контента через iframe",
     "embedLabel": "Вставьте код iframe",
     "embedPlaceholder": "<iframe src=\"...\" width=\"100%\" height=\"400\"></iframe>",
-    "embedSave": "Сохранить",
+    "embedRun": "Запустить",
     "embedEdit": "Редактировать"
   },
   "taskTypes": {
