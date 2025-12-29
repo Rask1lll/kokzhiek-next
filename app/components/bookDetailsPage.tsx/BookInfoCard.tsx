@@ -3,10 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { FiEdit2, FiTrash2, FiSend, FiCheck, FiX, FiAlertCircle, FiDownload } from "react-icons/fi";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiSend,
+  FiCheck,
+  FiX,
+  FiAlertCircle,
+  FiDownload,
+} from "react-icons/fi";
 import { useTranslations } from "next-intl";
 import { BookStatus } from "@/app/types/book";
-import { handleUpdateBookStatus, UpdateBookStatusPayload } from "@/app/services/book/booksApi";
+import {
+  handleUpdateBookStatus,
+  UpdateBookStatusPayload,
+} from "@/app/services/book/booksApi";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isModerator, isAuthor } from "@/app/libs/roles";
 
@@ -296,7 +307,8 @@ export default function BookInfoCard({
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t("rejectReason")} *
               </label>
-              <textarea spellCheck={false}
+              <textarea
+                spellCheck={false}
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder={t("rejectReasonPlaceholder")}

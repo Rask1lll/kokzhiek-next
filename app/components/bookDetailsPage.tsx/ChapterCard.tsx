@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { FiChevronRight, FiTrash2, FiEdit2 } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import EditChapterModal from "./EditChapterModal";
+import { useAuth } from "@/app/hooks/useAuth";
+import { isAuthor } from "@/app/libs/roles";
 
 type ChapterCardProps = {
   chapterId: string;
@@ -24,6 +26,10 @@ export default function ChapterCard({
   const t = useTranslations("chapters");
   const { addContent } = useModalWindowStore();
   const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useAuth();
+  const canEdit = useMemo(() => {
+    return isAuthor(user);
+  }, [user]);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -74,23 +80,25 @@ export default function ChapterCard({
       </Link>
 
       {/* Edit button */}
-      <button
-        onClick={handleEdit}
-        className="absolute right-20 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-500"
-        title={t("edit")}
-      >
-        <FiEdit2 className="h-4 w-4" />
-      </button>
+      {canEdit && (
+        <button
+          onClick={handleEdit}
+          className="absolute right-20 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-500"
+          title={t("edit")}
+        >
+          <FiEdit2 className="h-4 w-4" />
+        </button>
+      )}
 
       {/* Delete button */}
-      {onDelete && (
+      {canEdit && onDelete && (
         <button
           onClick={handleDelete}
           disabled={isDeleting}
           className="absolute right-12 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"
           title={t("delete")}
         >
-          {isDeleting ? (
+          {canEdit && isDeleting ? (
             <svg
               className="animate-spin h-4 w-4"
               xmlns="http://www.w3.org/2000/svg"
