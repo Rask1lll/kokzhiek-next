@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import ImageCropModal from "./ImageCropModal";
 import { WidgetData } from "@/app/types/widget";
+import { useTranslations } from "next-intl";
 
 type ImageWidgetProps = {
   value: WidgetData; // URL of the image
@@ -23,6 +24,7 @@ export default function ImageWidget({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileTitle, setFileTitle] = useState<string>(String(value.text ?? ""));
   console.log(onTextChange);
+  const t = useTranslations();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -73,7 +75,7 @@ export default function ImageWidget({
         <input
           type="text"
           className="p-1 text-lg w-4/5 ring-1 rounded-md ring-gray-300 bg-white"
-          placeholder="Заголовок к картинке"
+          placeholder={t("taskEditor.image_title")}
           onChange={(e) => {
             onTextChange(e.target.value);
             setFileTitle(e.target.value);

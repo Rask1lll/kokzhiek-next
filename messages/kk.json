@@ -395,6 +395,8 @@
     "addOption": "Қосу +",
     "optionPlaceholder": "Нұсқа {number}",
     "addImage": "Сурет қосу",
+    "video_title": "Видео тақырыбы",
+    "image_title": "Сурет тақырыбы",
     "removeImage": "Суретті жою",
     "moveUp": "Жоғары жылжыту",
     "moveDown": "Төмен жылжыту",

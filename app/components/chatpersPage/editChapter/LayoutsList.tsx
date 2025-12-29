@@ -79,18 +79,18 @@ const blocks: blockType[] = [
   },
 
   // 4 columns
-  {
-    nameKey: "fourCols",
-    structure: (
-      <div className="w-full h-full grid grid-cols-4 gap-2 p-2">
-        <div className="bg-blue-200 rounded-md h-full"></div>
-        <div className="bg-green-200 rounded-md h-full"></div>
-        <div className="bg-yellow-200 rounded-md h-full"></div>
-        <div className="bg-pink-200 rounded-md h-full"></div>
-      </div>
-    ),
-    code: "four_cols",
-  },
+  // {
+  //   nameKey: "fourCols",
+  //   structure: (
+  //     <div className="w-full h-full grid grid-cols-4 gap-2 p-2">
+  //       <div className="bg-blue-200 rounded-md h-full"></div>
+  //       <div className="bg-green-200 rounded-md h-full"></div>
+  //       <div className="bg-yellow-200 rounded-md h-full"></div>
+  //       <div className="bg-pink-200 rounded-md h-full"></div>
+  //     </div>
+  //   ),
+  //   code: "four_cols",
+  // },
 
   // Sidebar layouts
   {

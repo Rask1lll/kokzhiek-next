@@ -1,6 +1,7 @@
 "use client";
 
 import { WidgetData } from "@/app/types/widget";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type VideoWidgetProps = {
@@ -17,7 +18,8 @@ export default function VideoWidget({
   onTextChange,
 }: VideoWidgetProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [fileTitle, setFileTitle] = useState<string>(String(value.text ?? " "));
+  const [fileTitle, setFileTitle] = useState<string>(String(value.text ?? ""));
+  const t = useTranslations();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,7 +51,7 @@ export default function VideoWidget({
         <input
           type="text"
           className="p-1 text-lg w-4/5 ring-1 rounded-md ring-gray-300 bg-white"
-          placeholder="Заголовок к видео"
+          placeholder={t("taskEditor.video_title")}
           onChange={(e) => {
             onTextChange(e.target.value);
             setFileTitle(e.target.value);
