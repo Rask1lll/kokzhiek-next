@@ -266,6 +266,25 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
             )}
           </div>
         </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => {
+              if (answers.length === 0) {
+                console.log("Ответ не заполнен");
+                return;
+              }
+              // Извлекаем массив найденных слов
+              const found = answers.map((a) => a.answer);
+              const answer = { found };
+              console.log("Ответ ученика (word_search):", answer);
+            }}
+            disabled={answers.length === 0}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            Отправить ответ
+          </button>
+        </div>
       </>
     </TaskViewWrapper>
   );

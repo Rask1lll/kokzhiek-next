@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useRef, useState, useMemo } from "react";
-import { FiMinus, FiPlus } from "react-icons/fi";
+import { FiMinus, FiPlus, FiTrash2, FiPlusCircle } from "react-icons/fi";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
 import { useTranslations } from "next-intl";
@@ -78,12 +78,16 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
   const cellDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const sizeDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const optionDebounceTimersRef = useRef<Map<number, NodeJS.Timeout>>(
+    new Map()
+  );
 
   // Cleanup timers on unmount
   useEffect(() => {
     const debounceTimer = debounceTimerRef.current;
     const sizeTimer = sizeDebounceTimerRef.current;
     const cellTimers = cellDebounceTimersRef.current;
+    const optionTimers = optionDebounceTimersRef.current;
 
     return () => {
       if (debounceTimer) {
@@ -96,6 +100,11 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
         clearTimeout(timer);
       });
       cellTimers.clear();
+
+      optionTimers.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      optionTimers.clear();
     };
   }, []);
 
@@ -280,6 +289,91 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
     }
   }, [validatedData.size, updateSize]);
 
+  // Options management (words to search)
+  const options = useMemo(
+    () => currentQuestion?.options || [],
+    [currentQuestion?.options]
+  );
+
+  const addWord = useCallback(async () => {
+    if (!currentQuestion?.id) return;
+
+    const newOptions = [
+      ...options,
+      {
+        body: "",
+        image_url: null,
+        is_correct: false,
+        match_id: null,
+        group: null,
+        order: options.length,
+      },
+    ];
+
+    const updated = await update(currentQuestion.id, { options: newOptions });
+    if (updated) {
+      setCurrentQuestion(updated);
+    }
+  }, [currentQuestion, options, update]);
+
+  const removeWord = useCallback(
+    async (optionId: number | undefined) => {
+      if (!currentQuestion?.id || !optionId) return;
+
+      const newOptions = options.filter((opt) => opt.id !== optionId);
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev ? { ...prev, options: newOptions } : null
+      );
+
+      // Send to server
+      const updated = await update(currentQuestion.id, { options: newOptions });
+      if (updated) {
+        setCurrentQuestion(updated);
+      }
+    },
+    [currentQuestion, options, update]
+  );
+
+  const updateWord = useCallback(
+    (optionId: number | undefined, newBody: string) => {
+      if (!currentQuestion?.id || !optionId) return;
+
+      const updatedOptions = options.map((opt) =>
+        opt.id === optionId
+          ? { ...opt, body: newBody.toUpperCase().trim() }
+          : opt
+      );
+
+      // Update UI immediately
+      setCurrentQuestion((prev) =>
+        prev ? { ...prev, options: updatedOptions } : null
+      );
+
+      // Debounce server update
+      const timerKey = optionId;
+      const existingTimer = optionDebounceTimersRef.current.get(timerKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+
+      const questionId = currentQuestion.id;
+      const timer = setTimeout(async () => {
+        if (!questionId) {
+          optionDebounceTimersRef.current.delete(timerKey);
+          return;
+        }
+
+        await update(questionId, { options: updatedOptions });
+        optionDebounceTimersRef.current.delete(timerKey);
+      }, 500);
+
+      optionDebounceTimersRef.current.set(timerKey, timer);
+    },
+    [currentQuestion, options, update]
+  );
+
   // Show loading state while loading
   if (loading) {
     return (
@@ -299,9 +393,13 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">
+          {t("questionLabel")}
+        </div>
 
-        <div className="text-base md:text-lg lg:text-xl text-gray-600">Вопрос к заданию</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">
+          Вопрос к заданию
+        </div>
         <input
           spellCheck={false}
           type="text"
@@ -360,6 +458,58 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
             );
           })}
         </div>
+      </div>
+
+      {/* Words to search */}
+      <div className="w-full p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="flex items-center justify-between mb-4">
+          <label className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
+            Слова для поиска
+          </label>
+          <button
+            type="button"
+            onClick={addWord}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+          >
+            <FiPlusCircle className="w-4 h-4" />
+            Добавить слово
+          </button>
+        </div>
+
+        {options.length === 0 ? (
+          <p className="text-gray-400 text-sm md:text-base lg:text-lg text-center py-4">
+            Нет слов для поиска. Добавьте слова, которые нужно найти в сетке.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {options.map((option, index) => (
+              <div
+                key={option.id || index}
+                className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+              >
+                <span className="text-base md:text-lg lg:text-xl font-medium text-slate-500 w-8 shrink-0">
+                  {index + 1}.
+                </span>
+                <input
+                  type="text"
+                  value={option.body || ""}
+                  onChange={(e) => updateWord(option.id, e.target.value)}
+                  placeholder="Введите слово"
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base md:text-lg lg:text-xl uppercase"
+                  spellCheck={false}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeWord(option.id)}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Удалить слово"
+                >
+                  <FiTrash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

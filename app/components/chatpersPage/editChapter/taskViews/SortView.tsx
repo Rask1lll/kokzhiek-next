@@ -7,11 +7,6 @@ import TaskViewWrapper from "./TaskViewWrapper";
 
 type SortViewProps = {
   widgetId: number;
-  onChange?: (value: string) => void;
-};
-
-type UserAnswer = {
-  assignments: Record<string, string>; // optionId -> columnId (group)
 };
 
 // Fisher-Yates shuffle with seed
@@ -26,7 +21,7 @@ function shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
   return shuffled;
 }
 
-export default function SortView({ widgetId, onChange }: SortViewProps) {
+export default function SortView({ widgetId }: SortViewProps) {
   const { questions } = useQuestions(widgetId);
   const [assignments, setAssignments] = useState<Record<string, string>>({});
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
@@ -95,11 +90,6 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
       };
       setAssignments(newAssignments);
       setSelectedCardId(null);
-
-      if (onChange) {
-        const answer: UserAnswer = { assignments: newAssignments };
-        onChange(JSON.stringify(answer));
-      }
     }
   };
 
@@ -107,11 +97,6 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
     const newAssignments = { ...assignments };
     delete newAssignments[cardId.toString()];
     setAssignments(newAssignments);
-
-    if (onChange) {
-      const answer: UserAnswer = { assignments: newAssignments };
-      onChange(JSON.stringify(answer));
-    }
   };
 
   if (!currentQuestion || columns.length === 0) {
@@ -252,6 +237,24 @@ export default function SortView({ widgetId, onChange }: SortViewProps) {
               );
             })}
           </div>
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => {
+              if (Object.keys(assignments).length === 0) {
+                console.log("Ответ не заполнен");
+                return;
+              }
+              // Преобразуем assignments: card_id (option.id) -> column_id (group)
+              const answer = { assignments };
+              console.log("Ответ ученика (sort):", answer);
+            }}
+            disabled={Object.keys(assignments).length === 0}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            Отправить ответ
+          </button>
         </div>
       </div>
     </TaskViewWrapper>

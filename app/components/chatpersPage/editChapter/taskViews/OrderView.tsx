@@ -8,11 +8,6 @@ import TaskViewWrapper from "./TaskViewWrapper";
 
 type OrderViewProps = {
   widgetId: number;
-  onChange?: (value: string) => void;
-};
-
-type UserAnswer = {
-  order: number[]; // Array of option IDs in user's order
 };
 
 // Fisher-Yates shuffle with seed
@@ -27,7 +22,7 @@ function shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
   return shuffled;
 }
 
-export default function OrderView({ widgetId, onChange }: OrderViewProps) {
+export default function OrderView({ widgetId }: OrderViewProps) {
   const { questions } = useQuestions(widgetId);
   const [shuffleSeed] = useState(() => Math.random());
 
@@ -81,11 +76,6 @@ export default function OrderView({ widgetId, onChange }: OrderViewProps) {
       newOrder[index],
     ];
     setUserOrder(newOrder);
-
-    if (onChange) {
-      const answer: UserAnswer = { order: newOrder };
-      onChange(JSON.stringify(answer));
-    }
   };
 
   // Get option by id
@@ -161,6 +151,25 @@ export default function OrderView({ widgetId, onChange }: OrderViewProps) {
               </div>
             );
           })}
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => {
+              if (userOrder.length === 0) {
+                console.log("Ответ не заполнен");
+                return;
+              }
+              // Преобразуем массив id в массив строк
+              const order = userOrder.map((id) => id.toString());
+              const answer = { order };
+              console.log("Ответ ученика (order):", answer);
+            }}
+            disabled={userOrder.length === 0}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            Отправить ответ
+          </button>
         </div>
       </div>
     </TaskViewWrapper>

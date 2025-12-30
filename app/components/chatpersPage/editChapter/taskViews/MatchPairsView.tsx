@@ -24,7 +24,7 @@ type PairItem = {
 };
 
 type UserAnswer = {
-  matches: Record<string, string>; // answerId (match_id) -> cellId (match_id)
+  matches: Record<string, string>; // answer_id (option.id) -> cell_id (option.id)
 };
 
 // Fisher-Yates shuffle algorithm
@@ -42,7 +42,7 @@ export default function MatchPairsView({
   onChange,
 }: MatchPairsViewProps) {
   const { questions } = useQuestions(widgetId);
-  const [matches, setMatches] = useState<Record<string, string>>({});
+  const [matches, setMatches] = useState<Record<string, string>>({}); // answer_id -> cell_id
   const [draggedAnswerId, setDraggedAnswerId] = useState<string | null>(null);
 
   const questionsArray = questions;
@@ -105,13 +105,19 @@ export default function MatchPairsView({
 
   // Shuffle answers once when data changes
   const shuffledAnswers = useMemo(() => {
-    const answers = data.pairs.map((pair) => ({
-      id: pair.id,
-      text: pair.answer.text,
-      imageUrl: pair.answer.imageUrl,
-    }));
+    const answers = data.pairs.map((pair) => {
+      const leftOption = options.find(
+        (opt) => opt.match_id === pair.id && opt.group === "left"
+      );
+      return {
+        id: pair.id, // match_id
+        optionId: leftOption?.id?.toString() || "", // option.id для ответа
+        text: pair.answer.text,
+        imageUrl: pair.answer.imageUrl,
+      };
+    });
     return shuffleArray(answers);
-  }, [data.pairs]);
+  }, [data.pairs, options]);
 
   const handleDragStart = (answerId: string) => {
     setDraggedAnswerId(answerId);
@@ -121,41 +127,83 @@ export default function MatchPairsView({
     e.preventDefault();
   };
 
-  const handleDrop = (cellId: string) => {
+  const handleDrop = (cellMatchId: string) => {
     if (draggedAnswerId) {
-      const newMatches = { ...matches, [draggedAnswerId]: cellId };
-      setMatches(newMatches);
+      // Находим option.id для answer (left) и cell (right)
+      const answerOption = options.find(
+        (opt) => opt.match_id === draggedAnswerId && opt.group === "left"
+      );
+      const cellOption = options.find(
+        (opt) => opt.match_id === cellMatchId && opt.group === "right"
+      );
 
-      if (onChange) {
-        const answer: UserAnswer = { matches: newMatches };
-        onChange(JSON.stringify(answer));
+      if (answerOption?.id && cellOption?.id) {
+        const answerId = answerOption.id.toString();
+        const cellId = cellOption.id.toString();
+        const newMatches = { ...matches, [answerId]: cellId };
+        setMatches(newMatches);
+
+        if (onChange) {
+          const answer: UserAnswer = { matches: newMatches };
+          onChange(JSON.stringify(answer));
+        }
       }
     }
     setDraggedAnswerId(null);
   };
 
-  const handleRemoveMatch = (answerId: string) => {
-    const newMatches = { ...matches };
-    delete newMatches[answerId];
-    setMatches(newMatches);
-
-    if (onChange) {
-      const answer: UserAnswer = { matches: newMatches };
-      onChange(JSON.stringify(answer));
+  const handleRemoveMatch = (answerMatchId: string) => {
+    // Находим option.id для answer
+    const answerOption = options.find(
+      (opt) => opt.match_id === answerMatchId && opt.group === "left"
+    );
+    if (answerOption?.id) {
+      const answerId = answerOption.id.toString();
+      const newMatches = { ...matches };
+      delete newMatches[answerId];
+      setMatches(newMatches);
     }
   };
 
   // Get which answer is matched to which cell
-  const getMatchedAnswerForCell = (cellId: string) => {
+  const getMatchedAnswerForCell = (cellMatchId: string) => {
+    const cellOption = options.find(
+      (opt) => opt.match_id === cellMatchId && opt.group === "right"
+    );
+    if (!cellOption?.id) return null;
+
+    const cellId = cellOption.id.toString();
     const answerId = Object.keys(matches).find(
       (aid) => matches[aid] === cellId
     );
-    return answerId ? shuffledAnswers.find((a) => a.id === answerId) : null;
+    if (!answerId) return null;
+
+    // Находим answer по option.id
+    const answerOption = options.find(
+      (opt) => opt.id?.toString() === answerId && opt.group === "left"
+    );
+    if (!answerOption) return null;
+
+    return shuffledAnswers.find((a) => a.id === answerOption.match_id) || null;
   };
 
   // Check if answer is already matched
-  const isAnswerMatched = (answerId: string) => {
+  const isAnswerMatched = (answerMatchId: string) => {
+    const answerOption = options.find(
+      (opt) => opt.match_id === answerMatchId && opt.group === "left"
+    );
+    if (!answerOption?.id) return false;
+    const answerId = answerOption.id.toString();
     return answerId in matches;
+  };
+
+  const handleSubmit = () => {
+    if (Object.keys(matches).length === 0) {
+      console.log("Ответ не заполнен");
+      return;
+    }
+    const answer = { matches };
+    console.log("Ответ ученика (match_pairs):", answer);
   };
 
   if (!currentQuestion || data.pairs.length === 0) {
@@ -177,7 +225,9 @@ export default function MatchPairsView({
             Варианты ответа:
           </div>
           <div></div>
-          <div className="text-base md:text-lg lg:text-xl font-medium text-slate-700">Ячейки:</div>
+          <div className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
+            Ячейки:
+          </div>
 
           {/* Content rows */}
           {data.pairs.map((pair, index) => {
@@ -295,6 +345,15 @@ export default function MatchPairsView({
               </div>
             );
           })}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={handleSubmit}
+            disabled={Object.keys(matches).length === 0}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            Отправить ответ
+          </button>
         </div>
       </div>
     </TaskViewWrapper>

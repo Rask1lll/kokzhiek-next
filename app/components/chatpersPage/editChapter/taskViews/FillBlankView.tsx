@@ -26,20 +26,11 @@ export default function FillBlankView({
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
   const body = currentQuestion?.body || "";
   const data = currentQuestion?.data as { blanks?: string[] } | undefined;
-  const blanks = data?.blanks || [];
-  const options = currentQuestion?.options || [];
-
-  // Create a map of blankId -> option for quick lookup
-  const blankOptionsMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    blanks.forEach((blankId) => {
-      const option = options.find((opt) => opt.match_id === blankId);
-      if (option) {
-        map[blankId] = option.body;
-      }
-    });
-    return map;
-  }, [blanks, options]);
+  const blanks = useMemo(() => data?.blanks || [], [data?.blanks]);
+  const options = useMemo(
+    () => currentQuestion?.options || [],
+    [currentQuestion?.options]
+  );
 
   const handleInput = (blankId: string, userInput: string) => {
     const newAnswers = { ...answers, [blankId]: userInput };
@@ -56,6 +47,15 @@ export default function FillBlankView({
     if (onChange) {
       onChange(JSON.stringify(answer));
     }
+  };
+
+  const handleSubmit = () => {
+    if (Object.keys(answers).length === 0) {
+      console.log("Ответ не заполнен");
+      return;
+    }
+    const answer = { answers };
+    console.log("Ответ ученика (fill_blank):", answer);
   };
 
   // Render text with inline inputs
@@ -95,6 +95,15 @@ export default function FillBlankView({
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
       <div className="sm:text-lg text-sm md:text-xl text-gray-800 leading-loose">
         {renderContent()}
+      </div>
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={handleSubmit}
+          disabled={Object.keys(answers).length === 0}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Отправить ответ
+        </button>
       </div>
     </TaskViewWrapper>
   );

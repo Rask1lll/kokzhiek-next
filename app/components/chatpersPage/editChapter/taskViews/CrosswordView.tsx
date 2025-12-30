@@ -6,7 +6,6 @@ import TaskViewWrapper from "./TaskViewWrapper";
 
 type CrosswordViewProps = {
   widgetId: number;
-  onChange?: (value: string) => void;
 };
 
 type QuestionItem = {
@@ -16,20 +15,14 @@ type QuestionItem = {
   keyLetterIndex: number;
 };
 
-type UserAnswer = {
-  answers: Record<string, string>; // questionId -> user answer
-};
-
-export default function CrosswordView({
-  widgetId,
-  onChange,
-}: CrosswordViewProps) {
+export default function CrosswordView({ widgetId }: CrosswordViewProps) {
   const { questions } = useQuestions(widgetId);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const inputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
+  const options = currentQuestion?.options || [];
   const data = currentQuestion?.data as
     | {
         keyword?: string;
@@ -79,11 +72,6 @@ export default function CrosswordView({
     const newAnswers = { ...answers, [questionId]: userAnswer.toUpperCase() };
     setAnswers(newAnswers);
 
-    if (onChange) {
-      const answer: UserAnswer = { answers: newAnswers };
-      onChange(JSON.stringify(answer));
-    }
-
     // Auto-focus next cell if letter was entered
     if (
       letterIndex !== undefined &&
@@ -122,7 +110,10 @@ export default function CrosswordView({
 
                 {/* Empty cells for offset */}
                 {Array.from({ length: offset }).map((_, i) => (
-                  <div key={`empty-${i}`} className="w-7 h-7" />
+                  <div
+                    key={`empty-${i}`}
+                    className="w-7 h-7 md:w-8 md:h-8 lg:w-9 lg:h-9"
+                  />
                 ))}
 
                 {/* Letter cells */}
@@ -200,10 +191,52 @@ export default function CrosswordView({
         {/* Questions */}
         <div className="space-y-2 pt-4 border-t border-gray-200">
           {questionsList.map((q, index) => (
-            <div key={q.id} className="text-base md:text-lg lg:text-xl text-gray-700">
+            <div
+              key={q.id}
+              className="text-base md:text-lg lg:text-xl text-gray-700"
+            >
               <span className="font-medium">{index + 1}.</span> {q.question}
             </div>
           ))}
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => {
+              if (Object.keys(answers).length === 0) {
+                console.log("Ответ не заполнен");
+                return;
+              }
+              // Для crossword нужно использовать match_id из options
+              // Создаем маппинг question.id -> match_id из options
+              const matchIdMap: Record<string, string> = {};
+              questionsList.forEach((q) => {
+                const option = options.find(
+                  (opt) => opt.match_id === q.id || opt.body === q.answer
+                );
+                if (option?.match_id) {
+                  matchIdMap[q.id] = option.match_id;
+                } else {
+                  // Если match_id не найден, используем question.id как есть
+                  matchIdMap[q.id] = q.id;
+                }
+              });
+
+              // Преобразуем answers: question.id -> match_id
+              const formattedAnswers: Record<string, string> = {};
+              Object.entries(answers).forEach(([questionId, answer]) => {
+                const matchId = matchIdMap[questionId] || questionId;
+                formattedAnswers[matchId] = answer;
+              });
+
+              const answer = { answers: formattedAnswers };
+              console.log("Ответ ученика (crossword):", answer);
+            }}
+            disabled={Object.keys(answers).length === 0}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            Отправить ответ
+          </button>
         </div>
       </div>
     </TaskViewWrapper>

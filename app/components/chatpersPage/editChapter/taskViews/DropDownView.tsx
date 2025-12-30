@@ -6,17 +6,9 @@ import TaskViewWrapper from "./TaskViewWrapper";
 
 type DropDownViewProps = {
   widgetId: number;
-  onChange?: (value: string) => void;
 };
 
-type UserAnswer = {
-  answers: Record<string, number>; // dropdownId -> selectedIndex
-};
-
-export default function DropDownView({
-  widgetId,
-  onChange,
-}: DropDownViewProps) {
+export default function DropDownView({ widgetId }: DropDownViewProps) {
   const { questions } = useQuestions(widgetId);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
@@ -48,11 +40,15 @@ export default function DropDownView({
   const handleSelect = (dropdownId: string, selectedIndex: number) => {
     const newAnswers = { ...answers, [dropdownId]: selectedIndex };
     setAnswers(newAnswers);
+  };
 
-    if (onChange) {
-      const answer: UserAnswer = { answers: newAnswers };
-      onChange(JSON.stringify(answer));
+  const handleSubmit = () => {
+    if (Object.keys(answers).length === 0) {
+      console.log("Ответ не выбран");
+      return;
     }
+    const answer = { answers };
+    console.log("Ответ ученика (dropdown):", answer);
   };
 
   // Render text with inline dropdowns
@@ -96,6 +92,15 @@ export default function DropDownView({
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
       <div className="text-lg md:text-xl lg:text-2xl text-gray-800 leading-relaxed">
         {renderContent()}
+      </div>
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={handleSubmit}
+          disabled={Object.keys(answers).length === 0}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Отправить ответ
+        </button>
       </div>
     </TaskViewWrapper>
   );

@@ -197,6 +197,28 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
             </p>
           </div>
         )}
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => {
+              if (cellToCardMap.size === 0) {
+                console.log("Ответ не заполнен");
+                return;
+              }
+              // Преобразуем Map в объект: cell_index -> option_id (строки)
+              const placements: Record<string, string> = {};
+              cellToCardMap.forEach((optionId, cellId) => {
+                placements[cellId] = optionId.toString();
+              });
+              const answer = { placements };
+              console.log("Ответ ученика (drag_drop):", answer);
+            }}
+            disabled={cellToCardMap.size === 0}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            Отправить ответ
+          </button>
+        </div>
       </div>
     </TaskViewWrapper>
   );
