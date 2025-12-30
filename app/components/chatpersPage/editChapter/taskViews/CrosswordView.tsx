@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useQuestions } from "@/app/hooks/useQuestions";
+import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
 
 type CrosswordViewProps = {
@@ -17,8 +18,14 @@ type QuestionItem = {
 
 export default function CrosswordView({ widgetId }: CrosswordViewProps) {
   const { questions } = useQuestions(widgetId);
+  const { loading, error, submit } = useAttempt(widgetId);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const inputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
@@ -71,6 +78,7 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
   ) => {
     const newAnswers = { ...answers, [questionId]: userAnswer.toUpperCase() };
     setAnswers(newAnswers);
+    setResult(null);
 
     // Auto-focus next cell if letter was entered
     if (
@@ -200,13 +208,37 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
           ))}
         </div>
 
+        {result && (
+          <div
+            className={`mt-4 p-4 rounded-lg border-2 ${
+              result.is_correct
+                ? "bg-green-50 border-green-300 text-green-800"
+                : "bg-red-50 border-red-300 text-red-800"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold">
+                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+              </span>
+              <span className="text-sm">(+{result.points_earned} балл)</span>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="mt-4 flex justify-end">
           <button
-            onClick={() => {
-              if (Object.keys(answers).length === 0) {
-                console.log("Ответ не заполнен");
+            onClick={async () => {
+              if (Object.keys(answers).length === 0 || !currentQuestion?.id) {
                 return;
               }
+
+              setSubmitting(true);
               // Для crossword нужно использовать match_id из options
               // Создаем маппинг question.id -> match_id из options
               const matchIdMap: Record<string, string> = {};
@@ -230,12 +262,21 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
               });
 
               const answer = { answers: formattedAnswers };
-              console.log("Ответ ученика (crossword):", answer);
+
+              const response = await submit(currentQuestion.id, answer);
+
+              if (response) {
+                setResult(response);
+              }
+
+              setSubmitting(false);
             }}
-            disabled={Object.keys(answers).length === 0}
+            disabled={
+              Object.keys(answers).length === 0 || submitting || loading
+            }
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            Отправить ответ
+            {submitting || loading ? "Отправка..." : "Отправить ответ"}
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useQuestions } from "@/app/hooks/useQuestions";
+import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
 import Image from "next/image";
 
@@ -11,11 +12,17 @@ type DragDropViewProps = {
 
 export default function DragDropView({ widgetId }: DragDropViewProps) {
   const { questions } = useQuestions(widgetId);
+  const { loading, error, submit } = useAttempt(widgetId);
   const [chosenElement, setChosenElement] = useState<number | null>(null);
   const [usedCardIds, setUsedCardIds] = useState<Set<number>>(new Set());
   const [cellToCardMap, setCellToCardMap] = useState<Map<string, number>>(
     new Map()
   );
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
@@ -56,6 +63,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
     setUsedCardIds((prev) => new Set(prev).add(chosenElement));
     setCellToCardMap((prev) => new Map(prev).set(cellId, chosenElement));
     setChosenElement(null);
+    setResult(null);
   };
 
   // Render text with inline cell placeholders
@@ -198,25 +206,56 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
           </div>
         )}
 
+        {result && (
+          <div
+            className={`mt-4 p-4 rounded-lg border-2 ${
+              result.is_correct
+                ? "bg-green-50 border-green-300 text-green-800"
+                : "bg-red-50 border-red-300 text-red-800"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold">
+                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+              </span>
+              <span className="text-sm">(+{result.points_earned} балл)</span>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="mt-4 flex justify-end">
           <button
-            onClick={() => {
-              if (cellToCardMap.size === 0) {
-                console.log("Ответ не заполнен");
+            onClick={async () => {
+              if (cellToCardMap.size === 0 || !currentQuestion?.id) {
                 return;
               }
+
+              setSubmitting(true);
               // Преобразуем Map в объект: cell_index -> option_id (строки)
               const placements: Record<string, string> = {};
               cellToCardMap.forEach((optionId, cellId) => {
                 placements[cellId] = optionId.toString();
               });
               const answer = { placements };
-              console.log("Ответ ученика (drag_drop):", answer);
+
+              const response = await submit(currentQuestion.id, answer);
+
+              if (response) {
+                setResult(response);
+              }
+
+              setSubmitting(false);
             }}
-            disabled={cellToCardMap.size === 0}
+            disabled={cellToCardMap.size === 0 || submitting || loading}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            Отправить ответ
+            {submitting || loading ? "Отправка..." : "Отправить ответ"}
           </button>
         </div>
       </div>

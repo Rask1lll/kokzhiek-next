@@ -1,6 +1,15 @@
-// import { create } from "zustand";
+import { create } from "zustand";
 
-// export const useQuizAttemptStore = create<QuizAttemptStore>((set) => ({
-//   quizAttempts: [],
-//   setQuizAttempts: (quizAttempt: Task) => set({ quizAttempts }),
-// }));
+type QuizAttemptStore = {
+  attemptId: number | null;
+  widgetId: number | null;
+  setAttempt: (attemptId: number, widgetId: number) => void;
+  clearAttempt: () => void;
+};
+
+export const useQuizAttemptStore = create<QuizAttemptStore>((set) => ({
+  attemptId: null,
+  widgetId: null,
+  setAttempt: (attemptId, widgetId) => set({ attemptId, widgetId }),
+  clearAttempt: () => set({ attemptId: null, widgetId: null }),
+}));

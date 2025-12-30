@@ -86,12 +86,7 @@ export default function ViewPlaceholder({
 
     // Task widgets (interactive)
     case "multiple_choice":
-      content = (
-        <MultipleChoiceView
-          widgetId={widget.id}
-          onChange={handleAnswerChange}
-        />
-      );
+      content = <MultipleChoiceView widgetId={widget.id} />;
       break;
     case "single_choice":
       content = (
@@ -99,9 +94,7 @@ export default function ViewPlaceholder({
       );
       break;
     case "dropdown":
-      content = (
-        <DropDownView widgetId={widget.id} onChange={handleAnswerChange} />
-      );
+      content = <DropDownView widgetId={widget.id} />;
       break;
     case "fill_blank":
       content = (
@@ -109,9 +102,7 @@ export default function ViewPlaceholder({
       );
       break;
     case "crossword":
-      content = (
-        <CrosswordView widgetId={widget.id} onChange={handleAnswerChange} />
-      );
+      content = <CrosswordView widgetId={widget.id} />;
       break;
     case "match_pairs":
       content = (
@@ -125,12 +116,10 @@ export default function ViewPlaceholder({
       content = <ConceptMapView widgetId={widget.id} />;
       break;
     case "sort":
-      content = <SortView widgetId={widget.id} onChange={handleAnswerChange} />;
+      content = <SortView widgetId={widget.id} />;
       break;
     case "order":
-      content = (
-        <OrderView widgetId={widget.id} onChange={handleAnswerChange} />
-      );
+      content = <OrderView widgetId={widget.id} />;
       break;
     case "drag_drop":
       content = <DragDropView widgetId={widget.id} />;

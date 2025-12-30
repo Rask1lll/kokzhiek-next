@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useQuestions } from "@/app/hooks/useQuestions";
+import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
 import { BiTrash } from "react-icons/bi";
 
@@ -49,8 +50,14 @@ const gridType = (size: number) => {
 
 export default function SearchWordView({ widgetId }: SearchWordViewProps) {
   const { questions } = useQuestions(widgetId);
+  const { loading, error, submit } = useAttempt(widgetId);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [answers, setAnswers] = useState<answer[]>([]);
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
@@ -170,6 +177,7 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
         { id: String(prev.length), answer: word },
       ]);
       setSelectedIndices([]);
+      setResult(null);
     }
   };
 
@@ -221,7 +229,9 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
           <div className="w-full mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
-                <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-1">Выбранное слово:</p>
+                <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-1">
+                  Выбранное слово:
+                </p>
                 <p className="text-xl md:text-2xl lg:text-3xl font-bold text-blue-700 uppercase">
                   {getCurrentWord()}
                 </p>
@@ -246,14 +256,20 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
 
         <div className="w-full mt-3">
           <div className="flex flex-col gap-2">
-            <p className="text-base md:text-lg lg:text-xl font-semibold">Найденные слова:</p>
+            <p className="text-base md:text-lg lg:text-xl font-semibold">
+              Найденные слова:
+            </p>
             {answers.length === 0 ? (
-              <p className="text-gray-400 text-base md:text-lg lg:text-xl">Пока не найдено слов</p>
+              <p className="text-gray-400 text-base md:text-lg lg:text-xl">
+                Пока не найдено слов
+              </p>
             ) : (
               answers.map((el, i) => {
                 return (
                   <div className="flex gap-2 items-center" key={el.id}>
-                    <span className="text-lg md:text-xl lg:text-2xl w-4">{i + 1}.</span>
+                    <span className="text-lg md:text-xl lg:text-2xl w-4">
+                      {i + 1}.
+                    </span>
                     <div className="ring ring-gray-300 p-2 rounded-lg bg-gray-50 font-semibold text-lg md:text-xl lg:text-2xl uppercase">
                       {el.answer}
                     </div>
@@ -267,22 +283,53 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
           </div>
         </div>
 
+        {result && (
+          <div
+            className={`mt-4 p-4 rounded-lg border-2 ${
+              result.is_correct
+                ? "bg-green-50 border-green-300 text-green-800"
+                : "bg-red-50 border-red-300 text-red-800"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold">
+                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+              </span>
+              <span className="text-sm">(+{result.points_earned} балл)</span>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="mt-4 flex justify-end">
           <button
-            onClick={() => {
-              if (answers.length === 0) {
-                console.log("Ответ не заполнен");
+            onClick={async () => {
+              if (answers.length === 0 || !currentQuestion?.id) {
                 return;
               }
+
+              setSubmitting(true);
               // Извлекаем массив найденных слов
               const found = answers.map((a) => a.answer);
               const answer = { found };
-              console.log("Ответ ученика (word_search):", answer);
+
+              const response = await submit(currentQuestion.id, answer);
+
+              if (response) {
+                setResult(response);
+              }
+
+              setSubmitting(false);
             }}
-            disabled={answers.length === 0}
+            disabled={answers.length === 0 || submitting || loading}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            Отправить ответ
+            {submitting || loading ? "Отправка..." : "Отправить ответ"}
           </button>
         </div>
       </>

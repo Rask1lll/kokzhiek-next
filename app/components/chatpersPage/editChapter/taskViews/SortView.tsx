@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
+import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
 
 type SortViewProps = {
@@ -23,9 +24,12 @@ function shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
 
 export default function SortView({ widgetId }: SortViewProps) {
   const { questions } = useQuestions(widgetId);
+  const { loading, error, submit } = useAttempt(widgetId);
   const [assignments, setAssignments] = useState<Record<string, string>>({});
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [shuffleSeed] = useState(() => Math.random());
+  const [result, setResult] = useState<{ is_correct: boolean; points_earned: number } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
@@ -90,6 +94,7 @@ export default function SortView({ widgetId }: SortViewProps) {
       };
       setAssignments(newAssignments);
       setSelectedCardId(null);
+      setResult(null);
     }
   };
 
@@ -97,6 +102,7 @@ export default function SortView({ widgetId }: SortViewProps) {
     const newAssignments = { ...assignments };
     delete newAssignments[cardId.toString()];
     setAssignments(newAssignments);
+    setResult(null);
   };
 
   if (!currentQuestion || columns.length === 0) {
@@ -239,21 +245,52 @@ export default function SortView({ widgetId }: SortViewProps) {
           </div>
         </div>
 
+        {result && (
+          <div
+            className={`mt-4 p-4 rounded-lg border-2 ${
+              result.is_correct
+                ? "bg-green-50 border-green-300 text-green-800"
+                : "bg-red-50 border-red-300 text-red-800"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold">
+                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+              </span>
+              <span className="text-sm">(+{result.points_earned} балл)</span>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="mt-4 flex justify-end">
           <button
-            onClick={() => {
-              if (Object.keys(assignments).length === 0) {
-                console.log("Ответ не заполнен");
+            onClick={async () => {
+              if (Object.keys(assignments).length === 0 || !currentQuestion?.id) {
                 return;
               }
+
+              setSubmitting(true);
               // Преобразуем assignments: card_id (option.id) -> column_id (group)
               const answer = { assignments };
-              console.log("Ответ ученика (sort):", answer);
+              
+              const response = await submit(currentQuestion.id, answer);
+              
+              if (response) {
+                setResult(response);
+              }
+              
+              setSubmitting(false);
             }}
-            disabled={Object.keys(assignments).length === 0}
+            disabled={Object.keys(assignments).length === 0 || submitting || loading}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            Отправить ответ
+            {submitting || loading ? "Отправка..." : "Отправить ответ"}
           </button>
         </div>
       </div>
