@@ -197,6 +197,39 @@ export function useChapterPresence(user: UserData | null) {
     };
   }, [user, connect]);
 
+  // Обработка закрытия вкладки/перехода - отправляем leave через sendBeacon
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentChapterRef.current && user) {
+        const leaveMsg: LeaveMessage = {
+          type: "presence.leave",
+          bookId: currentChapterRef.current.bookId,
+          chapterId: currentChapterRef.current.chapterId,
+          user: {
+            id: String(user.id),
+          },
+        };
+
+        // Используем sendBeacon для надёжной отправки при закрытии
+        const API_URL = process.env.NEXT_PUBLIC_SERVER_URL || "";
+        navigator.sendBeacon(
+          `${API_URL}/api/v1/presence/leave`,
+          JSON.stringify(leaveMsg)
+        );
+
+        // Также пробуем отправить через WebSocket
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify(leaveMsg));
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [user]);
+
   // Присоединиться к главе
   const joinChapter = useCallback(
     (bookId: string, chapterId: string) => {
