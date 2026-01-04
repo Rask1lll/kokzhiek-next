@@ -42,6 +42,7 @@
     "archived": "Мұрағатта"
   },
   "book": {
+    "history": "Тарих",
     "edit": "Өңдеу",
     "delete": "Жою",
     "toModeration": "Модерацияға",
@@ -388,6 +389,7 @@
     "isbnPlaceholder": "978-0-123456-78-9",
     "createButton": "Кітап құру"
   },
+  "history": "тарих",
   "taskEditor": {
     "loading": "Жүктелуде...",
     "loadError": "Сұрақты жүктеу қатесі",

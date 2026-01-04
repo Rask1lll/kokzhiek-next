@@ -11,6 +11,7 @@ import {
   FiX,
   FiAlertCircle,
   FiDownload,
+  FiClock,
 } from "react-icons/fi";
 import { useTranslations } from "next-intl";
 import { BookStatus } from "@/app/types/book";
@@ -137,8 +138,8 @@ export default function BookInfoCard({
   const statusConfig = STATUS_CONFIG[currentStatus];
 
   return (
-    <section className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6 md:flex not-md:justify-center gap-5 mx-10">
-      <div className="relative flex justify-center shrink-0">
+    <section className="rounded-2xl h-full bg-white shadow-md border border-gray-200 p-5 md:p-6 md:flex not-md:justify-center gap-5 mx-10">
+      <div className=" relative flex justify-center shrink-0">
         <div className="overflow-hidden rounded-xl bg-gray-100 w-[150px] h-[200px] md:w-[180px] md:h-[240px]">
           <Image
             src={coverUrl || PLACEHOLDER_COVER}
@@ -151,7 +152,7 @@ export default function BookInfoCard({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3">
+      <div className="h-full flex flex-1 flex-col gap-3">
         <div className="sm:flex-row flex flex-col gap-2 items-start justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
@@ -279,6 +280,17 @@ export default function BookInfoCard({
             </div>
           </div>
         )}
+        <div className="mt-auto flex justify-end">
+          {canEdit && (
+            <Link
+              href={`/books/book/history?book=${bookId}`}
+              className="inline-flex items-center gap-2 rounded-lg border border-purple-300 px-3 py-1.5 text-sm font-medium text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-colors"
+            >
+              <FiClock className="h-4 w-4" />
+              <span>{t("history")}</span>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Reject Modal */}
