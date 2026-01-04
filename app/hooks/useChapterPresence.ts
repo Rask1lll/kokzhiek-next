@@ -38,9 +38,10 @@ type BookPresenceMessage = {
 
 type PresenceByChapter = Record<string, PresenceUser[]>;
 
+// В production используем домен API сервера, не фронтенда
 const WS_URL =
   process.env.NODE_ENV === "production"
-    ? `wss://${process.env.NEXT_PUBLIC_WS_DOMAIN || window.location.host}/ws`
+    ? "wss://api.next.shaqyrym.online/ws"
     : "ws://localhost:8080/ws";
 
 export function useChapterPresence(user: UserData | null) {
