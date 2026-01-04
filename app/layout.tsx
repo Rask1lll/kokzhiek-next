@@ -3,7 +3,12 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
+import dynamic from "next/dynamic";
+
+const ServiceWorkerRegistration = dynamic(
+  () => import("./components/ServiceWorkerRegistration"),
+  { ssr: false }
+);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

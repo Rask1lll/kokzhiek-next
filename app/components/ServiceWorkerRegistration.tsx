@@ -4,11 +4,18 @@ import { useEffect } from "react";
 
 export default function ServiceWorkerRegistration() {
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      "serviceWorker" in navigator
-    ) {
-      // Регистрируем Service Worker
+    // Проверяем, что мы в браузере
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    // Проверяем поддержку Service Worker
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    // Регистрируем Service Worker только после полной загрузки страницы
+    const registerServiceWorker = () => {
       navigator.serviceWorker
         .register("/service-worker.js")
         .then((registration) => {
@@ -35,11 +42,13 @@ export default function ServiceWorkerRegistration() {
         .catch((error) => {
           console.error("Service Worker registration failed:", error);
         });
+    };
 
-      // Обработка обновлений Service Worker
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        console.log("Service Worker controller changed");
-      });
+    // Регистрируем после загрузки страницы
+    if (document.readyState === "complete") {
+      registerServiceWorker();
+    } else {
+      window.addEventListener("load", registerServiceWorker);
     }
   }, []);
 
