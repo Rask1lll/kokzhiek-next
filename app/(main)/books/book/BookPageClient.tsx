@@ -12,6 +12,7 @@ import { handleDeleteBook } from "@/app/services/book/booksApi";
 import { getAuthHeaders } from "@/app/libs/auth";
 import { useChapterPresence } from "@/app/hooks/useChapterPresence";
 import { useAuth } from "@/app/hooks/useAuth";
+import { isAuthor } from "@/app/libs/roles";
 
 const LANGUAGE_MAP: Record<string, string> = {
   kk: "Қазақ тілі",
@@ -109,8 +110,8 @@ export default function BookPageClient() {
         <ChaptersContainer
           bookId={id as string}
           isLoading={isLoading}
-          isChapterOccupied={isChapterOccupied}
-          getChapterUsers={getChapterUsers}
+          isChapterOccupied={isAuthor(user) ? isChapterOccupied : undefined}
+          getChapterUsers={isAuthor(user) ? getChapterUsers : undefined}
         />
       </div>
     </main>

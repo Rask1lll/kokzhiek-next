@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { UserData } from "../types/user";
+import { isAuthor } from "../libs/roles";
 
 export type PresenceUser = {
   id: string;
@@ -59,6 +60,12 @@ export function useChapterPresence(user: UserData | null) {
   const connect = useCallback(() => {
     if (!user) {
       console.log("WS connect skipped - no user");
+      return;
+    }
+
+    // Только авторы могут использовать presence
+    if (!isAuthor(user)) {
+      console.log("WS connect skipped - user is not an author");
       return;
     }
 
@@ -209,10 +216,10 @@ export function useChapterPresence(user: UserData | null) {
     };
   }, [user, connect]);
 
-  // Обработка закрытия вкладки/перехода - отправляем leave через sendBeacon
+  // Обработка закрытия вкладки/перехода - отправляем leave через sendBeacon (только для авторов)
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (currentChapterRef.current && user) {
+      if (currentChapterRef.current && user && isAuthor(user)) {
         const leaveMsg: LeaveMessage = {
           type: "presence.leave",
           bookId: currentChapterRef.current.bookId,
@@ -242,10 +249,10 @@ export function useChapterPresence(user: UserData | null) {
     };
   }, [user]);
 
-  // Присоединиться к главе
+  // Присоединиться к главе (только для авторов)
   const joinChapter = useCallback(
     (bookId: string, chapterId: string) => {
-      if (!user) return;
+      if (!user || !isAuthor(user)) return;
 
       currentChapterRef.current = { bookId, chapterId };
 
@@ -270,10 +277,10 @@ export function useChapterPresence(user: UserData | null) {
     [user]
   );
 
-  // Покинуть главу
+  // Покинуть главу (только для авторов)
   const leaveChapter = useCallback(
     (bookId: string, chapterId: string) => {
-      if (!user) return;
+      if (!user || !isAuthor(user)) return;
 
       currentChapterRef.current = null;
 
@@ -293,8 +300,10 @@ export function useChapterPresence(user: UserData | null) {
     [user]
   );
 
-  // Запросить состояние всех глав книги
+  // Запросить состояние всех глав книги (только для авторов)
   const requestBookPresence = useCallback((bookId: string) => {
+    if (!isAuthor(user)) return;
+
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       const msg: BookPresenceMessage = {
         type: "presence.book",
@@ -308,7 +317,7 @@ export function useChapterPresence(user: UserData | null) {
         wsRef.current?.readyState
       );
     }
-  }, []);
+  }, [user]);
 
   // Проверка занятости главы (занята другими пользователями)
   const isChapterOccupied = useCallback(

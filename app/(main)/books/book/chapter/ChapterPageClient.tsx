@@ -11,6 +11,7 @@ import { useConstructor } from "@/app/hooks/useConstructor";
 import { useBlocks } from "@/app/hooks/useBlocks";
 import { useChapterPresence } from "@/app/hooks/useChapterPresence";
 import { useAuth } from "@/app/hooks/useAuth";
+import { isAuthor } from "@/app/libs/roles";
 
 export function ChapterPageSkeleton() {
   return (
@@ -44,14 +45,14 @@ export default function ChapterPageClient() {
   const [draggedId, setDraggedId] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Отправляем join при входе в главу, leave при выходе
+  // Отправляем join при входе в главу, leave при выходе (только для авторов)
   useEffect(() => {
-    if (bookId && chapterId && user) {
+    if (bookId && chapterId && user && isAuthor(user)) {
       joinChapter(bookId, chapterId);
     }
 
     return () => {
-      if (bookId && chapterId && user) {
+      if (bookId && chapterId && user && isAuthor(user)) {
         leaveChapter(bookId, chapterId);
       }
     };
