@@ -43,9 +43,7 @@ export default function BookPageClient() {
   const onDeleteBook = async () => {
     if (!book) return;
 
-    const confirmed = window.confirm(
-      t("deleteConfirm", { title: book.title })
-    );
+    const confirmed = window.confirm(t("deleteConfirm", { title: book.title }));
     if (!confirmed) return;
 
     router.push("/books");
@@ -118,4 +116,3 @@ export default function BookPageClient() {
     </main>
   );
 }
-

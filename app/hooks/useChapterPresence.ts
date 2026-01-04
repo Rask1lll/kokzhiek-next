@@ -45,10 +45,15 @@ const WS_URL =
 
 export function useChapterPresence(user: UserData | null) {
   const wsRef = useRef<WebSocket | null>(null);
-  const [presenceByChapter, setPresenceByChapter] = useState<PresenceByChapter>({});
+  const [presenceByChapter, setPresenceByChapter] = useState<PresenceByChapter>(
+    {}
+  );
   const [isConnected, setIsConnected] = useState(false);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const currentChapterRef = useRef<{ bookId: string; chapterId: string } | null>(null);
+  const currentChapterRef = useRef<{
+    bookId: string;
+    chapterId: string;
+  } | null>(null);
 
   const connect = useCallback(() => {
     if (!user) {
@@ -148,8 +153,14 @@ export function useChapterPresence(user: UserData | null) {
 
           // Ответ со списком пользователей по всем главам книги (presence.book)
           if (data.type === "presence.book") {
-            const chapters: Record<string, PresenceUser[]> = data.chapters || {};
-            console.log("WS presence for book:", data.bookId, "chapters:", chapters);
+            const chapters: Record<string, PresenceUser[]> =
+              data.chapters || {};
+            console.log(
+              "WS presence for book:",
+              data.bookId,
+              "chapters:",
+              chapters
+            );
             setPresenceByChapter((prev) => ({
               ...prev,
               ...chapters,
@@ -282,21 +293,21 @@ export function useChapterPresence(user: UserData | null) {
   );
 
   // Запросить состояние всех глав книги
-  const requestBookPresence = useCallback(
-    (bookId: string) => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        const msg: BookPresenceMessage = {
-          type: "presence.book",
-          bookId,
-        };
-        console.log("WS requesting book presence:", msg);
-        wsRef.current.send(JSON.stringify(msg));
-      } else {
-        console.log("WS not ready for book presence request, state:", wsRef.current?.readyState);
-      }
-    },
-    []
-  );
+  const requestBookPresence = useCallback((bookId: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      const msg: BookPresenceMessage = {
+        type: "presence.book",
+        bookId,
+      };
+      console.log("WS requesting book presence:", msg);
+      wsRef.current.send(JSON.stringify(msg));
+    } else {
+      console.log(
+        "WS not ready for book presence request, state:",
+        wsRef.current?.readyState
+      );
+    }
+  }, []);
 
   // Проверка занятости главы (занята другими пользователями)
   const isChapterOccupied = useCallback(

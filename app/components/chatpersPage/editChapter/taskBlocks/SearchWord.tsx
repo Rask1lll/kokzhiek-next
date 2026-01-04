@@ -494,7 +494,7 @@ export default function SearchWord({ widgetId }: SearchWordProps) {
                   type="text"
                   value={option.body || ""}
                   onChange={(e) => updateWord(option.id, e.target.value)}
-                  placeholder="Введите слово"
+                  placeholder={t("cellPlaceholder")}
                   className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base md:text-lg lg:text-xl uppercase"
                   spellCheck={false}
                 />

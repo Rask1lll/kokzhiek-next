@@ -128,7 +128,6 @@ export function useWidgets(options: UseWidgetsOptions = {}) {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Handle widget deletion
   const handleDelete = useCallback(
     async (widget: Widget, blockId: number) => {
       if (!widget || isDeleting) return;

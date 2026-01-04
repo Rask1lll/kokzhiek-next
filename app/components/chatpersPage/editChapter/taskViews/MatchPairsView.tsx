@@ -46,7 +46,10 @@ export default function MatchPairsView({
   const { loading, error, submit } = useAttempt(widgetId);
   const [matches, setMatches] = useState<Record<string, string>>({}); // answer_id -> cell_id
   const [draggedAnswerId, setDraggedAnswerId] = useState<string | null>(null);
-  const [result, setResult] = useState<{ is_correct: boolean; points_earned: number } | null>(null);
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
@@ -184,7 +187,6 @@ export default function MatchPairsView({
     );
     if (!answerId) return null;
 
-    // Находим answer по option.id
     const answerOption = options.find(
       (opt) => opt.id?.toString() === answerId && opt.group === "left"
     );
@@ -210,13 +212,13 @@ export default function MatchPairsView({
 
     setSubmitting(true);
     const answer = { matches };
-    
+
     const response = await submit(currentQuestion.id, answer);
-    
+
     if (response) {
       setResult(response);
     }
-    
+
     setSubmitting(false);
   };
 
@@ -360,7 +362,7 @@ export default function MatchPairsView({
             );
           })}
         </div>
-        
+
         {result && (
           <div
             className={`mt-4 p-4 rounded-lg border-2 ${
@@ -387,7 +389,9 @@ export default function MatchPairsView({
         <div className="mt-4 flex justify-end">
           <button
             onClick={handleSubmit}
-            disabled={Object.keys(matches).length === 0 || submitting || loading}
+            disabled={
+              Object.keys(matches).length === 0 || submitting || loading
+            }
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {submitting || loading ? "Отправка..." : "Отправить ответ"}

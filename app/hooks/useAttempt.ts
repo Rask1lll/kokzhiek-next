@@ -9,7 +9,12 @@ import {
 import { useQuizAttemptStore } from "@/app/store/quizAttemptStore";
 
 export function useAttempt(widgetId: number) {
-  const { attemptId, widgetId: storeWidgetId, setAttempt, clearAttempt } = useQuizAttemptStore();
+  const {
+    attemptId,
+    widgetId: storeWidgetId,
+    setAttempt,
+    clearAttempt,
+  } = useQuizAttemptStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,7 +68,8 @@ export function useAttempt(widgetId: number) {
         // Начинаем новую попытку
         const startResponse = await startAttempt(widgetId);
         if (!startResponse?.success || !startResponse.data) {
-          const errorMessage = startResponse?.messages?.[0] || "Не удалось начать попытку";
+          const errorMessage =
+            startResponse?.messages?.[0] || "Не удалось начать попытку";
           setError(errorMessage);
           setLoading(false);
           return null;
@@ -74,13 +80,18 @@ export function useAttempt(widgetId: number) {
       }
 
       // Отправляем ответ
-      const response = await submitAnswer(currentAttemptId, questionId, answerData);
+      const response = await submitAnswer(
+        currentAttemptId,
+        questionId,
+        answerData
+      );
       if (response?.success && response.data) {
         setLoading(false);
         return response.data;
       }
 
-      const errorMessage = response?.messages?.[0] || "Не удалось отправить ответ";
+      const errorMessage =
+        response?.messages?.[0] || "Не удалось отправить ответ";
       setError(errorMessage);
       setLoading(false);
       return null;
@@ -88,33 +99,35 @@ export function useAttempt(widgetId: number) {
     [attemptId, widgetId, storeWidgetId, setAttempt, clearAttempt]
   );
 
-  const complete = useCallback(async (): Promise<CompleteAttemptResponse | null> => {
-    if (!attemptId) {
-      setError("Попытка не начата");
-      return null;
-    }
+  const complete =
+    useCallback(async (): Promise<CompleteAttemptResponse | null> => {
+      if (!attemptId) {
+        setError("Попытка не начата");
+        return null;
+      }
 
-    // Проверяем, что attemptId соответствует текущему widgetId
-    if (storeWidgetId !== widgetId) {
-      setError("Попытка не соответствует текущему виджету");
-      return null;
-    }
+      // Проверяем, что attemptId соответствует текущему widgetId
+      if (storeWidgetId !== widgetId) {
+        setError("Попытка не соответствует текущему виджету");
+        return null;
+      }
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    const response = await completeAttempt(attemptId);
-    if (response?.success && response.data) {
+      const response = await completeAttempt(attemptId);
+      if (response?.success && response.data) {
+        setLoading(false);
+        clearAttempt();
+        return response.data;
+      }
+
+      const errorMessage =
+        response?.messages?.[0] || "Не удалось завершить попытку";
+      setError(errorMessage);
       setLoading(false);
-      clearAttempt();
-      return response.data;
-    }
-
-    const errorMessage = response?.messages?.[0] || "Не удалось завершить попытку";
-    setError(errorMessage);
-    setLoading(false);
-    return null;
-  }, [attemptId, widgetId, storeWidgetId, clearAttempt]);
+      return null;
+    }, [attemptId, widgetId, storeWidgetId, clearAttempt]);
 
   return {
     attemptId,
@@ -125,4 +138,3 @@ export function useAttempt(widgetId: number) {
     complete,
   };
 }
-

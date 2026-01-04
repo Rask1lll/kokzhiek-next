@@ -157,6 +157,11 @@ export default function Sort({ widgetId }: SortProps) {
     const newColumns = [...currentColumns, newColumn];
 
     // Update UI immediately
+
+    // Send to server
+    await update(currentQuestion.id, {
+      data: { columns: newColumns },
+    });
     setCurrentQuestion((prev) =>
       prev
         ? {
@@ -165,11 +170,6 @@ export default function Sort({ widgetId }: SortProps) {
           }
         : null
     );
-
-    // Send to server
-    update(currentQuestion.id, {
-      data: { columns: newColumns },
-    });
   }, [currentQuestion, update]);
 
   const removeColumn = useCallback(
@@ -359,9 +359,7 @@ export default function Sort({ widgetId }: SortProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="w-full space-y-4 p-4 text-gray-500">
-        {t("loadError")}
-      </div>
+      <div className="w-full space-y-4 p-4 text-gray-500">{t("loadError")}</div>
     );
   }
 
@@ -369,7 +367,9 @@ export default function Sort({ widgetId }: SortProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">
+          {t("questionLabel")}
+        </div>
         <input
           spellCheck={false}
           type="text"
