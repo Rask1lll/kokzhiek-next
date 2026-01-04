@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiChevronRight, FiTrash2, FiEdit2 } from "react-icons/fi";
+import { FiChevronRight, FiTrash2, FiEdit2, FiLock } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -9,12 +9,15 @@ import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import EditChapterModal from "./EditChapterModal";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isAuthor } from "@/app/libs/roles";
+import { PresenceUser } from "@/app/hooks/useChapterPresence";
 
 type ChapterCardProps = {
   chapterId: string;
   title: string;
   bookid: string;
   onDelete?: (chapterId: string) => Promise<void>;
+  isOccupied?: boolean;
+  occupiedBy?: PresenceUser[];
 };
 
 export default function ChapterCard({
@@ -22,6 +25,8 @@ export default function ChapterCard({
   title,
   bookid,
   onDelete,
+  isOccupied = false,
+  occupiedBy = [],
 }: ChapterCardProps) {
   const t = useTranslations("chapters");
   const { addContent } = useModalWindowStore();
@@ -56,6 +61,47 @@ export default function ChapterCard({
       setIsDeleting(false);
     }
   };
+
+  // Получаем имя пользователя, занимающего главу
+  const occupiedByName = occupiedBy[0]?.name || t("someone");
+
+  // Если глава занята, рендерим div вместо Link
+  if (isOccupied) {
+    return (
+      <div className="relative group">
+        <div
+          className="flex w-full items-center justify-between rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-left shadow-sm cursor-not-allowed opacity-75"
+          title={t("occupiedBy", { name: occupiedByName })}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-xs font-semibold text-orange-700">
+              <FiLock />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                {title}
+              </p>
+              <p className="text-xs text-orange-600 mt-0.5">
+                {t("occupiedBy", { name: occupiedByName })}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {occupiedBy.slice(0, 3).map((u) => (
+              <div
+                key={u.id}
+                className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-200 text-xs font-semibold text-orange-800"
+                title={u.name}
+              >
+                {(u.name?.[0] || "?").toUpperCase()}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative group">

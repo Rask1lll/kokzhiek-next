@@ -6,15 +6,20 @@ import ChapterCard from "./ChapterCard";
 import ChapterCardSkeleton from "./ChapterCardSkeleton";
 import { useChaptersStore } from "@/app/store/chaptersStore";
 import { useChapters } from "@/app/hooks/useChapters";
+import { PresenceUser } from "@/app/hooks/useChapterPresence";
 
 type ChaptersContainerProps = {
   isLoading: boolean;
   bookId: string;
+  isChapterOccupied?: (chapterId: string) => boolean;
+  getChapterUsers?: (chapterId: string) => PresenceUser[];
 };
 
 export default function ChaptersContainer({
   isLoading: externalLoading,
   bookId,
+  isChapterOccupied,
+  getChapterUsers,
 }: ChaptersContainerProps) {
   const { chapters } = useChaptersStore();
   const { deleteChapter } = useChapters(bookId);
@@ -41,15 +46,22 @@ export default function ChaptersContainer({
           </>
         ) : (
           <>
-            {chapters.map((chapter) => (
-              <ChapterCard
-                key={chapter.id}
-                chapterId={String(chapter.id)}
-                title={chapter.title}
-                bookid={bookId}
-                onDelete={handleDeleteChapter}
-              />
-            ))}
+            {chapters.map((chapter) => {
+              const chapterId = String(chapter.id);
+              const occupied = isChapterOccupied?.(chapterId) ?? false;
+              const users = getChapterUsers?.(chapterId) ?? [];
+              return (
+                <ChapterCard
+                  key={chapter.id}
+                  chapterId={chapterId}
+                  title={chapter.title}
+                  bookid={bookId}
+                  onDelete={handleDeleteChapter}
+                  isOccupied={occupied}
+                  occupiedBy={users}
+                />
+              );
+            })}
             <CreateChapterButton />
           </>
         )}

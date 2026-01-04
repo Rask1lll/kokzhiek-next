@@ -10,6 +10,8 @@ import { useChaptersStore } from "@/app/store/chaptersStore";
 import { Book } from "@/app/types/book";
 import { handleDeleteBook } from "@/app/services/book/booksApi";
 import { getAuthHeaders } from "@/app/libs/auth";
+import { useChapterPresence } from "@/app/hooks/useChapterPresence";
+import { useAuth } from "@/app/hooks/useAuth";
 
 const LANGUAGE_MAP: Record<string, string> = {
   kk: "Қазақ тілі",
@@ -35,6 +37,8 @@ export default function BookPageClient() {
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { setChapters } = useChaptersStore();
+  const { user } = useAuth();
+  const { isConnected, requestBookPresence, isChapterOccupied, getChapterUsers } = useChapterPresence(user);
 
   const onDeleteBook = async () => {
     if (!book) return;
@@ -74,6 +78,13 @@ export default function BookPageClient() {
     fetchBook();
   }, [id, setChapters]);
 
+  // Запрашиваем состояние глав когда WebSocket подключен
+  useEffect(() => {
+    if (id && isConnected) {
+      requestBookPresence(id);
+    }
+  }, [id, isConnected, requestBookPresence]);
+
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-6">
       <div className="mx-auto">
@@ -97,7 +108,12 @@ export default function BookPageClient() {
       </div>
 
       <div className="mt-4">
-        <ChaptersContainer bookId={id as string} isLoading={isLoading} />
+        <ChaptersContainer
+          bookId={id as string}
+          isLoading={isLoading}
+          isChapterOccupied={isChapterOccupied}
+          getChapterUsers={getChapterUsers}
+        />
       </div>
     </main>
   );

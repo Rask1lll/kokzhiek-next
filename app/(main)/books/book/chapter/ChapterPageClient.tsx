@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 import CreateBlock from "@/app/components/chatpersPage/CreateBlock";
@@ -9,6 +9,8 @@ import Layout from "@/app/components/chatpersPage/editChapter/Layout";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { useConstructor } from "@/app/hooks/useConstructor";
 import { useBlocks } from "@/app/hooks/useBlocks";
+import { useChapterPresence } from "@/app/hooks/useChapterPresence";
+import { useAuth } from "@/app/hooks/useAuth";
 
 export function ChapterPageSkeleton() {
   return (
@@ -36,10 +38,24 @@ export default function ChapterPageClient() {
   const { addContent, removeContent } = useModalWindowStore();
   const { blocks, isLoading } = useConstructor({ bookId, chapterId });
   const { create: createBlock, swap: swapBlocks } = useBlocks();
+  const { user } = useAuth();
+  const { joinChapter, leaveChapter } = useChapterPresence(user);
 
   const [draggedId, setDraggedId] = useState<number | null>(null);
-
   const [isDragging, setIsDragging] = useState(false);
+
+  // Отправляем join при входе в главу, leave при выходе
+  useEffect(() => {
+    if (bookId && chapterId && user) {
+      joinChapter(bookId, chapterId);
+    }
+
+    return () => {
+      if (bookId && chapterId && user) {
+        leaveChapter(bookId, chapterId);
+      }
+    };
+  }, [bookId, chapterId, user, joinChapter, leaveChapter]);
 
   const handleCreate = () => {
     addContent(
