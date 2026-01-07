@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 export default function ServiceWorkerRegistration() {
+  // return null;
   useEffect(() => {
     // Проверяем, что мы в браузере
     if (typeof window === "undefined") {
@@ -54,4 +55,3 @@ export default function ServiceWorkerRegistration() {
 
   return null;
 }
-

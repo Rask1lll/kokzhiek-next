@@ -112,6 +112,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       body: newBody,
       data: { dropdowns: newDropdowns },
     });
+    console.log(update, "wdawdwadawd", newOptions);
     if (updated) {
       // Update UI with data from server
       setCurrentQuestion(updated);
@@ -173,6 +174,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       const updated = await update(currentQuestion.id, {
         options: newOptions,
       });
+      console.log(update, "wdawdwadwd", newOptions);
       if (updated) {
         setCurrentQuestion(updated);
       }

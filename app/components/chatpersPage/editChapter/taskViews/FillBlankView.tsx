@@ -23,14 +23,27 @@ export default function FillBlankView({
   const { questions } = useQuestions(widgetId);
   const { loading, error, submit } = useAttempt(widgetId);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [result, setResult] = useState<{ is_correct: boolean; points_earned: number } | null>(null);
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
   const body = currentQuestion?.body || "";
-  const data = currentQuestion?.data as { blanks?: string[] } | undefined;
-  const blanks = useMemo(() => data?.blanks || [], [data?.blanks]);
+  const data = currentQuestion?.data as
+    | { blanks?: string[] | Array<{ id: string }> }
+    | undefined;
+  // Handle both string[] and object[] formats
+  const blanks = useMemo(() => {
+    const blanksArray = data?.blanks || [];
+    // If it's an array of objects, extract IDs; otherwise use as-is
+    if (blanksArray.length > 0 && typeof blanksArray[0] === "object") {
+      return (blanksArray as Array<{ id: string }>).map((b) => b.id);
+    }
+    return blanksArray as string[];
+  }, [data?.blanks]);
   const options = useMemo(
     () => currentQuestion?.options || [],
     [currentQuestion?.options]
@@ -59,13 +72,13 @@ export default function FillBlankView({
 
     setSubmitting(true);
     const answer = { answers };
-    
+
     const response = await submit(currentQuestion.id, answer);
-    
+
     if (response) {
       setResult(response);
     }
-    
+
     setSubmitting(false);
   };
 
@@ -107,7 +120,7 @@ export default function FillBlankView({
       <div className="sm:text-lg text-sm md:text-xl text-gray-800 leading-loose">
         {renderContent()}
       </div>
-      
+
       {result && (
         <div
           className={`mt-4 p-4 rounded-lg border-2 ${

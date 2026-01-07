@@ -259,12 +259,12 @@ export default function MatchPairsView({
             return (
               <div key={pair.id} className="contents">
                 {/* Answer column */}
-                <div className="flex items-center">
+                <div className="min-h-[200px]">
                   {answerForRow && (
                     <div
                       draggable={!answerIsMatched}
                       onDragStart={() => handleDragStart(answerForRow.id)}
-                      className={`w-full px-4 py-3 rounded-lg border-2 transition-all ${
+                      className={`w-full min-h-[200px] px-2 py-1 rounded-lg border-2 transition-all ${
                         answerIsMatched
                           ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
                           : draggedAnswerId === answerForRow.id
@@ -272,9 +272,9 @@ export default function MatchPairsView({
                           : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-move"
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-center justify-center gap-2">
                         {answerForRow.imageUrl && (
-                          <div className="relative w-8 h-8 shrink-0">
+                          <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 shrink-0">
                             <Image
                               src={answerForRow.imageUrl}
                               alt=""
@@ -284,7 +284,7 @@ export default function MatchPairsView({
                             />
                           </div>
                         )}
-                        <span className="text-base md:text-lg lg:text-xl font-medium text-gray-800 wrap-break-word">
+                        <span className="text-base text-center md:text-lg lg:text-xl font-medium text-gray-800 wrap-break-word">
                           {answerForRow.text || "Пусто"}
                         </span>
                       </div>
@@ -298,30 +298,30 @@ export default function MatchPairsView({
                 </div>
 
                 {/* Cell column */}
-                <div className="flex items-center">
+                <div className="flex min-h-[200px] items-center">
                   <div
                     onDragOver={handleDragOver}
                     onDrop={() => handleDrop(pair.id)}
-                    className={`w-full min-h-[60px] p-4 rounded-lg border-2 transition-all ${
+                    className={`w-full min-h-[300px] p-4 rounded-lg border-2 transition-all ${
                       matchedAnswer
                         ? "bg-slate-100 border-slate-400"
                         : "bg-slate-50 border-slate-300 border-dashed hover:border-blue-400"
                     }`}
                   >
                     {matchedAnswer ? (
-                      <div className="space-y-2">
+                      <div className="min-h-[200px] space-y-2">
                         <div className="flex items-center justify-end">
                           <button
                             type="button"
                             onClick={() => handleRemoveMatch(matchedAnswer.id)}
-                            className="text-xs text-red-500 hover:text-red-700"
+                            className="text-sm md:text-base lg:text-lg text-red-500 hover:text-red-700"
                           >
                             Удалить
                           </button>
                         </div>
                         <div className="flex items-center gap-2">
                           {matchedAnswer.imageUrl && (
-                            <div className="relative w-8 h-8 shrink-0">
+                            <div className="relative w-20 h-20 md:w-40 md:h-40 lg:w-48 lg:h-48 shrink-0">
                               <Image
                                 src={matchedAnswer.imageUrl}
                                 alt=""
@@ -337,10 +337,10 @@ export default function MatchPairsView({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center min-h-[60px]">
+                      <div className="flex items-center justify-center min-h-[200px]">
                         <div className="text-center">
                           {pair.cell.imageUrl && (
-                            <div className="relative w-10 h-10 mx-auto mb-2">
+                            <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 mx-auto mb-2">
                               <Image
                                 src={pair.cell.imageUrl}
                                 alt=""
@@ -371,7 +371,7 @@ export default function MatchPairsView({
                 : "bg-red-50 border-red-300 text-red-800"
             }`}
           >
-            <div className="flex items-center gap-2">
+            <div className=" items-center gap-2">
               <span className="text-lg font-semibold">
                 {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
               </span>

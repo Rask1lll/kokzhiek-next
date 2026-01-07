@@ -13,14 +13,23 @@ export default function DropDownView({ widgetId }: DropDownViewProps) {
   const { questions } = useQuestions(widgetId);
   const { loading, error, submit } = useAttempt(widgetId);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [result, setResult] = useState<{ is_correct: boolean; points_earned: number } | null>(null);
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
   const body = currentQuestion?.body || "";
-  const data = currentQuestion?.data as { dropdowns?: string[] } | undefined;
-  const dropdowns = useMemo(() => data?.dropdowns || [], [data?.dropdowns]);
+  const data = currentQuestion?.data as
+    | { dropdowns?: Array<{ id: string; correct_index: number }> }
+    | undefined;
+  // Extract dropdown IDs from objects
+  const dropdowns = useMemo(() => {
+    const dropdownsArray = data?.dropdowns || [];
+    return dropdownsArray.map((d) => d.id);
+  }, [data?.dropdowns]);
   const options = useMemo(
     () => currentQuestion?.options || [],
     [currentQuestion?.options]
@@ -54,13 +63,13 @@ export default function DropDownView({ widgetId }: DropDownViewProps) {
 
     setSubmitting(true);
     const answer = { answers };
-    
+
     const response = await submit(currentQuestion.id, answer);
-    
+
     if (response) {
       setResult(response);
     }
-    
+
     setSubmitting(false);
   };
 
@@ -70,7 +79,10 @@ export default function DropDownView({ widgetId }: DropDownViewProps) {
 
     return parts.map((part, index) => {
       const match = part.match(/\{\{([^}]+)\}\}/);
+
       if (match) {
+        // match[1] contains the ID without curly braces (e.g., "dropdown1")
+        // match[0] contains the full match with braces (e.g., "{{dropdown1}}")
         const dropdownId = match[1];
         if (dropdowns.includes(dropdownId)) {
           const dropdownOptions = dropdownOptionsMap[dropdownId] || [];
@@ -106,7 +118,7 @@ export default function DropDownView({ widgetId }: DropDownViewProps) {
       <div className="text-lg md:text-xl lg:text-2xl text-gray-800 leading-relaxed">
         {renderContent()}
       </div>
-      
+
       {result && (
         <div
           className={`mt-4 p-4 rounded-lg border-2 ${
