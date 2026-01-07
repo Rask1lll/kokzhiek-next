@@ -89,7 +89,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
     const newOptions = [
       ...(currentQuestion.options || []),
       {
-        body: "Вариант 1",
+        body: "",
         image_url: null,
         is_correct: true,
         match_id: dropdownId,
@@ -97,7 +97,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
         order: 0,
       },
       {
-        body: "Вариант 2",
+        body: "",
         image_url: null,
         is_correct: false,
         match_id: dropdownId,
@@ -160,7 +160,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
       const newOptions = [
         ...(currentQuestion.options || []),
         {
-          body: `Вариант ${nextPosition + 1}`,
+          body: ``,
           image_url: null,
           is_correct: false,
           match_id: dropdownId,
@@ -452,6 +452,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
                       e.target.value
                     )
                   }
+                  placeholder={t("Variant")}
                   className="flex-1 px-2 py-1 text-base md:text-lg lg:text-xl bg-white border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button

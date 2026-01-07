@@ -390,6 +390,7 @@
     "createButton": "Создать книгу"
   },
   "taskEditor": {
+    "Variant": "Вариант",
     "loading": "Загрузка...",
     "loadError": "Ошибка загрузки вопроса",
     "questionLabel": "Вопрос к заданию",

@@ -93,7 +93,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
     const newOptions = [
       ...(currentQuestion.options || []),
       {
-        body: "Новый вариант",
+        body: "",
         image_url: null,
         is_correct: false,
         match_id: null,
@@ -262,9 +262,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="w-full space-y-4 p-4 text-gray-500">
-        {t("loadError")}
-      </div>
+      <div className="w-full space-y-4 p-4 text-gray-500">{t("loadError")}</div>
     );
   }
 
@@ -274,7 +272,9 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
     <div className="w-full space-y-4">
       {/* Settings bar */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">
+          {t("questionLabel")}
+        </div>
         <input
           spellCheck
           type="text"
@@ -318,7 +318,7 @@ export default function MultipleChoice({ widgetId }: MultipleChoiceProps) {
               <input
                 spellCheck
                 type="text"
-                value={option.body || ""}
+                value={option.body}
                 onChange={(e) =>
                   updateOption(option.id, { body: e.target.value })
                 }

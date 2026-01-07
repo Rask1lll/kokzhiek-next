@@ -391,6 +391,7 @@
   },
   "history": "тарих",
   "taskEditor": {
+    "Variant": "Нұсқа",
     "loading": "Жүктелуде...",
     "loadError": "Сұрақты жүктеу қатесі",
     "questionLabel": "Тапсырмаға сұрақ",

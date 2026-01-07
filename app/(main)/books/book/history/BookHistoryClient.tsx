@@ -2,9 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { FiClock, FiUser, FiGitBranch } from "react-icons/fi";
+import { FiClock, FiUser } from "react-icons/fi";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import RollbackModal, { type HistoryVersion } from "./RollbackModal";
+import { useBookHistory } from "@/app/hooks/useBookHistory";
 
 export function BookHistorySkeleton() {
   return (
@@ -30,53 +31,60 @@ export default function BookHistoryClient() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get("book");
   const { addContent } = useModalWindowStore();
+  const { getEvents } = useBookHistory();
   const [versions, setVersions] = useState<HistoryVersion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!bookId) return;
 
-    setTimeout(() => {
-      setVersions([
-        {
-          id: "1",
-          date: "2024-01-15T14:30:00Z",
-          author: "Иванов Иван",
-          authorEmail: "ivan@example.com",
-          changes: ["Обновлен заголовок", "Добавлена новая глава"],
-          version: "v1.2.0",
-          branch: "main",
-        },
-        {
-          id: "2",
-          date: "2024-01-10T10:15:00Z",
-          author: "Петров Петр",
-          authorEmail: "petr@example.com",
-          changes: ["Исправлены ошибки", "Обновлено описание"],
-          version: "v1.1.0",
-          branch: "main",
-        },
-        {
-          id: "3",
-          date: "2024-01-05T09:00:00Z",
-          author: "Сидоров Сидор",
-          authorEmail: "sidor@example.com",
-          changes: ["Создана книга", "Добавлена обложка"],
-          version: "v1.0.0",
-          branch: "main",
-        },
-        {
-          id: "4",
-          date: "2024-01-03T16:45:00Z",
-          author: "Иванов Иван",
-          authorEmail: "ivan@example.com",
-          changes: ["Начальная версия"],
-          version: "v0.1.0",
-          branch: "development",
-        },
-      ]);
-      setIsLoading(false);
-    }, 500);
+    // Вызываем API для получения списка сессий
+    getEvents(bookId).then((response) => {
+      console.log("Book History Sessions API Response:", response);
+
+      // Временные данные для демонстрации (удалим после проверки API)
+      setTimeout(() => {
+        setVersions([
+          {
+            id: "1",
+            date: "2024-01-15T14:30:00Z",
+            author: "Иванов Иван",
+            authorEmail: "ivan@example.com",
+            changes: ["Обновлен заголовок", "Добавлена новая глава"],
+            version: "v1.2.0",
+            branch: "main",
+          },
+          {
+            id: "2",
+            date: "2024-01-10T10:15:00Z",
+            author: "Петров Петр",
+            authorEmail: "petr@example.com",
+            changes: ["Исправлены ошибки", "Обновлено описание"],
+            version: "v1.1.0",
+            branch: "main",
+          },
+          {
+            id: "3",
+            date: "2024-01-05T09:00:00Z",
+            author: "Сидоров Сидор",
+            authorEmail: "sidor@example.com",
+            changes: ["Создана книга", "Добавлена обложка"],
+            version: "v1.0.0",
+            branch: "main",
+          },
+          {
+            id: "4",
+            date: "2024-01-03T16:45:00Z",
+            author: "Иванов Иван",
+            authorEmail: "ivan@example.com",
+            changes: ["Начальная версия"],
+            version: "v0.1.0",
+            branch: "development",
+          },
+        ]);
+        setIsLoading(false);
+      }, 500);
+    });
   }, [bookId]);
 
   const formatDate = (dateString: string) => {

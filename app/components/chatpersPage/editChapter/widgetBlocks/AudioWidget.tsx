@@ -1,19 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { WidgetData } from "@/app/types/widget";
+import { useTranslations } from "next-intl";
 
 type AudioWidgetProps = {
-  value: string; // URL of the audio
+  value: WidgetData;
   onChange: (value: string) => void;
   onFileUpload?: (file: File) => Promise<string | null>;
+  onTextChange?: (text: string) => void;
 };
 
 export default function AudioWidget({
   value,
   onChange,
   onFileUpload,
+  onTextChange,
 }: AudioWidgetProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [fileTitle, setFileTitle] = useState<string>(String(value?.text ?? ""));
+  const t = useTranslations();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,17 +42,31 @@ export default function AudioWidget({
     }
   };
 
+  const audioUrl =
+    value?.url && typeof value.url === "string" ? value.url : null;
+
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full flex flex-col space-y-3 p-2">
+      {onTextChange && (
+        <input
+          type="text"
+          className="p-1 text-lg w-4/5 ring-1 rounded-md ring-gray-300 bg-white"
+          placeholder={t("taskEditor.audio_title")}
+          onChange={(e) => {
+            onTextChange(e.target.value);
+            setFileTitle(e.target.value);
+          }}
+          value={fileTitle}
+        />
+      )}
       {/* Audio player */}
-      {value && (
+      {audioUrl && (
         <div className="w-full">
-          <audio src={value} controls className="w-full rounded-lg">
+          <audio src={audioUrl} controls className="w-full rounded-lg">
             Ваш браузер не поддерживает аудио
           </audio>
         </div>
       )}
-
       {/* Upload button */}
       <label
         className={`inline-flex items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors duration-100 ${
@@ -93,7 +113,7 @@ export default function AudioWidget({
               />
             </svg>
             <span className="font-medium">
-              {value ? "Заменить аудио" : "Загрузить аудио"}
+              {audioUrl ? "Заменить аудио" : "Загрузить аудио"}
             </span>
           </>
         )}

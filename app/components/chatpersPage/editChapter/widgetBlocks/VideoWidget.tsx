@@ -46,7 +46,7 @@ export default function VideoWidget({
     value?.url && typeof value.url === "string" ? value.url : null;
 
   return (
-    <div className="w-full p-2 space-y-3">
+    <div className="flex flex-col w-full p-2 space-y-3">
       {onTextChange && (
         <input
           type="text"
@@ -73,7 +73,7 @@ export default function VideoWidget({
 
       {/* Upload button */}
       <label
-        className={`inline-flex items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors duration-100 ${
+        className={`inline-flex w-fit items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors duration-100 ${
           isUploading ? "opacity-50 pointer-events-none" : ""
         }`}
       >
@@ -117,7 +117,7 @@ export default function VideoWidget({
               />
             </svg>
             <span className="font-medium">
-              {value ? "Заменить видео" : "Загрузить видео"}
+              {videoUrl ? "Заменить видео" : "Загрузить видео"}
             </span>
           </>
         )}

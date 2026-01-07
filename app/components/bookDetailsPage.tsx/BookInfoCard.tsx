@@ -287,7 +287,7 @@ export default function BookInfoCard({
               className="inline-flex items-center gap-2 rounded-lg border border-purple-300 px-3 py-1.5 text-sm font-medium text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-colors"
             >
               <FiClock className="h-4 w-4" />
-              <span>{t("history")}</span>
+              <span>{t("history")}12231233123</span>
             </Link>
           )}
         </div>

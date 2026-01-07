@@ -70,18 +70,20 @@ export default function ImageWidget({
     value?.url && typeof value.url === "string" ? value.url : null;
 
   return (
-    <div className="w-full space-y-3 p-2">
+    <div className="w-full flex flex-col space-y-3 p-2">
       {onTextChange && (
-        <input
-          type="text"
-          className="p-1 text-lg w-4/5 ring-1 rounded-md ring-gray-300 bg-white"
-          placeholder={t("taskEditor.image_title")}
-          onChange={(e) => {
-            onTextChange(e.target.value);
-            setFileTitle(e.target.value);
-          }}
-          value={fileTitle}
-        />
+        <div>
+          <input
+            type="text"
+            className="p-1 text-lg w-4/5 ring-1 rounded-md ring-gray-300 bg-white"
+            placeholder={t("taskEditor.image_title")}
+            onChange={(e) => {
+              onTextChange(e.target.value);
+              setFileTitle(e.target.value);
+            }}
+            value={fileTitle}
+          />
+        </div>
       )}
       {imageUrl && (
         <div className="relative w-full">
@@ -94,7 +96,7 @@ export default function ImageWidget({
       )}
       {/* Upload button */}
       <label
-        className={`inline-flex items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors duration-100 ${
+        className={`inline-flex w-fit items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors duration-100 ${
           isUploading ? "opacity-50 pointer-events-none" : ""
         }`}
       >
@@ -138,7 +140,7 @@ export default function ImageWidget({
               />
             </svg>
             <span className="font-medium">
-              {value ? "Заменить фото" : "Загрузить фото"}
+              {imageUrl ? "Заменить фото" : "Загрузить фото"}
             </span>
           </>
         )}

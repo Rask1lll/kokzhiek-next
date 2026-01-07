@@ -72,7 +72,7 @@ export default function ViewPlaceholder({
       content = <VideoView value={urlValue} text={textValue} />;
       break;
     case "audio":
-      content = <AudioView value={urlValue} />;
+      content = <AudioView value={urlValue} text={textValue} />;
       break;
     case "formula":
       content = <FormulaView value={textValue} />;

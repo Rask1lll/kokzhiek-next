@@ -70,13 +70,10 @@ const LayoutPlaceholder = ({
     setIsDeleting(false);
   }, [widget, blockId, isDeleting, removeWidget, t]);
 
-  const handleChange = useCallback(
-    (value: string) => {
-      if (!widget) return;
-      updateWidget(widget.id, { ...widget.data, text: value });
-    },
-    [widget, updateWidget]
-  );
+  const handleChange = (value: string) => {
+    if (!widget) return;
+    updateWidget(widget.id, { ...widget.data, text: value });
+  };
 
   const handleMediaChange = useCallback(
     (url: string) => {
@@ -156,8 +153,9 @@ const LayoutPlaceholder = ({
       case "audio":
         widgetContent = (
           <AudioWidget
-            value={urlValue}
+            value={widget.data}
             onChange={handleMediaChange}
+            onTextChange={handleChange}
             onFileUpload={handleFileUpload}
           />
         );
