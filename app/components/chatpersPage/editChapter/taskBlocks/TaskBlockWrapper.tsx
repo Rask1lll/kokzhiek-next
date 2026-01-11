@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useCallback, useRef, useState, useEffect } from "react";
-import { FiImage, FiTrash2, FiHelpCircle } from "react-icons/fi";
+import { FiImage, FiTrash2, FiHelpCircle, FiType } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
@@ -32,10 +32,47 @@ export default function TaskBlockWrapper({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hintDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [showBGModal, setShowBGModal] = useState(false);
+  const [showSignModal, setShowSignModal] = useState(false);
   const [colorFilterTimeout, setColorFilterTimeout] =
     useState<ReturnType<typeof setTimeout>>();
   const [colorEnterTimeout, setColorEnterTimeout] =
     useState<ReturnType<typeof setTimeout>>();
+  const [signEnterTimeout, setSignEnterTimeout] =
+    useState<ReturnType<typeof setTimeout>>();
+
+  // Popular conditional signs
+  const popularSigns = [
+    "⚠️",
+    "⭐",
+    "✓",
+    "✗",
+    "ℹ️",
+    "⚡",
+    "❓",
+    "💡",
+    "🔍",
+    "📌",
+    "❗",
+    "❌",
+    "✅",
+    "➡️",
+    "⬅️",
+    "⬆️",
+    "⬇️",
+    "🔴",
+    "🟢",
+    "🟡",
+    "🔵",
+    "1️⃣",
+    "2️⃣",
+    "3️⃣",
+    "A",
+    "B",
+    "C",
+    "•",
+    "→",
+    "←",
+  ];
 
   // Update currentQuestion when questions change
   useEffect(() => {
@@ -118,6 +155,35 @@ export default function TaskBlockWrapper({
     });
   };
 
+  const handleSignSelect = (sign: string) => {
+    if (!currentQuestion?.id) return;
+
+    const newData = {
+      ...currentQuestion.data,
+      conditionalSign: sign || undefined,
+    };
+
+    // Remove conditionalSign from data if empty
+    if (!sign) {
+      delete newData.conditionalSign;
+    }
+
+    setCurrentQuestion((prev) => (prev ? { ...prev, data: newData } : null));
+
+    const questionId = currentQuestion.id;
+    if (!questionId) return;
+
+    update(questionId, {
+      data: newData,
+    });
+
+    setShowSignModal(false);
+  };
+
+  const handleSignDelete = () => {
+    handleSignSelect("");
+  };
+
   const updateHint = useCallback(
     (hint: string) => {
       if (!currentQuestion?.id) return;
@@ -153,14 +219,23 @@ export default function TaskBlockWrapper({
     [currentQuestion, update]
   );
 
-  // Cleanup timer on unmount
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (hintDebounceTimerRef.current) {
         clearTimeout(hintDebounceTimerRef.current);
       }
+      if (colorFilterTimeout) {
+        clearTimeout(colorFilterTimeout);
+      }
+      if (colorEnterTimeout) {
+        clearTimeout(colorEnterTimeout);
+      }
+      if (signEnterTimeout) {
+        clearTimeout(signEnterTimeout);
+      }
     };
-  }, []);
+  }, [colorFilterTimeout, colorEnterTimeout, signEnterTimeout]);
 
   if (loading || !currentQuestion) {
     return <>{children}</>;
@@ -174,6 +249,13 @@ export default function TaskBlockWrapper({
     typeof currentQuestion.data.bgColor === "string"
       ? currentQuestion.data.bgColor
       : "#ffffff";
+  const conditionalSign =
+    currentQuestion.data &&
+    typeof currentQuestion.data === "object" &&
+    "conditionalSign" in currentQuestion.data &&
+    typeof currentQuestion.data.conditionalSign === "string"
+      ? currentQuestion.data.conditionalSign
+      : "";
 
   return (
     <div
@@ -325,6 +407,96 @@ export default function TaskBlockWrapper({
           )}
         </div>
 
+        {/* Conditional sign */}
+        <div className="flex relative items-center gap-2">
+          {showSignModal && (
+            <div
+              onMouseLeave={() => {
+                setSignEnterTimeout(
+                  setTimeout(() => {
+                    setShowSignModal(false);
+                  }, 3000)
+                );
+              }}
+              onMouseEnter={() => {
+                if (signEnterTimeout) clearTimeout(signEnterTimeout);
+              }}
+              className="absolute z-10 -bottom-15 p-3 ring rounded-lg ring-gray-300 left-0 bg-white"
+            >
+              <div className="w-fit flex flex-wrap gap-2 mb-3 max-w-xs">
+                {popularSigns.map((sign) => (
+                  <button
+                    key={sign}
+                    type="button"
+                    onClick={() => handleSignSelect(sign)}
+                    className="p-2 text-xl hover:bg-gray-100 rounded border border-gray-200 transition-colors"
+                    title={sign}
+                  >
+                    {sign}
+                  </button>
+                ))}
+              </div>
+              <div className="h-fit gap-2 flex items-center">
+                <label htmlFor="customSign" className="text-sm">
+                  Свой символ:
+                </label>
+                <input
+                  id="customSign"
+                  type="text"
+                  maxLength={5}
+                  placeholder="Введите символ"
+                  className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && e.currentTarget.value) {
+                      handleSignSelect(e.currentTarget.value);
+                    }
+                  }}
+                />
+              </div>
+              {conditionalSign && (
+                <div className="mt-2">
+                  <Button
+                    color="red"
+                    content="Удалить символ"
+                    size="sm"
+                    onClick={handleSignDelete}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setShowSignModal(!showSignModal);
+            }}
+            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+              conditionalSign
+                ? "bg-green-100 text-green-700 hover:bg-green-200"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-300"
+            }`}
+            title="Добавить условный знак"
+          >
+            <FiType className="w-4 h-4" />
+            <span>Условный знак</span>
+          </button>
+          {conditionalSign && (
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-2 text-lg bg-green-50 text-green-700 rounded-lg border border-green-200">
+                {conditionalSign}
+              </div>
+              <button
+                type="button"
+                onClick={handleSignDelete}
+                className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                title="Удалить символ"
+              >
+                <FiTrash2 className="w-2.5 h-2.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Hint input */}
         <div className="flex items-center gap-2 flex-1">
           <button
@@ -363,6 +535,15 @@ export default function TaskBlockWrapper({
           )}
         </div>
       </div>
+
+      {/* Conditional sign display */}
+      {conditionalSign && (
+        <div className="mb-2 flex items-center">
+          <span className="text-2xl font-semibold text-gray-700 mr-2">
+            {conditionalSign}
+          </span>
+        </div>
+      )}
 
       {/* Task content */}
       {children}
