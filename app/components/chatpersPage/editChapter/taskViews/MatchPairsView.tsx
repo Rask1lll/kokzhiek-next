@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
+import { getNegativeFeedback, getPositiveFeedback } from "@/app/libs/feedback";
 
 type MatchPairsViewProps = {
   widgetId: number;
@@ -373,7 +374,9 @@ export default function MatchPairsView({
           >
             <div className=" items-center gap-2">
               <span className="text-lg font-semibold">
-                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+                {result.is_correct
+                  ? getPositiveFeedback()
+                  : getNegativeFeedback()}
               </span>
               <span className="text-sm">(+{result.points_earned} балл)</span>
             </div>

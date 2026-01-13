@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
+import { getNegativeFeedback, getPositiveFeedback } from "@/app/libs/feedback";
 
 type SortViewProps = {
   widgetId: number;
@@ -28,7 +29,10 @@ export default function SortView({ widgetId }: SortViewProps) {
   const [assignments, setAssignments] = useState<Record<string, string>>({});
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [shuffleSeed] = useState(() => Math.random());
-  const [result, setResult] = useState<{ is_correct: boolean; points_earned: number } | null>(null);
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
@@ -255,7 +259,9 @@ export default function SortView({ widgetId }: SortViewProps) {
           >
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold">
-                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+                {result.is_correct
+                  ? getPositiveFeedback()
+                  : getNegativeFeedback()}
               </span>
               <span className="text-sm">(+{result.points_earned} балл)</span>
             </div>
@@ -271,23 +277,28 @@ export default function SortView({ widgetId }: SortViewProps) {
         <div className="mt-4 flex justify-end">
           <button
             onClick={async () => {
-              if (Object.keys(assignments).length === 0 || !currentQuestion?.id) {
+              if (
+                Object.keys(assignments).length === 0 ||
+                !currentQuestion?.id
+              ) {
                 return;
               }
 
               setSubmitting(true);
               // Преобразуем assignments: card_id (option.id) -> column_id (group)
               const answer = { assignments };
-              
+
               const response = await submit(currentQuestion.id, answer);
-              
+
               if (response) {
                 setResult(response);
               }
-              
+
               setSubmitting(false);
             }}
-            disabled={Object.keys(assignments).length === 0 || submitting || loading}
+            disabled={
+              Object.keys(assignments).length === 0 || submitting || loading
+            }
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {submitting || loading ? "Отправка..." : "Отправить ответ"}

@@ -26,9 +26,12 @@ export default function EditBookPageClient() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const DIFFICULTY_OPTIONS = [
-    { value: "Начальный", label: t("difficultyBeginner") },
-    { value: "Средний", label: t("difficultyIntermediate") },
-    { value: "Продвинутый", label: t("difficultyAdvanced") },
+    { value: "A1", label: t("difficultyA1") },
+    { value: "A2", label: t("difficultyA2") },
+    { value: "B1", label: t("difficultyB1") },
+    { value: "B2", label: t("difficultyB2") },
+    { value: "C1", label: t("difficultyC1") },
+    { value: "C2", label: t("difficultyC2") },
   ];
 
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +51,7 @@ export default function EditBookPageClient() {
   const [isbn, setIsbn] = useState("");
   const [year, setYear] = useState<number | undefined>();
   const [edition, setEdition] = useState("");
-  const [difficulty, setDifficulty] = useState("Начальный");
+  const [difficulty, setDifficulty] = useState("A1");
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -79,7 +82,7 @@ export default function EditBookPageClient() {
         setIsbn(book.publication?.isbn || "");
         setYear(book.publication?.year ?? undefined);
         setEdition(book.publication?.edition || "");
-        setDifficulty(book.settings?.difficulty || "Начальный");
+        setDifficulty(book.settings?.difficulty || "A1");
         setCoverImageUrl(book.cover_image_url || null);
       }
       setIsLoading(false);
@@ -376,7 +379,7 @@ export default function EditBookPageClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-700">
-                  {t("difficulty")}
+                  {t("lang_level")}
                 </label>
                 <select
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

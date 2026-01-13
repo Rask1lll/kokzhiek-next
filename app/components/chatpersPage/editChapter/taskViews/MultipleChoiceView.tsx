@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
+import { getNegativeFeedback, getPositiveFeedback } from "@/app/libs/feedback";
 
 type MultipleChoiceViewProps = {
   widgetId: number;
@@ -16,7 +17,10 @@ export default function MultipleChoiceView({
   const { questions } = useQuestions(widgetId);
   const { loading, error, submit } = useAttempt(widgetId);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [result, setResult] = useState<{ is_correct: boolean; points_earned: number } | null>(null);
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
@@ -41,13 +45,13 @@ export default function MultipleChoiceView({
 
     setSubmitting(true);
     const answer = { selected_ids: selectedIds };
-    
+
     const response = await submit(currentQuestion.id, answer);
-    
+
     if (response) {
       setResult(response);
     }
-    
+
     setSubmitting(false);
   };
 
@@ -91,7 +95,7 @@ export default function MultipleChoiceView({
             </div>
           </label>
         ))}
-        
+
         {result && (
           <div
             className={`mt-4 p-4 rounded-lg border-2 ${
@@ -102,7 +106,9 @@ export default function MultipleChoiceView({
           >
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold">
-                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+                {result.is_correct
+                  ? getPositiveFeedback()
+                  : getNegativeFeedback()}
               </span>
               <span className="text-sm">(+{result.points_earned} балл)</span>
             </div>

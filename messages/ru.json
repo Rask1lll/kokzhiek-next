@@ -184,6 +184,7 @@
     "user": "Пользователь"
   },
   "createBook": {
+    "lang_level": "Тілді меңгеру деңгейі",
     "title": "Создание книги",
     "bookTitle": "Название книги",
     "selectLanguage": "Выберите язык",
@@ -308,6 +309,7 @@
     "maxChaptersPerBook": "Макс. глав в книге"
   },
   "editBook": {
+    "lang_level": "Уровень владения языка",
     "backToBook": "Назад к книге",
     "title": "Редактирование книги",
     "subtitle": "Измените информацию о книге",
@@ -322,10 +324,7 @@
     "language": "Язык",
     "description": "Описание",
     "descriptionPlaceholder": "Кратко опишите содержание книги",
-    "difficulty": "Уровень сложности",
-    "difficultyBeginner": "Начальный",
-    "difficultyIntermediate": "Средний",
-    "difficultyAdvanced": "Продвинутый",
+    "difficulty": "Уровень владения языком",
     "isbn": "ISBN",
     "isbnPlaceholder": "978-0-123456-78-9",
     "year": "Год издания",
@@ -341,6 +340,12 @@
     "deleteCover": "Удалить",
     "coverHint": "JPG, PNG, до 5 МБ",
     "uploadingCover": "Загрузка...",
+    "difficultyA1": "A1 (Начальный)",
+    "difficultyA2": "A2 (Элементарный)",
+    "difficultyB1": "B1 (Средний)",
+    "difficultyB2": "B2 (Выше среднего)",
+    "difficultyC1": "C1 (Продвинутый)",
+    "difficultyC2": "C2 (Владение)",
     "noCover": "Нет обложки"
   },
   "chapterHeader": {
@@ -363,6 +368,7 @@
     "sidebarRight": "Сайдбар справа"
   },
   "createBookModal": {
+    "lang_level": "Уровень владения языка",
     "title": "Создать новую книгу",
     "subtitle": "Заполните основную информацию о книге. Это можно будет изменить позже.",
     "bookTitle": "Название книги *",
@@ -381,10 +387,13 @@
     "language": "Язык *",
     "description": "Описание",
     "descriptionPlaceholder": "Кратко опишите содержание книги",
-    "difficulty": "Уровень сложности",
-    "difficultyBeginner": "Начальный",
-    "difficultyIntermediate": "Средний",
-    "difficultyAdvanced": "Продвинутый",
+    "difficulty": "Уровень владения языком",
+    "difficultyA1": "A1 (Начальный)",
+    "difficultyA2": "A2 (Элементарный)",
+    "difficultyB1": "B1 (Средний)",
+    "difficultyB2": "B2 (Выше среднего)",
+    "difficultyC1": "C1 (Продвинутый)",
+    "difficultyC2": "C2 (Владение)",
     "isbn": "ISBN (необязательно)",
     "isbnPlaceholder": "978-0-123456-78-9",
     "createButton": "Создать книгу"

@@ -22,7 +22,7 @@ export default function CreateBookModal() {
   const [grade, setGrade] = useState("1");
   const [language, setLanguage] = useState("Қазақ тілі");
   const [description, setDescription] = useState("");
-  const [difficulty, setDifficulty] = useState("Начальный");
+  const [difficulty, setDifficulty] = useState("A1");
   const [isbn, setIsbn] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -32,9 +32,12 @@ export default function CreateBookModal() {
   const { removeContent } = useModalWindowStore();
 
   const DIFFICULTY_OPTIONS = [
-    { value: "Начальный", label: t("difficultyBeginner") },
-    { value: "Средний", label: t("difficultyIntermediate") },
-    { value: "Продвинутый", label: t("difficultyAdvanced") },
+    { value: "A1", label: t("difficultyA1") },
+    { value: "A2", label: t("difficultyA2") },
+    { value: "B1", label: t("difficultyB1") },
+    { value: "B2", label: t("difficultyB2") },
+    { value: "C1", label: t("difficultyC1") },
+    { value: "C2", label: t("difficultyC2") },
   ];
 
   useEffect(() => {
@@ -257,7 +260,7 @@ export default function CreateBookModal() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              {t("difficulty")}
+              {t("lang_level")}
             </label>
             <select
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

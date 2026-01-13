@@ -184,6 +184,7 @@
     "user": "Пайдаланушы"
   },
   "createBook": {
+    "lang_level": "Тіл деңгейі",
     "title": "Кітап құру",
     "bookTitle": "Кітап атауы",
     "selectLanguage": "Тілді таңдаңыз",
@@ -308,6 +309,7 @@
     "maxChaptersPerBook": "Кітапқа макс. тараулар"
   },
   "editBook": {
+    "lang_level": "Тілді меңгеру деңгейі",
     "backToBook": "Кітапқа оралу",
     "title": "Кітапты өңдеу",
     "subtitle": "Кітап туралы ақпаратты өзгертіңіз",
@@ -322,10 +324,13 @@
     "language": "Тіл",
     "description": "Сипаттама",
     "descriptionPlaceholder": "Кітап мазмұнын қысқаша сипаттаңыз",
-    "difficulty": "Қиындық деңгейі",
-    "difficultyBeginner": "Бастапқы",
-    "difficultyIntermediate": "Орташа",
-    "difficultyAdvanced": "Жоғары",
+    "difficulty": "Тілді меңгеру деңгейі",
+    "difficultyA1": "A1 (Бастапқы)",
+    "difficultyA2": "A2 (Элементарлы)",
+    "difficultyB1": "B1 (Орташа)",
+    "difficultyB2": "B2 (Орташадан жоғары)",
+    "difficultyC1": "C1 (Жоғары)",
+    "difficultyC2": "C2 (Шеберлік)",
     "isbn": "ISBN",
     "isbnPlaceholder": "978-0-123456-78-9",
     "year": "Шығу жылы",
@@ -363,6 +368,7 @@
     "sidebarRight": "Оң жақ панель"
   },
   "createBookModal": {
+    "lang_level": "Тілді меңгеру деңгейі",
     "title": "Жаңа кітап құру",
     "subtitle": "Кітап туралы негізгі ақпаратты толтырыңыз. Мұны кейін өзгертуге болады.",
     "bookTitle": "Кітап атауы *",
@@ -381,10 +387,13 @@
     "language": "Тіл *",
     "description": "Сипаттама",
     "descriptionPlaceholder": "Кітап мазмұнын қысқаша сипаттаңыз",
-    "difficulty": "Қиындық деңгейі",
-    "difficultyBeginner": "Бастапқы",
-    "difficultyIntermediate": "Орташа",
-    "difficultyAdvanced": "Жоғары",
+    "difficulty": "Тілді меңгеру деңгейі",
+    "difficultyA1": "A1 (Бастапқы)",
+    "difficultyA2": "A2 (Элементарлы)",
+    "difficultyB1": "B1 (Орташа)",
+    "difficultyB2": "B2 (Орташадан жоғары)",
+    "difficultyC1": "C1 (Жоғары)",
+    "difficultyC2": "C2 (Шеберлік)",
     "isbn": "ISBN (міндетті емес)",
     "isbnPlaceholder": "978-0-123456-78-9",
     "createButton": "Кітап құру"

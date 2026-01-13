@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
+import { getNegativeFeedback, getPositiveFeedback } from "@/app/libs/feedback";
 
 type OrderViewProps = {
   widgetId: number;
@@ -27,7 +28,10 @@ export default function OrderView({ widgetId }: OrderViewProps) {
   const { questions } = useQuestions(widgetId);
   const { loading, error, submit } = useAttempt(widgetId);
   const [shuffleSeed] = useState(() => Math.random());
-  const [result, setResult] = useState<{ is_correct: boolean; points_earned: number } | null>(null);
+  const [result, setResult] = useState<{
+    is_correct: boolean;
+    points_earned: number;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const questionsArray = questions;
@@ -168,7 +172,9 @@ export default function OrderView({ widgetId }: OrderViewProps) {
           >
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold">
-                {result.is_correct ? "✓ Правильно!" : "✗ Неправильно"}
+                {result.is_correct
+                  ? getPositiveFeedback()
+                  : getNegativeFeedback()}
               </span>
               <span className="text-sm">(+{result.points_earned} балл)</span>
             </div>
@@ -192,13 +198,13 @@ export default function OrderView({ widgetId }: OrderViewProps) {
               // Преобразуем массив id в массив строк
               const order = userOrder.map((id) => id.toString());
               const answer = { order };
-              
+
               const response = await submit(currentQuestion.id, answer);
-              
+
               if (response) {
                 setResult(response);
               }
-              
+
               setSubmitting(false);
             }}
             disabled={userOrder.length === 0 || submitting || loading}
