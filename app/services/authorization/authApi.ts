@@ -1,5 +1,5 @@
 import { ConstructorResponse } from "@/app/types/constructorResponse";
-import { getAuthHeaders } from "@/app/libs/auth";
+import { getAuthHeaders, getHeaders } from "@/app/libs/auth";
 import { UserData } from "@/app/types/user";
 
 export async function handleGetMe(): Promise<
@@ -40,10 +40,7 @@ export async function handleSendResetCode(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/password/send-code`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: getHeaders(),
         body: JSON.stringify({ email }),
       }
     );
@@ -68,10 +65,7 @@ export async function handleVerifyResetCode(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/password/verify-code`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: getHeaders(),
         body: JSON.stringify({ email, code }),
       }
     );
@@ -99,10 +93,7 @@ export async function handleResetPassword(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/password/reset`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: getHeaders(),
         body: JSON.stringify({
           email,
           token,

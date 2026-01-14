@@ -2,7 +2,7 @@
 
 import Loading from "@/app/components/Loading/Loading";
 import LanguageSwitcher from "@/app/components/navigation/LanguageSwitcher";
-import { setToken } from "@/app/libs/auth";
+import { setToken, getHeaders } from "@/app/libs/auth";
 import { useTranslations } from "next-intl";
 
 import Link from "next/link";
@@ -41,10 +41,7 @@ export default function LoginPage() {
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/login`,
         {
           method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Accept: "application/json",
-          },
+          headers: getHeaders(),
           body: reqData,
         }
       );

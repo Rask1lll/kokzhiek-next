@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { setToken } from "@/app/libs/auth";
+import { setToken, getHeaders } from "@/app/libs/auth";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/app/components/navigation/LanguageSwitcher";
 import PasswordStrengthIndicator from "@/app/components/PasswordStrengthIndicator/PasswordStrengthIndicator";
@@ -36,10 +36,7 @@ export default function RegisterPage() {
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/register`,
         {
           method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-type": "application/json",
-          },
+          headers: getHeaders(),
           body: JSON.stringify({
             name: firstName,
             email,

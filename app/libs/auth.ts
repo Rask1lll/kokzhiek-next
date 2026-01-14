@@ -9,6 +9,12 @@ export function getToken(): string | null {
   return match ? match[1] : null;
 }
 
+export function getLocale(): string {
+  if (typeof window === "undefined") return "ru";
+  const match = document.cookie.match(/(?:^|; )locale=([^;]*)/);
+  return match ? match[1] : "ru";
+}
+
 export function setToken(token: string): void {
   document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=${TOKEN_MAX_AGE}`;
 }
@@ -19,17 +25,30 @@ export function removeToken(): void {
 
 export function getAuthHeaders() {
   const token = getToken();
+  const locale = getLocale();
   return {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
     Accept: "application/json",
+    "Accept-Language": locale,
   };
 }
 
 export function getAuthHeadersFormdata() {
   const token = getToken();
+  const locale = getLocale();
   return {
     Authorization: `Bearer ${token}`,
     Accept: "application/json",
+    "Accept-Language": locale,
+  };
+}
+
+export function getHeaders() {
+  const locale = getLocale();
+  return {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "Accept-Language": locale,
   };
 }
