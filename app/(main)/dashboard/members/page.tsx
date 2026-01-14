@@ -2,19 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { FiUsers, FiMail, FiCalendar } from "react-icons/fi";
+import { FiUsers, FiMail, FiCalendar, FiKey } from "react-icons/fi";
 import { useSchoolMembers } from "@/app/hooks/useSchoolMembers";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isSchool as checkIsSchool } from "@/app/libs/roles";
-import { MemberRole } from "@/app/types/member";
+import { MemberRole, Member } from "@/app/types/member";
+import ResetPasswordModal from "@/app/components/ResetPasswordModal/ResetPasswordModal";
 
 export default function MembersPage() {
   const t = useTranslations("membersPage");
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const { user } = useAuth();
-  const { members, isLoading, getMembers } = useSchoolMembers();
+  const { members, isLoading, getMembers, resetPassword } = useSchoolMembers();
   const [roleFilter, setRoleFilter] = useState<MemberRole | "">("");
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   const isSchool = checkIsSchool(user);
 
@@ -45,6 +48,27 @@ export default function MembersPage() {
       month: "short",
       year: "numeric",
     });
+  };
+
+  const handleResetPasswordClick = (member: Member) => {
+    setSelectedMember(member);
+    setShowResetModal(true);
+  };
+
+  const handleResetPasswordSubmit = async (password: string, confirmPassword: string) => {
+    if (!selectedMember) return { success: false, message: "Member not selected" };
+
+    const result = await resetPassword(selectedMember.id, {
+      password,
+      password_confirmation: confirmPassword,
+    });
+
+    return result;
+  };
+
+  const handleCloseModal = () => {
+    setShowResetModal(false);
+    setSelectedMember(null);
   };
 
   return (
@@ -105,6 +129,11 @@ export default function MembersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     {t("dateColumn")}
                   </th>
+                  {isSchool && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      {t("actionsColumn")}
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -143,6 +172,19 @@ export default function MembersPage() {
                         {formatDate(member.created_at)}
                       </div>
                     </td>
+                    {isSchool && (
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() => handleResetPasswordClick(member)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                          title={t("resetPassword")}
+                        >
+                          <FiKey className="w-4 h-4" />
+                          {t("resetPassword")}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -150,6 +192,18 @@ export default function MembersPage() {
           </div>
         )}
       </div>
+
+      {/* Reset Password Modal - only for school_admin */}
+      {isSchool && (
+        <ResetPasswordModal
+          isOpen={showResetModal && !!selectedMember}
+          userName={selectedMember?.name || ""}
+          userEmail={selectedMember?.email || ""}
+          onClose={handleCloseModal}
+          onSubmit={handleResetPasswordSubmit}
+          translationNamespace="membersPage"
+        />
+      )}
     </div>
   );
 }

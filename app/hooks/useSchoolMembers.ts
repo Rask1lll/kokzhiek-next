@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { handleGetSchoolMembers } from "../services/school/membersApi";
+import {
+  handleGetSchoolMembers,
+  handleResetMemberPassword,
+  ResetPasswordPayload,
+  ApiResult,
+} from "../services/school/membersApi";
 import { Member, GetMembersParams } from "../types/member";
 
 export function useSchoolMembers() {
@@ -18,5 +23,15 @@ export function useSchoolMembers() {
     return resData;
   }, []);
 
-  return { members, isLoading, getMembers };
+  const resetPassword = useCallback(
+    async (
+      userId: number,
+      payload: ResetPasswordPayload
+    ): Promise<ApiResult<{ message: string }>> => {
+      return await handleResetMemberPassword(userId, payload);
+    },
+    []
+  );
+
+  return { members, isLoading, getMembers, resetPassword };
 }

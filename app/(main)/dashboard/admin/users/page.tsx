@@ -2,23 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { FiSearch, FiEdit2, FiX, FiCheck } from "react-icons/fi";
-import { getAuthHeaders } from "@/app/libs/auth";
+import { FiSearch, FiEdit2, FiX, FiCheck, FiKey } from "react-icons/fi";
 import { useAlertStore } from "@/app/store/alertStore";
-
-type Role = {
-  id: number;
-  alias: string;
-  name: string;
-};
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: Role;
-  created_at: string;
-};
+import ResetPasswordModal from "@/app/components/ResetPasswordModal/ResetPasswordModal";
+import {
+  AdminUser,
+  Role,
+  handleGetAdminUsers,
+  handleGetAdminRoles,
+  handleUpdateUserRole,
+  handleAdminResetPassword,
+} from "@/app/services/admin/adminApi";
 
 export default function AdminUsersPage() {
   const t = useTranslations("adminUsersPage");
@@ -26,7 +20,7 @@ export default function AdminUsersPage() {
   const locale = useLocale();
   const showAlert = useAlertStore((state) => state.showAlert);
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -34,48 +28,26 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<number | null>(null);
   const [editRoleId, setEditRoleId] = useState<number | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  
+  // Reset password state
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetUser, setResetUser] = useState<AdminUser | null>(null);
 
   // Загрузка ролей
   useEffect(() => {
-    async function fetchRoles() {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/admin/roles`,
-          { headers: getAuthHeaders() }
-        );
-        const data = await res.json();
-        if (res.ok) {
-          setRoles(data.data || data || []);
-        }
-      } catch {
-        console.error("Failed to fetch roles");
-      }
-    }
-    fetchRoles();
+    handleGetAdminRoles().then(setRoles);
   }, []);
 
   // Загрузка пользователей
   const fetchUsers = useCallback(async () => {
     setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append("search", searchQuery);
-      if (roleFilter) params.append("role_id", String(roleFilter));
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/admin/users?${params}`,
-        { headers: getAuthHeaders() }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setUsers(data.data || data || []);
-      }
-    } catch {
-      console.error("Failed to fetch users");
-    } finally {
-      setLoading(false);
-    }
+    const data = await handleGetAdminUsers({
+      search: searchQuery || undefined,
+      role_id: roleFilter || undefined,
+    });
+    setUsers(data);
+    setLoading(false);
   }, [searchQuery, roleFilter]);
 
   useEffect(() => {
@@ -92,7 +64,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const openUserModal = (user: User) => {
+  const openUserModal = (user: AdminUser) => {
     setSelectedUser(user);
     setEditRoleId(user.role.id);
   };
@@ -102,36 +74,50 @@ export default function AdminUsersPage() {
     setEditRoleId(null);
   };
 
+  // Reset password handlers
+  const openResetModal = (user: AdminUser) => {
+    setResetUser(user);
+    setShowResetModal(true);
+  };
+
+  const closeResetModal = () => {
+    setShowResetModal(false);
+    setResetUser(null);
+  };
+
+  const handleResetPassword = async (password: string, confirmPassword: string) => {
+    if (!resetUser) return { success: false, message: "User not selected" };
+
+    const result = await handleAdminResetPassword(resetUser.id, {
+      password,
+      password_confirmation: confirmPassword,
+    });
+
+    if (result.success) {
+      showAlert(t("resetPasswordSuccess"), "success", 3000);
+    }
+
+    return result;
+  };
+
   const handleModalUpdateRole = async () => {
     if (!selectedUser || !editRoleId) return;
 
     setSavingId(selectedUser.id);
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/admin/users/${selectedUser.id}/role`,
-        {
-          method: "PATCH",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ role_id: editRoleId }),
-        }
-      );
+    const result = await handleUpdateUserRole(selectedUser.id, editRoleId);
+    setSavingId(null);
 
-      if (res.ok) {
-        const newRole = roles.find((r) => r.id === editRoleId);
-        if (newRole) {
-          setUsers((prev) =>
-            prev.map((u) =>
-              u.id === selectedUser.id ? { ...u, role: newRole } : u
-            )
-          );
-        }
-        closeUserModal();
-        showAlert(t("roleUpdated"), "success", 3000);
+    if (result.success) {
+      const newRole = roles.find((r) => r.id === editRoleId);
+      if (newRole) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === selectedUser.id ? { ...u, role: newRole } : u
+          )
+        );
       }
-    } catch {
-      console.error("Failed to update user role");
-    } finally {
-      setSavingId(null);
+      closeUserModal();
+      showAlert(t("roleUpdated"), "success", 3000);
     }
   };
 
@@ -277,6 +263,13 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
+                          onClick={() => openResetModal(user)}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title={t("resetPassword")}
+                        >
+                          <FiKey className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => openUserModal(user)}
                           className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title={t("changeRole")}
@@ -378,6 +371,16 @@ export default function AdminUsersPage() {
           </div>
         </div>
       )}
+
+      {/* Модальное окно сброса пароля */}
+      <ResetPasswordModal
+        isOpen={showResetModal && !!resetUser}
+        userName={resetUser?.name || ""}
+        userEmail={resetUser?.email || ""}
+        onClose={closeResetModal}
+        onSubmit={handleResetPassword}
+        translationNamespace="adminUsersPage"
+      />
     </div>
   );
 }
