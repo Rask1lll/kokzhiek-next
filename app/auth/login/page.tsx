@@ -180,7 +180,7 @@ export default function LoginPage() {
                 </span>
               </label>
               <a
-                href="/forgot-password"
+                href="/auth/forgot-password"
                 className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
               >
                 {t("forgotPassword")}

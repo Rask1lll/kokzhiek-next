@@ -31,3 +31,94 @@ export async function handleLogout(): Promise<boolean> {
     return false;
   }
 }
+
+export async function handleSendResetCode(
+  email: string
+): Promise<{ success: boolean; message?: string; expiresIn?: number }> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/password/send-code`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }
+    );
+    const data = await res.json();
+    return {
+      success: res.ok,
+      message: data.message,
+      expiresIn: data.expires_in,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+}
+
+export async function handleVerifyResetCode(
+  email: string,
+  code: string
+): Promise<{ success: boolean; message?: string; token?: string; expiresIn?: number }> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/password/verify-code`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email, code }),
+      }
+    );
+    const data = await res.json();
+    return {
+      success: res.ok,
+      message: data.message,
+      token: data.token,
+      expiresIn: data.expires_in,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+}
+
+export async function handleResetPassword(
+  email: string,
+  token: string,
+  password: string,
+  password_confirmation: string
+): Promise<{ success: boolean; message?: string; errors?: Record<string, string[]> }> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/password/reset`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          token,
+          password,
+          password_confirmation,
+        }),
+      }
+    );
+    const data = await res.json();
+    return {
+      success: res.ok,
+      message: data.message,
+      errors: data.errors,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+}
