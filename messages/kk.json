@@ -1,4 +1,10 @@
 {
+  "passwordStrength": {
+    "weak": "Әлсіз құпия сөз",
+    "fair": "Орташа құпия сөз",
+    "good": "Жақсы құпия сөз",
+    "strong": "Сенімді құпия сөз"
+  },
   "nav": {
     "books": "Кітаптар",
     "dashboard": "Басқару панелі",
@@ -284,7 +290,11 @@
     "resetPasswordSuccess": "Құпия сөз сәтті өзгертілді",
     "resetPasswordError": "Құпия сөзді қалпына келтіру қатесі",
     "passwordsDoNotMatch": "Құпия сөздер сәйкес келмейді",
-    "passwordTooShort": "Құпия сөз кемінде 8 таңбадан тұруы керек"
+    "passwordTooShort": "Құпия сөз кемінде 8 таңбадан тұруы керек",
+    "strengthWeak": "Әлсіз құпия сөз",
+    "strengthFair": "Орташа құпия сөз",
+    "strengthGood": "Жақсы құпия сөз",
+    "strengthStrong": "Сенімді құпия сөз"
   },
   "adminUsersPage": {
     "title": "Пайдаланушыларды басқару",
@@ -312,6 +322,10 @@
     "resetPasswordError": "Құпия сөзді қалпына келтіру қатесі",
     "passwordsDoNotMatch": "Құпия сөздер сәйкес келмейді",
     "passwordTooShort": "Құпия сөз кемінде 8 таңбадан тұруы керек",
+    "strengthWeak": "Әлсіз құпия сөз",
+    "strengthFair": "Орташа құпия сөз",
+    "strengthGood": "Жақсы құпия сөз",
+    "strengthStrong": "Сенімді құпия сөз",
     "deleteConfirm": "Бұл пайдаланушыны жою керек пе?",
     "roleUpdated": "Пайдаланушы рөлі жаңартылды"
   },

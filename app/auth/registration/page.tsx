@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { setToken } from "@/app/libs/auth";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/app/components/navigation/LanguageSwitcher";
+import PasswordStrengthIndicator from "@/app/components/PasswordStrengthIndicator/PasswordStrengthIndicator";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -216,6 +217,7 @@ export default function RegisterPage() {
                   {fieldErrors.password[0]}
                 </p>
               )}
+              <PasswordStrengthIndicator password={password} />
             </div>
 
             <div>

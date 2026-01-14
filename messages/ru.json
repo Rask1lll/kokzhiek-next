@@ -1,4 +1,10 @@
 {
+  "passwordStrength": {
+    "weak": "Слабый пароль",
+    "fair": "Средний пароль",
+    "good": "Хороший пароль",
+    "strong": "Надёжный пароль"
+  },
   "nav": {
     "books": "Книги",
     "dashboard": "Панель управления",
@@ -284,7 +290,11 @@
     "resetPasswordSuccess": "Пароль успешно изменён",
     "resetPasswordError": "Ошибка при сбросе пароля",
     "passwordsDoNotMatch": "Пароли не совпадают",
-    "passwordTooShort": "Пароль должен содержать минимум 8 символов"
+    "passwordTooShort": "Пароль должен содержать минимум 8 символов",
+    "strengthWeak": "Слабый пароль",
+    "strengthFair": "Средний пароль",
+    "strengthGood": "Хороший пароль",
+    "strengthStrong": "Надёжный пароль"
   },
   "adminUsersPage": {
     "title": "Управление пользователями",
@@ -312,6 +322,10 @@
     "resetPasswordError": "Ошибка при сбросе пароля",
     "passwordsDoNotMatch": "Пароли не совпадают",
     "passwordTooShort": "Пароль должен содержать минимум 8 символов",
+    "strengthWeak": "Слабый пароль",
+    "strengthFair": "Средний пароль",
+    "strengthGood": "Хороший пароль",
+    "strengthStrong": "Надёжный пароль",
     "deleteConfirm": "Удалить этого пользователя?",
     "roleUpdated": "Роль пользователя обновлена"
   },

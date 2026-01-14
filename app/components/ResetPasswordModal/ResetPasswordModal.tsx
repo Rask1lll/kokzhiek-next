@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FiX, FiCheck, FiKey } from "react-icons/fi";
 import { useTranslations } from "next-intl";
+import PasswordStrengthIndicator from "@/app/components/PasswordStrengthIndicator/PasswordStrengthIndicator";
 
 type ResetPasswordModalProps = {
   isOpen: boolean;
@@ -103,6 +104,7 @@ export default function ResetPasswordModal({
               placeholder={t("passwordPlaceholder")}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
+            <PasswordStrengthIndicator password={newPassword} />
           </div>
 
           <div>
