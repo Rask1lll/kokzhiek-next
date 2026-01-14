@@ -269,3 +269,42 @@ export async function handleUpdateBookStatus(
     };
   }
 }
+
+export type DuplicateBookPayload = {
+  title?: string;
+};
+
+export async function handleDuplicateBook(
+  id: number,
+  payload?: DuplicateBookPayload
+): Promise<ApiResult<Book>> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}/duplicate`,
+      {
+        headers: getAuthHeaders(),
+        method: "POST",
+        body: JSON.stringify(payload || {}),
+      }
+    );
+    const json = await res.json();
+
+    if (!res.ok) {
+      const errorResponse = json as ValidationErrorResponse;
+      return {
+        success: false,
+        errors: errorResponse.errors || {},
+        message: errorResponse.message || "Ошибка при дублировании книги",
+      };
+    }
+
+    return { success: true, data: json.data };
+  } catch (error) {
+    console.error("Error duplicating book:", error);
+    return {
+      success: false,
+      errors: {},
+      message: "Ошибка сети при дублировании книги",
+    };
+  }
+}

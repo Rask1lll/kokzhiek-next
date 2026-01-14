@@ -1,10 +1,12 @@
 import { useCallback } from "react";
 import {
   ApiResult,
+  DuplicateBookPayload,
   GetBooksParams,
   handleCreateBook,
   handleDeleteBook,
   handleDeleteBookCover,
+  handleDuplicateBook,
   handleGetBook,
   handleGetBooks,
   handleUpdateBook,
@@ -95,5 +97,15 @@ export function useBooks() {
     return result;
   };
 
-  return { createBook, deleteBook, deleteCover, editBook, getBook, getBooks, isLoading, uploadCover };
+  const duplicateBook = async (
+    bookId: number,
+    payload?: DuplicateBookPayload
+  ): Promise<ApiResult<Book>> => {
+    setIsLoading(true);
+    const result = await handleDuplicateBook(bookId, payload);
+    setIsLoading(false);
+    return result;
+  };
+
+  return { createBook, deleteBook, deleteCover, duplicateBook, editBook, getBook, getBooks, isLoading, uploadCover };
 }

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MdDelete } from "react-icons/md";
+import { FiCopy } from "react-icons/fi";
 import { useTranslations } from "next-intl";
 import { ViewMode } from "../filters/BooksViewModeToggle";
 import { BookStatus } from "@/app/types/book";
@@ -13,12 +14,15 @@ type BookCardProps = {
   status?: BookStatus;
   grade?: string;
   coverImageUrl?: string;
+  canEdit?: boolean;
   onDelete: (bookId: number, bookTitle: string) => void;
+  onDuplicate?: (bookId: number, bookTitle: string) => void;
   viewMode?: ViewMode;
 };
 
-export default function BookCard({ bookId, name, status = "draft", grade, coverImageUrl, onDelete, viewMode = "grid" }: BookCardProps) {
+export default function BookCard({ bookId, name, status = "draft", grade, coverImageUrl, canEdit = false, onDelete, onDuplicate, viewMode = "grid" }: BookCardProps) {
   const t = useTranslations("status");
+  const tBook = useTranslations("book");
 
   const STATUS_CONFIG: Record<BookStatus, { label: string; bg: string; color: string }> = {
     draft: { label: t("draft"), bg: "bg-gray-100", color: "text-gray-600" },
@@ -32,6 +36,14 @@ export default function BookCard({ bookId, name, status = "draft", grade, coverI
     e.preventDefault();
     e.stopPropagation();
     onDelete(bookId, name);
+  };
+
+  const handleDuplicate = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDuplicate) {
+      onDuplicate(bookId, name);
+    }
   };
 
   if (viewMode === "list") {
@@ -75,13 +87,26 @@ export default function BookCard({ bookId, name, status = "draft", grade, coverI
           </div>
         </Link>
 
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="absolute top-4 right-4 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hover:bg-red-600 cursor-pointer z-10"
-        >
-          <MdDelete className="w-5 h-5" />
-        </button>
+        {canEdit && (
+          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+            <button
+              type="button"
+              onClick={handleDuplicate}
+              className="bg-blue-500 text-white rounded-full p-2 shadow-lg hover:bg-blue-600 cursor-pointer"
+              title={tBook("duplicate")}
+            >
+              <FiCopy className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="bg-red-500 text-white rounded-full p-2 shadow-lg hover:bg-red-600 cursor-pointer"
+              title={tBook("delete")}
+            >
+              <MdDelete className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -124,13 +149,26 @@ export default function BookCard({ bookId, name, status = "draft", grade, coverI
           </div>
         </Link>
 
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hover:bg-red-600 cursor-pointer"
-        >
-          <MdDelete className="w-5 h-5" />
-        </button>
+        {canEdit && (
+          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+            <button
+              type="button"
+              onClick={handleDuplicate}
+              className="bg-blue-500 text-white rounded-full p-2 shadow-lg hover:bg-blue-600 cursor-pointer"
+              title={tBook("duplicate")}
+            >
+              <FiCopy className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="bg-red-500 text-white rounded-full p-2 shadow-lg hover:bg-red-600 cursor-pointer"
+              title={tBook("delete")}
+            >
+              <MdDelete className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

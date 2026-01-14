@@ -9,13 +9,21 @@ import BooksFilterBar, {
 import { ViewMode } from "@/app/components/booksPage/booksSection/filters/BooksViewModeToggle";
 import { useBooksStore } from "@/app/store/booksStore";
 import { useBooks } from "@/app/hooks/useBooks";
+import { useAuth } from "@/app/hooks/useAuth";
 import { GetBooksParams } from "@/app/services/book/booksApi";
 import { BookStatus } from "@/app/types/book";
 import style from "@/app/components/booksPage/booksSection/booksList/BooksList.module.css";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { isAuthor } from "@/app/libs/roles";
 
 export default function BooksPageClient() {
   const { books } = useBooksStore();
-  const { deleteBook, getBooks, isLoading } = useBooks();
+  const { deleteBook, duplicateBook, getBooks, isLoading } = useBooks();
+  const { user } = useAuth();
+  const router = useRouter();
+  const t = useTranslations("book");
+  const canEdit = isAuthor(user);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [filters, setFilters] = useState<GetBooksParams>({
     sort_by: "recent",
@@ -54,6 +62,16 @@ export default function BooksPageClient() {
     setFilters(newFilters);
   };
 
+  const handleDuplicateBook = async (bookId: number, bookTitle: string) => {
+    const result = await duplicateBook(bookId);
+    if (result.success) {
+      await getBooks(filters);
+      router.push(`/books/book?book=${result.data.id}`);
+    } else {
+      alert(result.message || t("duplicateError"));
+    }
+  };
+
   return (
     <>
       <BooksFilterBar onChange={handleFilterChange} />
@@ -80,8 +98,10 @@ export default function BooksPageClient() {
               status={el.status}
               grade={el.grade?.label}
               coverImageUrl={el.cover_image_url}
+              canEdit={canEdit}
               key={el.id}
               onDelete={deleteBook}
+              onDuplicate={handleDuplicateBook}
               viewMode={viewMode}
             />
           ))

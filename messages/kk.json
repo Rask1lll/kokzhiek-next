@@ -45,6 +45,8 @@
     "history": "Тарих",
     "edit": "Өңдеу",
     "delete": "Жою",
+    "duplicate": "Көшіру",
+    "duplicateError": "Кітапты көшіру кезінде қате",
     "toModeration": "Модерацияға",
     "approve": "Мақұлдау",
     "reject": "Қабылдамау",
