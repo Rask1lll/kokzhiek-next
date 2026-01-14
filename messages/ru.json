@@ -142,6 +142,8 @@
     "codeSentTo": "Код отправлен на",
     "verifyCode": "Подтвердить",
     "changeEmail": "Изменить email",
+    "resendCode": "Отправить код повторно",
+    "resendCodeIn": "Отправить повторно через {seconds} сек",
     "enterFullCode": "Введите полный 6-значный код",
     "invalidCode": "Неверный код. Проверьте и попробуйте снова",
     "backToLogin": "Вернуться к входу",

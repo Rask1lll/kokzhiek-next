@@ -142,6 +142,8 @@
     "codeSentTo": "Код жіберілді",
     "verifyCode": "Растау",
     "changeEmail": "Email-ді өзгерту",
+    "resendCode": "Кодты қайта жіберу",
+    "resendCodeIn": "{seconds} сек кейін қайта жіберу",
     "enterFullCode": "Толық 6 санды кодты енгізіңіз",
     "invalidCode": "Қате код. Тексеріп, қайталап көріңіз",
     "backToLogin": "Кіруге оралу",

@@ -10,7 +10,7 @@ import {
 } from "@/app/services/authorization/authApi";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { FormEvent, useState, useRef } from "react";
+import { FormEvent, useState, useRef, useEffect, useCallback } from "react";
 
 type Step = "email" | "code" | "password" | "success";
 
@@ -25,9 +25,46 @@ export default function ForgotPasswordPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
   const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setResendCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCountdown]);
+
+  const startResendCountdown = useCallback(() => {
+    setResendCountdown(60);
+  }, []);
+
+  const handleResendCode = async () => {
+    setResendLoading(true);
+    setError("");
+
+    try {
+      const result = await handleSendResetCode(email);
+
+      if (result.success) {
+        startResendCountdown();
+        setCode(["", "", "", "", "", ""]);
+      } else {
+        setError(result.message || tCommon("error"));
+      }
+    } catch {
+      setError(tCommon("error"));
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleEmailSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -39,6 +76,7 @@ export default function ForgotPasswordPage() {
 
       if (result.success) {
         setStep("code");
+        startResendCountdown();
       } else {
         setError(result.message || tCommon("error"));
       }
@@ -332,6 +370,23 @@ export default function ForgotPasswordPage() {
                         t("verifyCode")
                       )}
                     </button>
+
+                    <div className="flex items-center justify-center gap-1 text-sm">
+                      {resendCountdown > 0 ? (
+                        <span className="text-gray-500">
+                          {t("resendCodeIn", { seconds: resendCountdown })}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleResendCode}
+                          disabled={resendLoading}
+                          className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors disabled:opacity-50"
+                        >
+                          {resendLoading ? tCommon("loading") : t("resendCode")}
+                        </button>
+                      )}
+                    </div>
 
                     <button
                       type="button"
