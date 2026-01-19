@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CgArrowRight } from "react-icons/cg";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
@@ -43,6 +44,7 @@ export default function MatchPairsView({
   widgetId,
   onChange,
 }: MatchPairsViewProps) {
+  const t = useTranslations();
   const { questions } = useQuestions(widgetId);
   const { loading, error, submit } = useAttempt(widgetId);
   const [matches, setMatches] = useState<Record<string, string>>({}); // answer_id -> cell_id
@@ -260,12 +262,12 @@ export default function MatchPairsView({
             return (
               <div key={pair.id} className="contents">
                 {/* Answer column */}
-                <div className="min-h-[200px]">
+                <div className="flex h-full">
                   {answerForRow && (
                     <div
                       draggable={!answerIsMatched}
                       onDragStart={() => handleDragStart(answerForRow.id)}
-                      className={`w-full min-h-[200px] px-2 py-1 rounded-lg border-2 transition-all ${
+                      className={`w-full h-full min-h-[200px] px-2 py-1 rounded-lg border-2 transition-all flex flex-col ${
                         answerIsMatched
                           ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
                           : draggedAnswerId === answerForRow.id
@@ -273,7 +275,7 @@ export default function MatchPairsView({
                           : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-move"
                       }`}
                     >
-                      <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="flex flex-col items-center justify-center gap-2 flex-1">
                         {answerForRow.imageUrl && (
                           <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 shrink-0">
                             <Image
@@ -294,33 +296,33 @@ export default function MatchPairsView({
                 </div>
 
                 {/* Arrow column */}
-                <div className="flex items-center justify-center px-2">
+                <div className="flex items-center justify-center px-2 h-full self-stretch">
                   <CgArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
                 </div>
 
                 {/* Cell column */}
-                <div className="flex min-h-[200px] items-center">
+                <div className="flex h-full">
                   <div
                     onDragOver={handleDragOver}
                     onDrop={() => handleDrop(pair.id)}
-                    className={`w-full min-h-[300px] p-4 rounded-lg border-2 transition-all ${
+                    className={`w-full h-full min-h-[200px] p-4 rounded-lg border-2 transition-all flex flex-col ${
                       matchedAnswer
                         ? "bg-slate-100 border-slate-400"
                         : "bg-slate-50 border-slate-300 border-dashed hover:border-blue-400"
                     }`}
                   >
                     {matchedAnswer ? (
-                      <div className="min-h-[200px] space-y-2">
+                      <div className="flex flex-col space-y-2 flex-1">
                         <div className="flex items-center justify-end">
                           <button
                             type="button"
                             onClick={() => handleRemoveMatch(matchedAnswer.id)}
                             className="text-sm md:text-base lg:text-lg text-red-500 hover:text-red-700"
                           >
-                            Удалить
+                            {t("constructor.removeMatch")}
                           </button>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2 flex-1">
                           {matchedAnswer.imageUrl && (
                             <div className="relative w-20 h-20 md:w-40 md:h-40 lg:w-48 lg:h-48 shrink-0">
                               <Image
@@ -338,7 +340,7 @@ export default function MatchPairsView({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center min-h-[200px]">
+                      <div className="flex items-center justify-center flex-1">
                         <div className="text-center">
                           {pair.cell.imageUrl && (
                             <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 mx-auto mb-2">

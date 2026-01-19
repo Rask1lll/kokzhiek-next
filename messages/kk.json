@@ -530,6 +530,7 @@
     "noAnswers": "Жауаптар жоқ. Құру үшін «Жауап қосу» батырмасын басыңыз.",
     "answerNumber": "Жауап {number}",
     "deleteAnswer": "Жауапты жою",
+    "removeMatch": "Жою",
     "gridSize": "Тор өлшемі:",
     "decreaseSize": "Өлшемді кішірейту",
     "increaseSize": "Өлшемді ұлғайту",
