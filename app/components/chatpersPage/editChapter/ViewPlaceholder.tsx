@@ -27,6 +27,7 @@ import SearchWordView from "./taskViews/SearchWordView";
 import ConceptMapView from "./taskViews/ConceptMapView";
 import SortView from "./taskViews/SortView";
 import OrderView from "./taskViews/OrderView";
+import SentenceOrderView from "./taskViews/SentenceOrderView";
 import DragDropView from "./taskViews/DragDropView";
 
 type ViewPlaceholderProps = {
@@ -120,6 +121,9 @@ export default function ViewPlaceholder({
       break;
     case "order":
       content = <OrderView widgetId={widget.id} />;
+      break;
+    case "sentence_order":
+      content = <SentenceOrderView widgetId={widget.id} />;
       break;
     case "drag_drop":
       content = <DragDropView widgetId={widget.id} />;

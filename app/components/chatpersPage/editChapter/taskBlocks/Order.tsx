@@ -16,11 +16,12 @@ import { useTranslations } from "next-intl";
 
 type OrderProps = {
   widgetId: number;
+  questionType?: string;
 };
 
-export default function Order({ widgetId }: OrderProps) {
+export default function Order({ widgetId, questionType = "order" }: OrderProps) {
   const t = useTranslations("taskEditor");
-  const { questions, loading, update, uploadImage, removeImage } =
+  const { questions, loading, update, uploadImage, removeImage, create } =
     useQuestions(widgetId);
 
   // Get first question from array
@@ -28,7 +29,32 @@ export default function Order({ widgetId }: OrderProps) {
     Array.isArray(questions) && questions.length > 0 ? questions[0] : null
   );
 
+  const hasCreatedQuestionRef = useRef(false);
+
   useEffect(() => {
+    if (loading) return;
+
+    // Auto-create question if none exists
+    if (
+      !hasCreatedQuestionRef.current &&
+      !loading &&
+      Array.isArray(questions) &&
+      questions.length === 0
+    ) {
+      hasCreatedQuestionRef.current = true;
+      create({
+        type: questionType,
+        body: "",
+        points: 1,
+        options: [],
+      }).then((newQuestion) => {
+        if (newQuestion) {
+          setCurrentQuestion(newQuestion);
+        }
+      });
+      return;
+    }
+
     if (Array.isArray(questions) && questions.length > 0) {
       const firstQuestion = questions[0];
       // Only update if question ID changed
@@ -39,7 +65,7 @@ export default function Order({ widgetId }: OrderProps) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions]);
+  }, [questions, loading, questionType]);
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const optionDebounceTimersRef = useRef<Map<number, NodeJS.Timeout>>(
@@ -412,12 +438,13 @@ export default function Order({ widgetId }: OrderProps) {
             {/* Image preview */}
             {answer.image_url && (
               <div className="relative ml-10 mt-2">
-                <div className="relative w-32 h-32 border border-slate-200 rounded-lg overflow-hidden">
+                <div className="relative w-40 h-40 border-2 border-slate-300 rounded-lg overflow-hidden bg-slate-50">
                   <Image
                     src={answer.image_url}
                     alt={answer.body || ""}
                     fill
                     className="object-cover"
+                    unoptimized
                   />
                 </div>
                 <button
@@ -427,10 +454,10 @@ export default function Order({ widgetId }: OrderProps) {
                       handleImageDelete(answer.id);
                     }
                   }}
-                  className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
                   title={t("removeImage")}
                 >
-                  <FiTrash2 className="w-3 h-3" />
+                  <FiTrash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}

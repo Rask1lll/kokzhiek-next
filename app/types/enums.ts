@@ -9,6 +9,7 @@ export enum TaskType {
   DRAG_DROP = "drag_drop",
   SORT = "sort",
   ORDER = "order",
+  SENTENCE_ORDER = "sentence_order",
   WORD_SEARCH = "word_search",
   CROSSWORD = "crossword",
 }

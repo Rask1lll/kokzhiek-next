@@ -13,6 +13,7 @@ import {
   FiLayers,
   FiList,
   FiHash,
+  FiBookOpen,
 } from "react-icons/fi";
 
 export const tasks = [
@@ -81,6 +82,12 @@ export const tasks = [
     title: "Упорядочить",
     description: "Расположение ответов в правильном порядке",
     icon: <FiList className="w-5 h-5 text-lime-500" />,
+  },
+  {
+    type: "sentence_order",
+    title: "Собери предложение",
+    description: "Расположите слова, чтобы составить предложение",
+    icon: <FiBookOpen className="w-5 h-5 text-emerald-500" />,
   },
   {
     type: "word_search",

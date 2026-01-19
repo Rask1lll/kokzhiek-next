@@ -241,7 +241,14 @@ const LayoutPlaceholder = ({
       case "order":
         widgetContent = (
           <TaskBlockWrapper widgetId={widget.id}>
-            <Order widgetId={widget.id} />
+            <Order widgetId={widget.id} questionType="order" />
+          </TaskBlockWrapper>
+        );
+        break;
+      case "sentence_order":
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <Order widgetId={widget.id} questionType="sentence_order" />
           </TaskBlockWrapper>
         );
         break;
