@@ -370,11 +370,14 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         }
 
         const questionId = currentQuestion.id;
-        const timer = setTimeout(() => {
-          update(questionId, {
+        const timer = setTimeout(async () => {
+          const updated = await update(questionId, {
             options,
             data: { shuffle: data.shuffleInOpiq },
           });
+          if (updated) {
+            setCurrentQuestion(updated);
+          }
           answerDebounceTimersRef.current.delete(timerKey);
         }, 500);
 
@@ -384,6 +387,10 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         update(currentQuestion.id, {
           options,
           data: { shuffle: data.shuffleInOpiq },
+        }).then((updated) => {
+          if (updated) {
+            setCurrentQuestion(updated);
+          }
         });
       }
     },
@@ -447,11 +454,14 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         }
 
         const questionId = currentQuestion.id;
-        const timer = setTimeout(() => {
-          update(questionId, {
+        const timer = setTimeout(async () => {
+          const updated = await update(questionId, {
             options,
             data: { shuffle: data.shuffleInOpiq },
           });
+          if (updated) {
+            setCurrentQuestion(updated);
+          }
           cellDebounceTimersRef.current.delete(timerKey);
         }, 500);
 
@@ -461,6 +471,10 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         update(currentQuestion.id, {
           options,
           data: { shuffle: data.shuffleInOpiq },
+        }).then((updated) => {
+          if (updated) {
+            setCurrentQuestion(updated);
+          }
         });
       }
     },
@@ -653,42 +667,39 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                   }}
                   className="hidden"
                 />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const input = fileInputRefs.current.get(
-                      `answer-${pair.id}`
-                    );
-                    input?.click();
-                  }}
-                  className={`flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors ${
-                    pair.answer.imageUrl
-                      ? "bg-pink-100 text-pink-600"
-                      : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                  }`}
-                >
-                  <FiImage className="w-3 h-3" />
-                  {pair.answer.imageUrl
-                    ? t("removeImage")
-                    : t("addImage")}
-                </button>
+                {!pair.answer.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = fileInputRefs.current.get(
+                        `answer-${pair.id}`
+                      );
+                      input?.click();
+                    }}
+                    className="flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  >
+                    <FiImage className="w-3 h-3" />
+                    {t("addImage")}
+                  </button>
+                )}
                 {pair.answer.imageUrl && (
                   <div className="relative mt-2">
-                    <div className="relative w-32 h-32 border border-slate-200 rounded-lg overflow-hidden">
+                    <div className="relative w-40 h-40 border-2 border-slate-300 rounded-lg overflow-hidden bg-slate-50">
                       <Image
                         src={pair.answer.imageUrl}
                         alt={pair.answer.text}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => handleImageDelete(pair.id, "answer")}
-                      className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                      className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
                       title={t("removeImage")}
                     >
-                      <FiTrash2 className="w-3 h-3" />
+                      <FiTrash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}
@@ -729,40 +740,37 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
                   }}
                   className="hidden"
                 />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const input = fileInputRefs.current.get(`cell-${pair.id}`);
-                    input?.click();
-                  }}
-                  className={`flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors ${
-                    pair.cell.imageUrl
-                      ? "bg-pink-100 text-pink-600"
-                      : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                  }`}
-                >
-                  <FiImage className="w-3 h-3" />
-                  {pair.cell.imageUrl
-                    ? t("removeImage")
-                    : t("addImage")}
-                </button>
+                {!pair.cell.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = fileInputRefs.current.get(`cell-${pair.id}`);
+                      input?.click();
+                    }}
+                    className="flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  >
+                    <FiImage className="w-3 h-3" />
+                    {t("addImage")}
+                  </button>
+                )}
                 {pair.cell.imageUrl && (
                   <div className="relative mt-2">
-                    <div className="relative w-32 h-32 border border-slate-200 rounded-lg overflow-hidden">
+                    <div className="relative w-40 h-40 border-2 border-slate-300 rounded-lg overflow-hidden bg-slate-50">
                       <Image
                         src={pair.cell.imageUrl}
                         alt={pair.cell.text}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => handleImageDelete(pair.id, "cell")}
-                      className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                      className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
                       title={t("removeImage")}
                     >
-                      <FiTrash2 className="w-3 h-3" />
+                      <FiTrash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}
