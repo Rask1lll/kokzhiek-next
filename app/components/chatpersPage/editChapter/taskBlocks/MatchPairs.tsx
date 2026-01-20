@@ -24,9 +24,13 @@ type PairItem = {
   };
 };
 
+type PairSizeMode = "small" | "medium" | "large" | "custom";
+
 type MatchPairsData = {
   pairs: PairItem[];
   shuffleInOpiq: boolean;
+  pairSizeMode?: PairSizeMode;
+  pairHeight?: number;
 };
 
 export default function MatchPairs({ widgetId }: MatchPairsProps) {
@@ -102,7 +106,10 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     const shuffleInOpiq =
       (currentQuestion.data as { shuffle?: boolean })?.shuffle ?? true;
 
-    return { pairs, shuffleInOpiq };
+    const pairSizeMode = (currentQuestion.data as { pairSizeMode?: PairSizeMode })?.pairSizeMode || "medium";
+    const pairHeight = (currentQuestion.data as { pairHeight?: number })?.pairHeight;
+
+    return { pairs, shuffleInOpiq, pairSizeMode, pairHeight };
   }, [currentQuestion]);
 
   useEffect(() => {
@@ -189,7 +196,12 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           ? {
               ...prev,
               options,
-              data: { ...prev.data, shuffle: newData.shuffleInOpiq },
+              data: {
+                ...prev.data,
+                shuffle: newData.shuffleInOpiq,
+                pairSizeMode: newData.pairSizeMode,
+                pairHeight: newData.pairHeight,
+              },
             }
           : null
       );
@@ -203,7 +215,11 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       const sendUpdate = () => {
         update(questionId, {
           options,
-          data: { shuffle: newData.shuffleInOpiq },
+          data: {
+            shuffle: newData.shuffleInOpiq,
+            pairSizeMode: newData.pairSizeMode,
+            pairHeight: newData.pairHeight,
+          },
         });
       };
 
@@ -572,7 +588,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
       </div>
 
       {/* Settings */}
-      <div className="flex flex-wrap items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+      <div className="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
@@ -586,6 +602,92 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
             {t("shuffleOptions")}
           </span>
         </label>
+
+        {/* Pair sizes */}
+        <div className="space-y-3 pt-2 border-t border-slate-200">
+          <span className="text-base md:text-lg lg:text-xl text-slate-600 block">
+            {t("pairSize")}
+          </span>
+          
+          {/* Size mode buttons */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                updateData({ ...data, pairSizeMode: "small" }, false)
+              }
+              className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                data.pairSizeMode === "small"
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {t("sizeSmall")}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                updateData({ ...data, pairSizeMode: "medium" }, false)
+              }
+              className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                data.pairSizeMode === "medium"
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {t("sizeMedium")}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                updateData({ ...data, pairSizeMode: "large" }, false)
+              }
+              className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                data.pairSizeMode === "large"
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {t("sizeLarge")}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                updateData({ ...data, pairSizeMode: "custom" }, false)
+              }
+              className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                data.pairSizeMode === "custom"
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {t("sizeCustom")}
+            </button>
+          </div>
+
+          {/* Custom height input (only shown when custom mode is selected) */}
+          {data.pairSizeMode === "custom" && (
+            <div className="flex items-center gap-2 pt-2">
+              <label className="text-sm md:text-base lg:text-lg text-slate-500">
+                {t("height")}:
+              </label>
+              <input
+                type="number"
+                min="100"
+                max="1000"
+                value={data.pairHeight || 200}
+                onChange={(e) =>
+                  updateData(
+                    { ...data, pairHeight: Number(e.target.value) || 200 },
+                    false
+                  )
+                }
+                className="w-20 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-slate-400">px</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Pairs list */}

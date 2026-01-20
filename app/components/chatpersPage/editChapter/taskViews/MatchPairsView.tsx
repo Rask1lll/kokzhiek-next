@@ -62,6 +62,29 @@ export default function MatchPairsView({
     [currentQuestion?.options]
   );
 
+  const pairSizeMode = (currentQuestion?.data as { pairSizeMode?: "small" | "medium" | "large" | "custom" })?.pairSizeMode || "medium";
+  const customHeight = (currentQuestion?.data as { pairHeight?: number })?.pairHeight;
+
+  // Get height based on mode (width stays full)
+  const getPairHeight = () => {
+    if (pairSizeMode === "custom" && customHeight) {
+      return customHeight;
+    }
+    
+    switch (pairSizeMode) {
+      case "small":
+        return 150;
+      case "medium":
+        return 200;
+      case "large":
+        return 300;
+      default:
+        return 200;
+    }
+  };
+
+  const pairHeight = getPairHeight();
+
   const data = useMemo((): { pairs: PairItem[] } => {
     if (!options.length) {
       return { pairs: [] };
@@ -267,7 +290,11 @@ export default function MatchPairsView({
                     <div
                       draggable={!answerIsMatched}
                       onDragStart={() => handleDragStart(answerForRow.id)}
-                      className={`w-full h-full min-h-[200px] px-2 py-1 rounded-lg border-2 transition-all flex flex-col ${
+                      style={{
+                        minHeight: `${pairHeight}px`,
+                        height: `${pairHeight}px`,
+                      }}
+                      className={`w-full px-2 py-1 rounded-lg border-2 transition-all flex flex-col ${
                         answerIsMatched
                           ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
                           : draggedAnswerId === answerForRow.id
@@ -277,12 +304,12 @@ export default function MatchPairsView({
                     >
                       <div className="flex flex-col items-center justify-center gap-2 flex-1">
                         {answerForRow.imageUrl && (
-                          <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 shrink-0">
+                          <div className="relative flex-1 w-full max-w-[80%] min-h-0">
                             <Image
                               src={answerForRow.imageUrl}
                               alt=""
                               fill
-                              className="object-cover rounded"
+                              className="object-contain rounded"
                               unoptimized
                             />
                           </div>
@@ -305,7 +332,11 @@ export default function MatchPairsView({
                   <div
                     onDragOver={handleDragOver}
                     onDrop={() => handleDrop(pair.id)}
-                    className={`w-full h-full min-h-[200px] p-4 rounded-lg border-2 transition-all flex flex-col ${
+                    style={{
+                      minHeight: `${pairHeight}px`,
+                      height: `${pairHeight}px`,
+                    }}
+                    className={`w-full p-4 rounded-lg border-2 transition-all flex flex-col ${
                       matchedAnswer
                         ? "bg-slate-100 border-slate-400"
                         : "bg-slate-50 border-slate-300 border-dashed hover:border-blue-400"
@@ -322,14 +353,14 @@ export default function MatchPairsView({
                             {t("constructor.removeMatch")}
                           </button>
                         </div>
-                        <div className="flex items-center justify-center gap-2 flex-1">
+                        <div className="flex flex-col items-center justify-center gap-2 flex-1">
                           {matchedAnswer.imageUrl && (
-                            <div className="relative w-20 h-20 md:w-40 md:h-40 lg:w-48 lg:h-48 shrink-0">
+                            <div className="relative flex-1 w-full max-w-[80%] min-h-0">
                               <Image
                                 src={matchedAnswer.imageUrl}
                                 alt=""
                                 fill
-                                className="object-cover rounded"
+                                className="object-contain rounded"
                                 unoptimized
                               />
                             </div>
@@ -341,14 +372,14 @@ export default function MatchPairsView({
                       </div>
                     ) : (
                       <div className="flex items-center justify-center flex-1">
-                        <div className="text-center">
+                        <div className="text-center w-full h-full flex flex-col items-center justify-center">
                           {pair.cell.imageUrl && (
-                            <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 mx-auto mb-2">
+                            <div className="relative flex-1 w-full max-w-[80%] min-h-0 mb-2">
                               <Image
                                 src={pair.cell.imageUrl}
                                 alt=""
                                 fill
-                                className="object-cover rounded"
+                                className="object-contain rounded"
                                 unoptimized
                               />
                             </div>
