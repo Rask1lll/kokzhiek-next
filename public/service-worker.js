@@ -1,4 +1,4 @@
-const CACHE_NAME = "kokzhiek-v1.03";
+const CACHE_NAME = "kokzhiek-v1.04";
 const BOOKS_PAGE = "/books";
 const BOOK_PAGE = "/books/book";
 const CHAPTER_PAGE = "/books/book/chapter";
