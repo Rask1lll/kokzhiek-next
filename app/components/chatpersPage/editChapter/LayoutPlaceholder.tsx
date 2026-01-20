@@ -7,6 +7,7 @@ import WidgetListModal from "./WidgetListModal";
 import HeadingWidget from "./widgetBlocks/HeadingWidget";
 import SubheadingWidget from "./widgetBlocks/SubheadingWidget";
 import TextWidget from "./widgetBlocks/TextWidget";
+import GlossaryTextWidget from "./widgetBlocks/GlossaryTextWidget";
 import QuoteWidget from "./widgetBlocks/QuoteWidget";
 import ListWidget from "./widgetBlocks/ListWidget";
 import GenericWidget from "./widgetBlocks/GenericWidget";
@@ -118,6 +119,18 @@ const LayoutPlaceholder = ({
       case "text":
         widgetContent = (
           <TextWidget value={textValue} onChange={handleChange} />
+        );
+        break;
+      case "glossary_text":
+        const glossaryData = widget.data as { content?: string; wordIds?: string[] } | undefined;
+        widgetContent = (
+          <GlossaryTextWidget
+            value={{
+              content: glossaryData?.content || "",
+              wordIds: glossaryData?.wordIds || [],
+            }}
+            onChange={(value) => updateWidget(widget.id, value)}
+          />
         );
         break;
       case "quote":

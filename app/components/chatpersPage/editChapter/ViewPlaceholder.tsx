@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import HeadingView from "./viewBlocks/HeadingView";
 import SubheadingView from "./viewBlocks/SubheadingView";
 import TextView from "./viewBlocks/TextView";
+import GlossaryTextView from "./viewBlocks/GlossaryTextView";
 import QuoteView from "./viewBlocks/QuoteView";
 import ListView from "./viewBlocks/ListItemView";
 import ImageView from "./viewBlocks/ImageView";
@@ -59,6 +60,17 @@ export default function ViewPlaceholder({
       break;
     case "text":
       content = <TextView value={textValue} />;
+      break;
+    case "glossary_text":
+      const glossaryData = widget.data as { content?: string; wordIds?: string[] } | undefined;
+      content = (
+        <GlossaryTextView
+          value={{
+            content: glossaryData?.content || "",
+            wordIds: glossaryData?.wordIds || [],
+          }}
+        />
+      );
       break;
     case "quote":
       content = <QuoteView value={textValue} />;

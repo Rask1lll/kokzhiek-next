@@ -654,5 +654,22 @@
     "borderStyleDotted": "Точечная",
     "borderStyleNone": "Нет",
     "resetBorder": "Сбросить границу"
+  },
+  "glossary": {
+    "addWord": "Добавить слово в глоссарий",
+    "editWord": "Редактировать слово",
+    "word": "Слово",
+    "translation": "Перевод",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "selectWord": "Выделите слово для добавления в глоссарий",
+    "glossaryWords": "Слова в глоссарии",
+    "enterText": "Введите текст...",
+    "saving": "Сохранение...",
+    "errorSavingWord": "Ошибка при сохранении слова",
+    "errorDeletingWord": "Ошибка при удалении слова",
+    "confirmDeleteWord": "Вы уверены, что хотите удалить это слово из глоссария?"
   }
 }

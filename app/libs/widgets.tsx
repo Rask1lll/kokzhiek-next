@@ -8,6 +8,7 @@ import {
   FiCode,
   FiMinus,
   FiGlobe,
+  FiBookOpen,
 } from "react-icons/fi";
 export const widgets = [
   {
@@ -27,6 +28,12 @@ export const widgets = [
     title: "Текст",
     description: "Обычный параграф текста",
     icon: <FiAlignLeft className="w-5 h-5 text-sky-500" />,
+  },
+  {
+    type: "glossary_text",
+    title: "Текст с глоссарием",
+    description: "Текст с интерактивными переводами слов",
+    icon: <FiBookOpen className="w-5 h-5 text-purple-500" />,
   },
   {
     type: "quote",

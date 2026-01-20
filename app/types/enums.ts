@@ -19,6 +19,7 @@ export enum WidgetType {
   HEADING = "heading",
   SUBHEADING = "subheading",
   TEXT = "text",
+  GLOSSARY_TEXT = "glossary_text",
   QUOTE = "quote",
   LIST = "list",
   IMAGE = "image",

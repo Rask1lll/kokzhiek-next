@@ -655,5 +655,22 @@
     "borderStyleDotted": "Нүктелі",
     "borderStyleNone": "Жоқ",
     "resetBorder": "Шекараны қалпына келтіру"
+  },
+  "glossary": {
+    "addWord": "Глоссарийге сөз қосу",
+    "editWord": "Сөзді өңдеу",
+    "word": "Сөз",
+    "translation": "Аударма",
+    "save": "Сақтау",
+    "cancel": "Болдырмау",
+    "delete": "Жою",
+    "edit": "Өңдеу",
+    "selectWord": "Глоссарийге қосу үшін сөзді таңдаңыз",
+    "glossaryWords": "Глоссарийдегі сөздер",
+    "enterText": "Мәтінді енгізіңіз...",
+    "saving": "Сақталуда...",
+    "errorSavingWord": "Сөзді сақтау кезінде қате",
+    "errorDeletingWord": "Сөзді жою кезінде қате",
+    "confirmDeleteWord": "Бұл сөзді глоссарийден жоюға сенімдісіз бе?"
   }
 }
