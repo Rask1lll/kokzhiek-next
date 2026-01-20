@@ -8,6 +8,7 @@ import HeadingWidget from "./widgetBlocks/HeadingWidget";
 import SubheadingWidget from "./widgetBlocks/SubheadingWidget";
 import TextWidget from "./widgetBlocks/TextWidget";
 import GlossaryTextWidget from "./widgetBlocks/GlossaryTextWidget";
+import GlossaryView from "./viewBlocks/GlossaryView";
 import QuoteWidget from "./widgetBlocks/QuoteWidget";
 import ListWidget from "./widgetBlocks/ListWidget";
 import GenericWidget from "./widgetBlocks/GenericWidget";
@@ -131,6 +132,14 @@ const LayoutPlaceholder = ({
             }}
             onChange={(value) => updateWidget(widget.id, value)}
           />
+        );
+        break;
+      case "glossary":
+        // Glossary widget shows all words from book glossary - no editor needed
+        widgetContent = (
+          <div className="w-full p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <GlossaryView value={widget.data} />
+          </div>
         );
         break;
       case "quote":

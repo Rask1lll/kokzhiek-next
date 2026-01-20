@@ -36,6 +36,12 @@ export const widgets = [
     icon: <FiBookOpen className="w-5 h-5 text-purple-500" />,
   },
   {
+    type: "glossary",
+    title: "Словарь",
+    description: "Полный список всех слов глоссария, отсортированный по алфавиту",
+    icon: <FiBookOpen className="w-5 h-5 text-indigo-600" />,
+  },
+  {
     type: "quote",
     title: "Цитата",
     description: "Выделенная цитата или важная мысль",

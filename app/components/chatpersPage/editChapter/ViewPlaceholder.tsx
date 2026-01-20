@@ -8,6 +8,7 @@ import HeadingView from "./viewBlocks/HeadingView";
 import SubheadingView from "./viewBlocks/SubheadingView";
 import TextView from "./viewBlocks/TextView";
 import GlossaryTextView from "./viewBlocks/GlossaryTextView";
+import GlossaryView from "./viewBlocks/GlossaryView";
 import QuoteView from "./viewBlocks/QuoteView";
 import ListView from "./viewBlocks/ListItemView";
 import ImageView from "./viewBlocks/ImageView";
@@ -71,6 +72,9 @@ export default function ViewPlaceholder({
           }}
         />
       );
+      break;
+    case "glossary":
+      content = <GlossaryView value={widget.data} />;
       break;
     case "quote":
       content = <QuoteView value={textValue} />;
