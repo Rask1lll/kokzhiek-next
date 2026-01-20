@@ -29,6 +29,25 @@ export default function TaskViewWrapper({
   const hint = (currentQuestion?.data as { hint?: string })?.hint || "";
   const imageUrl = currentQuestion?.image_url;
   const body = currentQuestion?.body || "";
+  const conditionalSign =
+    currentQuestion?.data &&
+    typeof currentQuestion.data === "object" &&
+    "conditionalSign" in currentQuestion.data &&
+    typeof currentQuestion.data.conditionalSign === "string"
+      ? currentQuestion.data.conditionalSign
+      : "";
+  const conditionalSignMode =
+    currentQuestion?.data &&
+    typeof currentQuestion.data === "object" &&
+    "conditionalSignMode" in currentQuestion.data &&
+    typeof (currentQuestion.data as { conditionalSignMode?: string })
+      .conditionalSignMode === "string"
+      ? (
+          currentQuestion.data as {
+            conditionalSignMode?: string;
+          }
+        ).conditionalSignMode
+      : "absolute";
   const { showAlert } = useAlert();
 
   useEffect(() => {
@@ -92,30 +111,81 @@ export default function TaskViewWrapper({
       <div
         className={`relative mb-2 z-10 wrap-anywhere ${imageUrl ? "p-4" : ""}`}
       >
-        {/* Header with question body and hint button */}
-        <div className="flex items-start justify-between gap-4 mb-4">
-          {showQuestionBody && body && (
-            <div className="flex-1">
-              <div className="text-lg font-medium text-gray-800">{body}</div>
-            </div>
-          )}
-          {hint && (
-            <button
-              type="button"
-              onClick={() => {
-                showAlert(hint, "hint", 10000);
-              }}
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-purple-700 hover:bg-purple-200 shrink-0"
-              title="Показать подсказку"
-            >
-              <FiHelpCircle className="w-4 h-4" />
-              <span>Подсказка</span>
-            </button>
-          )}
-        </div>
+        {/* Absolute mode: знак слева, выпирает за контент */}
+        {conditionalSignMode === "absolute" && conditionalSign && (
+          <span className="absolute -left-8 top-0 text-2xl font-semibold text-gray-700">
+            {conditionalSign}
+          </span>
+        )}
 
-        {/* Task content */}
-        {children}
+        {conditionalSignMode === "absolute" ? (
+          // Обычный контент, знак позиционируется абсолютно
+          <div>
+            {/* Header with question body and hint button */}
+            <div className="flex items-start justify-between gap-4 mb-4">
+              {showQuestionBody && body && (
+                <div className="flex-1">
+                  <div className="text-lg font-medium text-gray-800">
+                    {body}
+                  </div>
+                </div>
+              )}
+              {hint && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    showAlert(hint, "hint", 10000);
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-purple-700 hover:bg-purple-200 shrink-0"
+                  title="Показать подсказку"
+                >
+                  <FiHelpCircle className="w-4 h-4" />
+                  <span>Подсказка</span>
+                </button>
+              )}
+            </div>
+
+            {/* Task content */}
+            {children}
+          </div>
+        ) : (
+          // Inline mode: знак стоит в одной строке с контентом
+          <div className="flex items-start gap-2">
+            {conditionalSign && (
+              <span className="text-2xl font-semibold text-gray-700 flex-shrink-0">
+                {conditionalSign}
+              </span>
+            )}
+            <div className="flex-1">
+              {/* Header with question body and hint button */}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                {showQuestionBody && body && (
+                  <div className="flex-1">
+                    <div className="text-lg font-medium text-gray-800">
+                      {body}
+                    </div>
+                  </div>
+                )}
+                {hint && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      showAlert(hint, "hint", 10000);
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-purple-700 hover:bg-purple-200 shrink-0"
+                    title="Показать подсказку"
+                  >
+                    <FiHelpCircle className="w-4 h-4" />
+                    <span>Подсказка</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Task content */}
+              {children}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

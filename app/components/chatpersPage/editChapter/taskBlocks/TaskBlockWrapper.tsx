@@ -180,6 +180,24 @@ export default function TaskBlockWrapper({
     setShowSignModal(false);
   };
 
+  const handleSignModeChange = (mode: "inline" | "absolute") => {
+    if (!currentQuestion?.id) return;
+
+    const newData = {
+      ...currentQuestion.data,
+      conditionalSignMode: mode,
+    };
+
+    setCurrentQuestion((prev) => (prev ? { ...prev, data: newData } : null));
+
+    const questionId = currentQuestion.id;
+    if (!questionId) return;
+
+    update(questionId, {
+      data: newData,
+    });
+  };
+
   const handleSignDelete = () => {
     handleSignSelect("");
   };
@@ -256,6 +274,18 @@ export default function TaskBlockWrapper({
     typeof currentQuestion.data.conditionalSign === "string"
       ? currentQuestion.data.conditionalSign
       : "";
+  const conditionalSignMode =
+    currentQuestion.data &&
+    typeof currentQuestion.data === "object" &&
+    "conditionalSignMode" in currentQuestion.data &&
+    typeof (currentQuestion.data as { conditionalSignMode?: string })
+      .conditionalSignMode === "string"
+      ? (
+          currentQuestion.data as {
+            conditionalSignMode?: string;
+          }
+        ).conditionalSignMode
+      : "absolute";
 
   return (
     <div
@@ -495,6 +525,37 @@ export default function TaskBlockWrapper({
               </button>
             </div>
           )}
+
+          {/* Conditional sign position mode */}
+          {conditionalSign && (
+            <div className="ml-4 flex flex-col gap-1 text-xs text-slate-600">
+              <span>Расположение:</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className={`px-2 py-1 rounded border text-xs ${
+                    conditionalSignMode === "inline"
+                      ? "bg-green-100 border-green-300 text-green-800"
+                      : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
+                  }`}
+                  onClick={() => handleSignModeChange("inline")}
+                >
+                  В строке
+                </button>
+                <button
+                  type="button"
+                  className={`px-2 py-1 rounded border text-xs ${
+                    conditionalSignMode === "absolute"
+                      ? "bg-green-100 border-green-300 text-green-800"
+                      : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
+                  }`}
+                  onClick={() => handleSignModeChange("absolute")}
+                >
+                  Слева
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Hint input */}
@@ -536,17 +597,26 @@ export default function TaskBlockWrapper({
         </div>
       </div>
 
-      {/* Conditional sign display */}
-      {conditionalSign && (
-        <div className="mb-2 flex items-center">
-          <span className="text-2xl font-semibold text-gray-700 mr-2">
-            {conditionalSign}
-          </span>
+      {/* Task content with conditional sign */}
+      {conditionalSignMode === "absolute" ? (
+        <div className="relative">
+          {conditionalSign && (
+            <span className="absolute -left-8 top-0 text-2xl font-semibold text-gray-700">
+              {conditionalSign}
+            </span>
+          )}
+          <div>{children}</div>
+        </div>
+      ) : (
+        <div className="flex items-start gap-2">
+          {conditionalSign && (
+            <span className="text-2xl font-semibold text-gray-700 flex-shrink-0">
+              {conditionalSign}
+            </span>
+          )}
+          <div className="flex-1">{children}</div>
         </div>
       )}
-
-      {/* Task content */}
-      {children}
     </div>
   );
 }
