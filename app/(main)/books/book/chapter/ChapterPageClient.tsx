@@ -177,7 +177,7 @@ export default function ChapterPageClient() {
   const activeBlock = activeId ? blocks.find((b) => b.id === activeId) : null;
 
   return (
-    <div className="min-h-screen w-screen mt-20 flex flex-col items-center py-10">
+    <div className="h-screen w-screen mt-20 flex flex-col items-center py-10 overflow-y-auto chapter-scrollbar">
       <div className="2xl:w-5/6 w-full space-y-1">
         <DndContext
           sensors={sensors}
