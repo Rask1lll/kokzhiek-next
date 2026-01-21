@@ -2,6 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import CreateBlock from "@/app/components/chatpersPage/CreateBlock";
 import LayoutsList from "@/app/components/chatpersPage/editChapter/LayoutsList";
@@ -12,6 +30,7 @@ import { useBlocks } from "@/app/hooks/useBlocks";
 import { useChapterPresence } from "@/app/hooks/useChapterPresence";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isAuthor } from "@/app/libs/roles";
+import { Block } from "@/app/types/block";
 
 export function ChapterPageSkeleton() {
   return (
@@ -30,6 +49,50 @@ export function ChapterPageSkeleton() {
   );
 }
 
+// Sortable block wrapper component
+function SortableBlock({ block, isEditMode }: { block: Block; isEditMode: boolean }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: block.id, disabled: !isEditMode });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1,
+    zIndex: isDragging ? 1000 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`
+        bg-white flex w-full gap-2 rounded-lg p-1 cursor-default group
+        ${isDragging ? "shadow-2xl ring-2 ring-blue-400" : ""}
+      `}
+    >
+      <Layout
+        block={block}
+        dragHandleProps={isEditMode ? { ...attributes, ...listeners } : undefined}
+      />
+    </div>
+  );
+}
+
+// Drag overlay component - follows cursor during drag
+function DragOverlayContent({ block }: { block: Block }) {
+  return (
+    <div className="bg-white flex w-full gap-2 rounded-lg p-1 shadow-2xl ring-2 ring-blue-400 opacity-90 scale-[0.93] transition-transform">
+      <Layout block={block} />
+    </div>
+  );
+}
+
 export default function ChapterPageClient() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get("book");
@@ -42,8 +105,19 @@ export default function ChapterPageClient() {
   const { user } = useAuth();
   const { joinChapter, leaveChapter } = useChapterPresence(user);
 
-  const [draggedId, setDraggedId] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const [activeId, setActiveId] = useState<number | null>(null);
+
+  // Configure sensors for drag detection
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement before drag starts
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Отправляем join при входе в главу, leave при выходе (только для авторов)
   useEffect(() => {
@@ -69,33 +143,21 @@ export default function ChapterPageClient() {
     );
   };
 
-  const handleDragStart = (id: number, e: React.DragEvent<HTMLDivElement>) => {
-    if (!isEditMode) {
-      console.log("eeee");
-      e.preventDefault();
-      return;
-    }
-    setIsDragging(true);
-    setDraggedId(id);
-    console.log(id);
-    e.dataTransfer.effectAllowed = "move";
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    if (!isEditMode) {
-      e.preventDefault();
-      return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (over && active.id !== over.id) {
+      swapBlocks(active.id as number, over.id as number);
     }
-    e.preventDefault();
   };
 
-  const handleDrop = (targetId: number) => {
-    if (!isEditMode) return;
-    if (!draggedId || draggedId === targetId) return;
-
-    swapBlocks(draggedId, targetId);
-    setDraggedId(null);
-    setIsDragging(false);
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
 
   if (!bookId || !chapterId) {
@@ -112,30 +174,40 @@ export default function ChapterPageClient() {
     return <ChapterPageSkeleton />;
   }
 
+  const activeBlock = activeId ? blocks.find((b) => b.id === activeId) : null;
+
   return (
     <div className="min-h-screen w-screen mt-20 flex flex-col items-center py-10">
-      {/* <div className="w-5/6 space-y-6"> */}
       <div className="2xl:w-5/6 w-full space-y-1">
-        {blocks.map((block) => (
-          <div
-            key={block.id}
-            draggable={isDragging}
-            onDragOver={handleDragOver}
-            onDrop={() => {
-              console.log(!!draggedId);
-              console.log("droped");
-              handleDrop(block.id);
-            }}
-            className={`bg-white flex w-full gap-2 rounded-lg p-1 cursor-default group`}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <SortableContext
+            items={blocks.map((b) => b.id)}
+            strategy={verticalListSortingStrategy}
           >
-            <Layout
-              block={block}
-              handleDrop={handleDrop}
-              handleDragStart={handleDragStart}
-              handleDragOver={handleDragOver}
-            />
-          </div>
-        ))}
+            {blocks.map((block) => (
+              <SortableBlock
+                key={block.id}
+                block={block}
+                isEditMode={isEditMode}
+              />
+            ))}
+          </SortableContext>
+
+          {/* Drag overlay - the element that follows cursor */}
+          <DragOverlay adjustScale={false} dropAnimation={{
+            duration: 300,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+          }}>
+            {activeBlock ? <DragOverlayContent block={activeBlock} /> : null}
+          </DragOverlay>
+        </DndContext>
+
         {isEditMode && <CreateBlock onClick={handleCreate} />}
       </div>
     </div>

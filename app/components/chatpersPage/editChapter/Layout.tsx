@@ -16,16 +16,12 @@ import {
 
 type LayoutProps = {
   block: Block;
-  handleDrop?: (targetId: number) => void;
-  handleDragStart?: (id: number, e: React.DragEvent<HTMLDivElement>) => void;
-  handleDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  dragHandleProps?: Record<string, unknown>;
 };
 
 export default function Layout({
   block,
-  handleDrop,
-  handleDragStart,
-  handleDragOver,
+  dragHandleProps,
 }: LayoutProps) {
   const { layout_type, widgets, id, style } = block;
   const columnsCount = getColumnsCount(layout_type);
@@ -155,16 +151,10 @@ export default function Layout({
           onDelete={handleDelete}
         />
         <div
-          draggable={true}
-          onDragStart={(e) => {
-            e.stopPropagation();
-            if (handleDragStart) {
-              handleDragStart(block.id, e);
-            }
-          }}
-          className="flex p-1 cursor-move items-center"
+          {...dragHandleProps}
+          className="flex p-1 cursor-grab active:cursor-grabbing items-center transition-all duration-150 hover:scale-110 hover:bg-gray-100 rounded"
         >
-          <div className="text-gray-400 hover:text-gray-600">
+          <div className="text-gray-400 hover:text-blue-500 transition-colors">
             <PiDotsNine className="w-6 h-6" />
           </div>
         </div>
@@ -176,7 +166,10 @@ export default function Layout({
   if (columnsCount === 1) {
     const columnWidgets = groupedWidgets.get(0) || [];
     return (
-      <div className="flex group/block w-full" ref={layOurRef}>
+      <div
+        className="flex group/block w-full"
+        ref={layOurRef}
+      >
         <div
           className={`w-full rounded-md transition-colors ${hasCustomBorder ? '' : 'ring ring-gray-300'}`}
           style={getBlockStyles()}
@@ -195,7 +188,10 @@ export default function Layout({
 
   // Multi-column layout
   return (
-    <div className="flex group/block w-full" ref={layOurRef}>
+    <div
+      className="flex group/block w-full"
+      ref={layOurRef}
+    >
       <div
         data-layout-container
         className={`w-full flex rounded-md transition-colors overflow-hidden ${hasCustomBorder ? '' : 'ring ring-gray-300'}`}
