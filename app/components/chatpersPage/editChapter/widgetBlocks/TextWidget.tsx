@@ -217,9 +217,10 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
         onSelect={handleSelectionChange}
         onKeyUp={handleSelectionChange}
         onMouseUp={handleSelectionChange}
-        className="w-full text-wrap wrap-anywhere min-h-[80px] outline-none text-gray-800 prose prose-sm max-w-none
+        className="w-full text-wrap wrap-anywhere min-h-[80px] p-2 outline-none text-gray-800 prose prose-sm max-w-none
           *:my-1 [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
-          focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400"
+          focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400
+          cursor-text"
         data-placeholder="Введите текст..."
         suppressContentEditableWarning
       />
