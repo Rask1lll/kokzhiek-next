@@ -1,16 +1,17 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useCallback, useEffect, Fragment } from "react";
 import { Block } from "@/app/types/block";
 import { useSearchParams } from "next/navigation";
 import { useBlocks } from "@/app/hooks/useBlocks";
 import { PiDotsNine } from "react-icons/pi";
 import BlockMenu from "./BlockMenu";
 import Column from "./Column";
+import ColumnResizer from "./ColumnResizer";
 import {
   getColumnsCount,
-  getColumnClasses,
   groupWidgetsByColumn,
+  getDefaultColumnWidths,
 } from "./layoutUtils";
 
 type LayoutProps = {
@@ -35,6 +36,63 @@ export default function Layout({
   const layOurRef = useRef<HTMLDivElement | null>(null);
 
   const blockColor = style?.color || "";
+
+  // Получаем ширины колонок из style или используем дефолтные
+  const defaultWidths = getDefaultColumnWidths(layout_type);
+  const [columnWidths, setColumnWidths] = useState<number[]>(
+    style?.columnWidths || defaultWidths
+  );
+
+  // Синхронизируем с style когда он обновляется с бэка
+  useEffect(() => {
+    if (style?.columnWidths) {
+      setColumnWidths(style.columnWidths);
+    }
+  }, [style?.columnWidths]);
+
+  // Минимальная ширина колонки в процентах
+  const MIN_COLUMN_WIDTH = 15;
+
+  // Обработчик изменения ширины при перетаскивании
+  const handleResize = useCallback(
+    (resizerIndex: number, deltaPercent: number) => {
+      setColumnWidths((prev) => {
+        const newWidths = [...prev];
+        const leftCol = resizerIndex;
+        const rightCol = resizerIndex + 1;
+
+        // Вычисляем новые ширины
+        let newLeftWidth = newWidths[leftCol] + deltaPercent;
+        let newRightWidth = newWidths[rightCol] - deltaPercent;
+
+        // Применяем минимальные ограничения
+        if (newLeftWidth < MIN_COLUMN_WIDTH) {
+          newRightWidth += newLeftWidth - MIN_COLUMN_WIDTH;
+          newLeftWidth = MIN_COLUMN_WIDTH;
+        }
+        if (newRightWidth < MIN_COLUMN_WIDTH) {
+          newLeftWidth += newRightWidth - MIN_COLUMN_WIDTH;
+          newRightWidth = MIN_COLUMN_WIDTH;
+        }
+
+        // Проверяем, что обе колонки остаются в допустимых пределах
+        if (newLeftWidth >= MIN_COLUMN_WIDTH && newRightWidth >= MIN_COLUMN_WIDTH) {
+          newWidths[leftCol] = newLeftWidth;
+          newWidths[rightCol] = newRightWidth;
+        }
+
+        return newWidths;
+      });
+    },
+    []
+  );
+
+  // Сохранение при завершении перетаскивания
+  const handleResizeEnd = useCallback(() => {
+    // Округляем до 1 знака после запятой
+    const roundedWidths = columnWidths.map((w) => Math.round(w * 10) / 10);
+    updateStyle(id, { ...style, columnWidths: roundedWidths });
+  }, [columnWidths, id, style, updateStyle]);
 
   const handleColorChange = (color: string) => {
     updateStyle(id, { ...style, color });
@@ -88,7 +146,7 @@ export default function Layout({
     if (!isEdit) return null;
 
     return (
-      <div className="absolute top-2 -right-[40px] opacity-100 transition-opacity">
+      <div className="flex-shrink-0 flex flex-col items-center ml-2">
         <BlockMenu
           currentColor={blockColor}
           currentStyle={style}
@@ -104,10 +162,10 @@ export default function Layout({
               handleDragStart(block.id, e);
             }
           }}
-          className="flex p-2 flex-col justify-between cursor-move items-center"
+          className="flex p-1 cursor-move items-center"
         >
-          <div className="flex flex-col gap-0 justify-center text-gray-400 hover:text-gray-600">
-            <PiDotsNine className="h-full w-7" />
+          <div className="text-gray-400 hover:text-gray-600">
+            <PiDotsNine className="w-6 h-6" />
           </div>
         </div>
       </div>
@@ -130,52 +188,46 @@ export default function Layout({
             className=""
           />
         </div>
-        {isEdit && (
-          <div
-            draggable
-            onDragStart={(e) => {
-              handleDragStart && handleDragStart(block.id, e);
-            }}
-            onDragOver={handleDragOver}
-            onDrop={() => handleDrop && handleDrop(block.id)}
-            className="top-2 right-[-40px] opacity-100 transition-opacity"
-          >
-            <BlockMenu
-              currentColor={blockColor}
-              currentStyle={style}
-              onColorChange={handleColorChange}
-              onStyleChange={handleStyleChange}
-              onDelete={handleDelete}
-            />
-            <div className="flex flex-col justify-between items-center gap-1">
-              <div className="flex flex-col justify-center gap-0 text-gray-400 hover:text-gray-600">
-                <PiDotsNine />
-              </div>
-            </div>
-          </div>
-        )}
+        {renderEditControls()}
       </div>
     );
   }
 
   // Multi-column layout
   return (
-    <div className="relative flex group/block w-full" ref={layOurRef}>
+    <div className="flex group/block w-full" ref={layOurRef}>
       <div
-        className={`w-full flex rounded-md transition-colors ${hasCustomBorder ? '' : 'ring ring-gray-300'}`}
+        data-layout-container
+        className={`w-full flex rounded-md transition-colors overflow-hidden ${hasCustomBorder ? '' : 'ring ring-gray-300'}`}
         style={getBlockStyles()}
       >
         {Array.from({ length: columnsCount }).map((_, colIndex) => {
-          const columnWidgets = groupedWidgets.get(colIndex) || [];
-          const columnClass = getColumnClasses(layout_type, colIndex);
+          const colWidgets = groupedWidgets.get(colIndex) || [];
+          const widthPercent = columnWidths[colIndex] || 100 / columnsCount;
+          const isLastColumn = colIndex === columnsCount - 1;
+
           return (
-            <div key={colIndex} className={`${columnClass} p-0.5 mb-2`}>
-              <Column
-                blockId={id}
-                columnIndex={colIndex}
-                widgets={columnWidgets}
-              />
-            </div>
+            <Fragment key={colIndex}>
+              {/* Колонка */}
+              <div
+                className="p-0.5 mb-2 min-w-0"
+                style={{ flex: `${widthPercent} 0 0%` }}
+              >
+                <Column
+                  blockId={id}
+                  columnIndex={colIndex}
+                  widgets={colWidgets}
+                />
+              </div>
+
+              {/* Resizer между колонками (только в режиме редактирования) */}
+              {isEdit && !isLastColumn && (
+                <ColumnResizer
+                  onResize={(delta) => handleResize(colIndex, delta)}
+                  onResizeEnd={handleResizeEnd}
+                />
+              )}
+            </Fragment>
           );
         })}
       </div>

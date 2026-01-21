@@ -1,5 +1,41 @@
 import { Widget } from "@/app/types/widget";
 
+// Получить дефолтные ширины колонок в процентах на основе layout_type
+export function getDefaultColumnWidths(layoutCode: string): number[] {
+  switch (layoutCode) {
+    case "left_wide":
+    case "hero":
+      return [70, 30];
+
+    case "right_wide":
+      return [30, 70];
+
+    case "sidebar_left":
+      return [25, 75];
+
+    case "sidebar_right":
+      return [75, 25];
+
+    case "two_equal":
+    case "split":
+    case "two_rows":
+      return [50, 50];
+
+    case "three_cols":
+    case "2-column":
+      return [33.33, 33.33, 33.34];
+
+    case "three_center_wide":
+      return [25, 50, 25];
+
+    case "four_cols":
+      return [25, 25, 25, 25];
+
+    default:
+      return [100];
+  }
+}
+
 export function getColumnsCount(layoutCode: string): number {
   switch (layoutCode) {
     case "full":

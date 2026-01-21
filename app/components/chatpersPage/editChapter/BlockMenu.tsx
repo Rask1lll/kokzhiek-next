@@ -185,10 +185,10 @@ export default function BlockMenu({
     <div className="relative mt-2" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1.5 hover:bg-gray-200 border border-gray-300 border-l-0 rounded-l-none rounded-md transition-colors"
+        className="p-1.5 hover:bg-gray-200 rounded-md transition-colors"
         title={t("blockMenu")}
       >
-        <CgOptions className="w-7 h-7 text-gray-500" />
+        <CgOptions className="w-6 h-6 text-gray-500" />
       </button>
 
       {isOpen && (

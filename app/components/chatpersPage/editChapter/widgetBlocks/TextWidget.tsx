@@ -124,7 +124,11 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
     <div className="w-full">
       {/* Toolbar */}
       <div
-        className={`flex items-center gap-1 mb-2 p-1 bg-gray-50 rounded-lg border border-gray-200 transition-opacity ${"opacity-100"}`}
+        className={`flex items-center gap-1 mb-2 p-1 bg-gray-50 rounded-lg border border-gray-200 transition-opacity overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent ${"opacity-100"}`}
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#d1d5db transparent'
+        }}
       >
         {/* Text formatting */}
         <div className="flex items-center gap-0.5 border-r border-gray-200 pr-2 mr-1">
