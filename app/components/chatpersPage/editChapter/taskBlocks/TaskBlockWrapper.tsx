@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useCallback, useRef, useState, useEffect } from "react";
-import { FiImage, FiTrash2, FiHelpCircle, FiType } from "react-icons/fi";
+import { FiImage, FiTrash2, FiHelpCircle, FiType, FiStar } from "react-icons/fi";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question } from "@/app/types/question";
@@ -29,8 +29,10 @@ export default function TaskBlockWrapper({
     Array.isArray(questions) && questions.length > 0 ? questions[0] : null
   );
   const [showHintInput, setShowHintInput] = useState(false);
+  const [showPointsInput, setShowPointsInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hintDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pointsDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [showBGModal, setShowBGModal] = useState(false);
   const [showSignModal, setShowSignModal] = useState(false);
   const [colorFilterTimeout, setColorFilterTimeout] =
@@ -237,11 +239,40 @@ export default function TaskBlockWrapper({
     [currentQuestion, update]
   );
 
+  const updatePoints = useCallback(
+    (points: number) => {
+      if (!currentQuestion?.id) return;
+
+      const validPoints = Math.max(0, Math.min(100, points));
+
+      // Update UI immediately
+      setCurrentQuestion((prev) => (prev ? { ...prev, points: validPoints } : null));
+
+      // Debounce server update
+      if (pointsDebounceTimerRef.current) {
+        clearTimeout(pointsDebounceTimerRef.current);
+      }
+
+      const questionId = currentQuestion.id;
+      pointsDebounceTimerRef.current = setTimeout(() => {
+        if (!questionId) return;
+
+        update(questionId, {
+          points: validPoints,
+        });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
   // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (hintDebounceTimerRef.current) {
         clearTimeout(hintDebounceTimerRef.current);
+      }
+      if (pointsDebounceTimerRef.current) {
+        clearTimeout(pointsDebounceTimerRef.current);
       }
       if (colorFilterTimeout) {
         clearTimeout(colorFilterTimeout);
@@ -592,6 +623,37 @@ export default function TaskBlockWrapper({
           {!showHintInput && hint && (
             <div className="flex-1 px-3 py-2 text-sm bg-purple-50 text-purple-700 rounded-lg border border-purple-200">
               {hint}
+            </div>
+          )}
+        </div>
+
+        {/* Points input */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowPointsInput(!showPointsInput)}
+            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+              currentQuestion.points > 0
+                ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-300"
+            }`}
+            title="Настроить очки"
+          >
+            <FiStar className="w-4 h-4" />
+            <span>{currentQuestion.points > 0 ? `${currentQuestion.points} очков` : "Очки"}</span>
+          </button>
+          {showPointsInput && (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={currentQuestion.points}
+                onChange={(e) => updatePoints(parseInt(e.target.value) || 0)}
+                className="w-20 px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                autoFocus
+              />
+              <span className="text-xs text-slate-500">макс. 100</span>
             </div>
           )}
         </div>
