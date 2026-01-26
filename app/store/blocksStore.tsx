@@ -20,8 +20,25 @@ type BlocksStore = {
   updateWidgetLocal: (widgetId: number, data: WidgetData) => void;
   removeWidgetLocal: (blockId: number, widgetId: number) => void;
 
+  // Container widget children methods
+  addChildWidgetLocal: (parentWidgetId: number, childWidget: Widget) => void;
+  removeChildWidgetLocal: (parentWidgetId: number, childWidgetId: number) => void;
+  updateChildWidgetLocal: (parentWidgetId: number, childWidgetId: number, data: WidgetData) => void;
+
   clearBlocks: () => void;
 };
+
+function widgetToLocal(w: Widget): Widget {
+  return {
+    id: w.id,
+    type: w.type,
+    data: w.data ?? {},
+    row: w.row ?? 0,
+    column: w.column ?? 0,
+    parent_id: w.parent_id,
+    children: w.children?.map(widgetToLocal),
+  };
+}
 
 function BlockToLocal(Block: Block): Block {
   return {
@@ -29,13 +46,7 @@ function BlockToLocal(Block: Block): Block {
     layout_type: Block.layout_type,
     order: Block.order,
     style: Block.style ?? {},
-    widgets: (Block.widgets || []).map((w) => ({
-      id: w.id,
-      type: w.type,
-      data: w.data ?? {},
-      row: w.row ?? 0,
-      column: w.column ?? 0,
-    })),
+    widgets: (Block.widgets || []).map(widgetToLocal),
   };
 }
 
@@ -133,6 +144,66 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
               widgets: block.widgets.filter((w) => w.id !== widgetId),
             }
       ),
+    })),
+
+  // Add child widget to a container widget
+  addChildWidgetLocal: (parentWidgetId, childWidget) =>
+    set((state) => ({
+      blocks: state.blocks.map((block) => ({
+        ...block,
+        widgets: block.widgets.map((w) =>
+          w.id !== parentWidgetId
+            ? w
+            : {
+                ...w,
+                children: [
+                  ...(w.children || []),
+                  {
+                    id: childWidget.id,
+                    type: childWidget.type,
+                    data: childWidget.data ?? {},
+                    row: childWidget.row ?? 0,
+                    column: childWidget.column ?? 0,
+                    parent_id: parentWidgetId,
+                  },
+                ],
+              }
+        ),
+      })),
+    })),
+
+  // Remove child widget from a container widget
+  removeChildWidgetLocal: (parentWidgetId, childWidgetId) =>
+    set((state) => ({
+      blocks: state.blocks.map((block) => ({
+        ...block,
+        widgets: block.widgets.map((w) =>
+          w.id !== parentWidgetId
+            ? w
+            : {
+                ...w,
+                children: (w.children || []).filter((c) => c.id !== childWidgetId),
+              }
+        ),
+      })),
+    })),
+
+  // Update child widget data
+  updateChildWidgetLocal: (parentWidgetId, childWidgetId, data) =>
+    set((state) => ({
+      blocks: state.blocks.map((block) => ({
+        ...block,
+        widgets: block.widgets.map((w) =>
+          w.id !== parentWidgetId
+            ? w
+            : {
+                ...w,
+                children: (w.children || []).map((c) =>
+                  c.id !== childWidgetId ? c : { ...c, data }
+                ),
+              }
+        ),
+      })),
     })),
 
   clearBlocks: () => set({ blocks: [], chapterId: null }),

@@ -1,10 +1,12 @@
 "use client";
 
-import { widgets } from "@/app/libs/widgets";
+import { widgets, containers } from "@/app/libs/widgets";
 import Button from "../../Button/Button";
 import { useState } from "react";
 import { tasks } from "@/app/libs/tasks";
 import { useTranslations } from "next-intl";
+
+type Category = "widget" | "task" | "container";
 
 type WidgetListModalProps = {
   onSelect?: (type: string) => void;
@@ -14,25 +16,40 @@ export default function WidgetListModal({ onSelect }: WidgetListModalProps) {
   const t = useTranslations("widgetModal");
   const tWidgets = useTranslations("widgetTypes");
   const tTasks = useTranslations("taskTypes");
-  const [listContent, setListContent] = useState(widgets);
-  const [isWidget, setIsWidget] = useState(true);
-  function typeChangeOnclick(value: string) {
-    setListContent(value === "widget" ? widgets : tasks);
-    setIsWidget(value === "widget");
-  }
+  const tContainers = useTranslations("containerTypes");
+  const [activeCategory, setActiveCategory] = useState<Category>("widget");
+
+  const getListContent = () => {
+    switch (activeCategory) {
+      case "widget":
+        return widgets;
+      case "task":
+        return tasks;
+      case "container":
+        return containers;
+    }
+  };
 
   const getTitle = (type: string) => {
-    if (isWidget) {
-      return tWidgets(type);
+    switch (activeCategory) {
+      case "widget":
+        return tWidgets(type);
+      case "task":
+        return tTasks(type);
+      case "container":
+        return tContainers(type);
     }
-    return tTasks(type);
   };
 
   const getDescription = (type: string) => {
-    if (isWidget) {
-      return tWidgets(`${type}Desc`);
+    switch (activeCategory) {
+      case "widget":
+        return tWidgets(`${type}Desc`);
+      case "task":
+        return tTasks(`${type}Desc`);
+      case "container":
+        return tContainers(`${type}Desc`);
     }
-    return tTasks(`${type}Desc`);
   };
 
   return (
@@ -40,40 +57,45 @@ export default function WidgetListModal({ onSelect }: WidgetListModalProps) {
       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
         {t("title")}
       </h2>
-      <p className="text-sm  text-gray-500">
-        {t("description")}
-      </p>
-      <div className="flex gap-4">
+      <p className="text-sm text-gray-500">{t("description")}</p>
+      <div className="flex gap-2 flex-wrap">
         <Button
           color="slate"
           content={t("widgets")}
           value="widget"
-          isActive={isWidget}
-          onClick={typeChangeOnclick}
+          isActive={activeCategory === "widget"}
+          onClick={() => setActiveCategory("widget")}
         />
         <Button
           color="slate"
           content={t("tasks")}
           value="task"
-          isActive={!isWidget}
-          onClick={typeChangeOnclick}
+          isActive={activeCategory === "task"}
+          onClick={() => setActiveCategory("task")}
+        />
+        <Button
+          color="slate"
+          content={t("containers")}
+          value="container"
+          isActive={activeCategory === "container"}
+          onClick={() => setActiveCategory("container")}
         />
       </div>
 
       <div className="mt-2 w-full space-y-2 max-h-[60vh] overflow-y-auto pr-1">
-        {listContent.map((widget) => (
+        {getListContent().map((item) => (
           <div
-            key={widget.type}
-            onClick={() => onSelect?.(widget.type)}
+            key={item.type}
+            onClick={() => onSelect?.(item.type)}
             className="flex w-full items-start gap-3 rounded-lg border border-gray-200 px-3 py-2 sm:px-4 sm:py-3 hover:border-blue-400 hover:bg-blue-50/60 cursor-pointer transition-colors duration-100"
           >
-            <div className="mt-0.5 shrink-0">{widget.icon}</div>
+            <div className="mt-0.5 shrink-0">{item.icon}</div>
             <div className="flex flex-col gap-1">
               <span className="font-semibold text-gray-800">
-                {getTitle(widget.type)}
+                {getTitle(item.type)}
               </span>
               <span className="text-xs sm:text-sm text-gray-500">
-                {getDescription(widget.type)}
+                {getDescription(item.type)}
               </span>
             </div>
           </div>

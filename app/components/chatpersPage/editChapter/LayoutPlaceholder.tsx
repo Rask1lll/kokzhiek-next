@@ -33,6 +33,8 @@ import Sort from "./taskBlocks/Sort";
 import Order from "./taskBlocks/Order";
 import DragDrop from "./taskBlocks/DragDrop";
 import TaskBlockWrapper from "./taskBlocks/TaskBlockWrapper";
+import TableWidget from "./widgetBlocks/TableWidget";
+import CarouselWidget from "./widgetBlocks/CarouselWidget";
 
 type LayoutPlaceholderProps = {
   className?: string;
@@ -279,6 +281,24 @@ const LayoutPlaceholder = ({
           <TaskBlockWrapper widgetId={widget.id}>
             <DragDrop widgetId={widget.id} />
           </TaskBlockWrapper>
+        );
+        break;
+      case "widget_table":
+        widgetContent = (
+          <TableWidget
+            widget={widget}
+            blockId={blockId}
+            onUpdate={(data) => updateWidget(widget.id, data)}
+          />
+        );
+        break;
+      case "widget_carousel":
+        widgetContent = (
+          <CarouselWidget
+            widget={widget}
+            blockId={blockId}
+            onUpdate={(data) => updateWidget(widget.id, data)}
+          />
         );
         break;
       default:

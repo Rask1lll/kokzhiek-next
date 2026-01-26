@@ -9,6 +9,8 @@ import {
   FiMinus,
   FiGlobe,
   FiBookOpen,
+  FiGrid,
+  FiLayers,
 } from "react-icons/fi";
 export const widgets = [
   {
@@ -88,5 +90,21 @@ export const widgets = [
     title: "Встраивание",
     description: "Встраивание внешнего контента через iframe",
     icon: <FiGlobe className="w-5 h-5 text-cyan-500" />,
+  },
+];
+
+// Контейнерные виджеты (таблица, карусель и т.д.)
+export const containers = [
+  {
+    type: "widget_table",
+    title: "Таблица",
+    description: "Таблица с ячейками для любого контента",
+    icon: <FiGrid className="w-5 h-5 text-orange-500" />,
+  },
+  {
+    type: "widget_carousel",
+    title: "Карусель",
+    description: "Слайдер с переключаемыми слайдами",
+    icon: <FiLayers className="w-5 h-5 text-violet-500" />,
   },
 ];

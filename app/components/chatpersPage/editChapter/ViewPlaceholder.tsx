@@ -17,6 +17,8 @@ import AudioView from "./viewBlocks/AudioView";
 import FormulaView from "./viewBlocks/FormulaView";
 import DividerView from "./viewBlocks/DividerView";
 import EmbedView from "./viewBlocks/EmbedView";
+import TableView from "./viewBlocks/TableView";
+import CarouselView from "./viewBlocks/CarouselView";
 
 // View components for tasks
 import MultipleChoiceView from "./taskViews/MultipleChoiceView";
@@ -143,6 +145,14 @@ export default function ViewPlaceholder({
       break;
     case "drag_drop":
       content = <DragDropView widgetId={widget.id} />;
+      break;
+
+    // Container widgets
+    case "widget_table":
+      content = <TableView widget={widget} />;
+      break;
+    case "widget_carousel":
+      content = <CarouselView widget={widget} />;
       break;
     default:
       content = (

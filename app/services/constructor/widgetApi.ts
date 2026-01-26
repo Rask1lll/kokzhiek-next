@@ -143,3 +143,55 @@ export async function swapWidgets(
   });
   return res.json();
 }
+
+// Create child widget inside a container (table or carousel)
+export async function createChildWidget(
+  blockId: number,
+  parentId: number,
+  type: string,
+  data: WidgetData = {},
+  row: number = 0,
+  column: number = 0
+): Promise<ConstructorResponse<Widget>> {
+  const body: Record<string, unknown> = {
+    type,
+    data,
+    row,
+    column,
+    parent_id: parentId,
+  };
+
+  const res = await fetch(`${API_BASE}/api/v1/blocks/${blockId}/widgets`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("createChildWidget failed:", res.status, errorText);
+    return {
+      data: null as unknown as Widget,
+      messages: [`HTTP ${res.status}: ${errorText}`],
+      success: false,
+    };
+  }
+
+  return res.json();
+}
+
+// Reorder children inside a container widget
+export async function reorderContainerChildren(
+  containerId: number,
+  childrenOrder: { id: number; row: number; column: number }[]
+): Promise<ConstructorResponse<Widget[]>> {
+  const res = await fetch(
+    `${API_BASE}/api/v1/widgets/${containerId}/children/reorder`,
+    {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(childrenOrder),
+    }
+  );
+  return res.json();
+}

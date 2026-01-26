@@ -554,7 +554,14 @@
     "title": "Виджет түрін таңдаңыз",
     "description": "Сізге сәйкес келетін элементті таңдаңыз. Бұл элементтерді таңдалған блоктың ішіне қосуға болады.",
     "widgets": "Виджеттер",
-    "tasks": "Тапсырмалар"
+    "tasks": "Тапсырмалар",
+    "containers": "Контейнерлер"
+  },
+  "containerTypes": {
+    "widget_table": "Кесте",
+    "widget_tableDesc": "Кез келген контент үшін ұяшықтары бар кесте",
+    "widget_carousel": "Карусель",
+    "widget_carouselDesc": "Ауыстырылатын слайдтары бар слайдер"
   },
   "widgetTypes": {
     "heading": "Тақырып",
@@ -654,7 +661,24 @@
     "borderStyleDashed": "Сызықты",
     "borderStyleDotted": "Нүктелі",
     "borderStyleNone": "Жоқ",
-    "resetBorder": "Шекараны қалпына келтіру"
+    "resetBorder": "Шекараны қалпына келтіру",
+    "addRow": "Жол қосу",
+    "addColumn": "Баған қосу",
+    "removeRow": "Жолды жою",
+    "removeColumn": "Бағанды жою",
+    "addSlide": "Слайд қосу",
+    "removeSlide": "Слайдты жою",
+    "addWidgetToSlide": "Слайдқа виджет қосу",
+    "tableBorderSettings": "Шекара параметрлері",
+    "tableBorderWidth": "Қалыңдығы",
+    "tableBorderStyle": "Стилі",
+    "tableBorderStyle_solid": "Тұтас",
+    "tableBorderStyle_dashed": "Сызықша",
+    "tableBorderStyle_dotted": "Нүктелі",
+    "tableBorderStyle_none": "Жоқ",
+    "tableBorderColor": "Түсі",
+    "tableCellPadding": "Шегініс",
+    "tableOuterBorder": "Сыртқы шекара"
   },
   "glossary": {
     "addWord": "Глоссарийге сөз қосу",

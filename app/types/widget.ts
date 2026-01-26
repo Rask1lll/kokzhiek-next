@@ -6,4 +6,6 @@ export type Widget = {
   row: number;
   column: number;
   data: WidgetData;
+  parent_id?: number | null;
+  children?: Widget[];
 };

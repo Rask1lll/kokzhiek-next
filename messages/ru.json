@@ -553,7 +553,14 @@
     "title": "Выберите тип виджета",
     "description": "Выберите элемент который вам подходит. Эти элементы можно добавлять внутрь выбранного блока.",
     "widgets": "Виджеты",
-    "tasks": "Задания"
+    "tasks": "Задания",
+    "containers": "Контейнеры"
+  },
+  "containerTypes": {
+    "widget_table": "Таблица",
+    "widget_tableDesc": "Таблица с ячейками для любого контента",
+    "widget_carousel": "Карусель",
+    "widget_carouselDesc": "Слайдер с переключаемыми слайдами"
   },
   "widgetTypes": {
     "heading": "Заголовок",
@@ -653,7 +660,24 @@
     "borderStyleDashed": "Пунктирная",
     "borderStyleDotted": "Точечная",
     "borderStyleNone": "Нет",
-    "resetBorder": "Сбросить рамку"
+    "resetBorder": "Сбросить рамку",
+    "addRow": "Добавить строку",
+    "addColumn": "Добавить колонку",
+    "removeRow": "Удалить строку",
+    "removeColumn": "Удалить колонку",
+    "addSlide": "Добавить слайд",
+    "removeSlide": "Удалить слайд",
+    "addWidgetToSlide": "Добавить виджет на слайд",
+    "tableBorderSettings": "Настройки рамки",
+    "tableBorderWidth": "Толщина",
+    "tableBorderStyle": "Стиль",
+    "tableBorderStyle_solid": "Сплошная",
+    "tableBorderStyle_dashed": "Пунктир",
+    "tableBorderStyle_dotted": "Точки",
+    "tableBorderStyle_none": "Нет",
+    "tableBorderColor": "Цвет",
+    "tableCellPadding": "Отступы",
+    "tableOuterBorder": "Внешняя рамка"
   },
   "glossary": {
     "addWord": "Добавить слово в глоссарий",

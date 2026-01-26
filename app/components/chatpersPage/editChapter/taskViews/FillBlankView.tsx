@@ -1,10 +1,55 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
 import { getNegativeFeedback, getPositiveFeedback } from "@/app/libs/feedback";
+
+// Auto-resizing input component
+function AutoWidthInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+}) {
+  const spanRef = useRef<HTMLSpanElement>(null);
+  const [width, setWidth] = useState(70); // минимальная ширина
+
+  useEffect(() => {
+    if (spanRef.current) {
+      const newWidth = Math.min(200, Math.max(70, spanRef.current.offsetWidth + 16));
+      setWidth(newWidth);
+    }
+  }, [value]);
+
+  return (
+    <span className="relative inline-block align-baseline">
+      {/* Скрытый span для измерения ширины текста */}
+      <span
+        ref={spanRef}
+        className="invisible absolute whitespace-pre text-base md:text-lg lg:text-xl"
+        aria-hidden="true"
+      >
+        {value || placeholder}
+      </span>
+      <input
+        type="text"
+        spellCheck={true}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{ width: `${width}px` }}
+        className={className}
+      />
+    </span>
+  );
+}
 
 type FillBlankViewProps = {
   widgetId: number;
@@ -93,17 +138,12 @@ export default function FillBlankView({
         const blankId = match[1];
         if (blanks.includes(blankId)) {
           return (
-            <input
+            <AutoWidthInput
               key={index}
-              spellCheck={true}
-              type="text"
               value={answers[blankId] || ""}
-              onChange={(e) => {
-                handleInput(blankId, e.target.value);
-                e.target.style.width = `${e.target.scrollWidth}px`;
-              }}
-              placeholder={"..."}
-              className="mx-1 px-2 py-0.5 w-28 text-center text-base md:text-lg lg:text-xl bg-white border-b-2 border-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
+              onChange={(val) => handleInput(blankId, val)}
+              placeholder="..."
+              className="mx-1 px-2 py-0.5 text-center text-base md:text-lg lg:text-xl bg-white border-b-2 border-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
             />
           );
         }
