@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Widget } from "@/app/types/widget";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import ViewPlaceholder from "../ViewPlaceholder";
@@ -37,7 +37,11 @@ export default function CarouselView({ widget }: CarouselViewProps) {
     setCurrentSlide((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
   }, [totalSlides]);
 
-  const currentSlideWidget = getWidgetAtSlide(currentSlide);
+  // Memoize slides array
+  const slidesArray = useMemo(
+    () => Array.from({ length: totalSlides }, (_, i) => i),
+    [totalSlides]
+  );
 
   return (
     <div className="w-full">
@@ -60,27 +64,42 @@ export default function CarouselView({ widget }: CarouselViewProps) {
           </>
         )}
 
-        {/* Slide content */}
-        <div className="min-h-[200px] p-4">
-          {currentSlideWidget ? (
-            <ViewPlaceholder widget={currentSlideWidget} />
-          ) : (
-            <div className="w-full h-full min-h-[200px] flex items-center justify-center text-gray-400">
-              {/* Empty slide */}
-            </div>
-          )}
+        {/* Slides container with animation */}
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
+            {slidesArray.map((slideIndex) => {
+              const slideWidget = getWidgetAtSlide(slideIndex);
+              return (
+                <div
+                  key={slideIndex}
+                  className="min-h-[200px] p-4 w-full flex-shrink-0"
+                >
+                  {slideWidget ? (
+                    <ViewPlaceholder widget={slideWidget} />
+                  ) : (
+                    <div className="w-full h-full min-h-[200px] flex items-center justify-center text-gray-400">
+                      {/* Empty slide */}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Dots indicator */}
         {totalSlides > 1 && (
           <div className="flex justify-center gap-2 pb-4">
-            {Array.from({ length: totalSlides }, (_, i) => (
+            {slidesArray.map((i) => (
               <button
                 key={i}
                 onClick={() => setCurrentSlide(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                   i === currentSlide
-                    ? "bg-blue-500"
+                    ? "bg-blue-500 scale-125"
                     : "bg-gray-300 hover:bg-gray-400"
                 }`}
               />
