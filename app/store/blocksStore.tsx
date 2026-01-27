@@ -125,14 +125,41 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
     }),
 
   updateWidgetLocal: (widgetId, data) =>
-    set((state) => ({
-      blocks: state.blocks.map((block) => ({
+    set((state) => {
+      let found = false;
+      const updatedBlocks = state.blocks.map((block) => ({
         ...block,
-        widgets: block.widgets.map((w) =>
-          w.id !== widgetId ? w : { ...w, data }
-        ),
-      })),
-    })),
+        widgets: block.widgets.map((w) => {
+          // Если это сам виджет - обновляем его
+          if (w.id === widgetId) {
+            found = true;
+            console.log(`[updateWidgetLocal] Found widget ${widgetId} in block.widgets`);
+            return { ...w, data };
+          }
+          // Если это контейнерный виджет - проверяем его дочерние виджеты
+          if (w.children && w.children.length > 0) {
+            const hasChild = w.children.some((child) => child.id === widgetId);
+            if (hasChild) {
+              found = true;
+              console.log(`[updateWidgetLocal] Found child widget ${widgetId} in parent widget ${w.id}`);
+            }
+            return {
+              ...w,
+              children: w.children.map((child) =>
+                child.id === widgetId ? { ...child, data } : child
+              ),
+            };
+          }
+          return w;
+        }),
+      }));
+
+      if (!found) {
+        console.warn(`[updateWidgetLocal] Widget ${widgetId} not found in any block!`);
+      }
+
+      return { blocks: updatedBlocks };
+    }),
 
   removeWidgetLocal: (blockId, widgetId) =>
     set((state) => ({

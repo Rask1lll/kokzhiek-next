@@ -76,6 +76,7 @@ const LayoutPlaceholder = ({
 
   const handleChange = (value: string) => {
     if (!widget) return;
+    console.log(`[LayoutPlaceholder] handleChange for widget ${widget.id}, parent_id: ${widget.parent_id}, blockId: ${blockId}`);
     updateWidget(widget.id, { ...widget.data, text: value });
   };
 
