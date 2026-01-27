@@ -316,6 +316,9 @@
     "strengthGood": "Хороший пароль",
     "strengthStrong": "Надёжный пароль"
   },
+  "constructor":{
+    "removeMatch":"Удалить пару"
+  },
   "adminUsersPage": {
     "title": "Управление пользователями",
     "searchPlaceholder": "Поиск по имени или email...",
@@ -590,7 +593,9 @@
     "embedRun": "Запустить",
     "embedEdit": "Редактировать",
     "glossary_text": "Текст с глоссарием",
-    "glossary_textDesc": "Текст с интерактивными переводами слов"
+    "glossary_textDesc": "Текст с интерактивными переводами слов",
+    "glossary": "Словарь",
+    "glossaryDesc": "Полный список всех слов глоссария, отсортированный по алфавиту"
   },
   "taskTypes": {
     "multiple_choice": "Несколько из списка",

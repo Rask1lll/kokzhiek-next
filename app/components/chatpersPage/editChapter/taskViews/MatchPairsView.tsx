@@ -336,15 +336,15 @@ export default function MatchPairsView({
                       minHeight: `${pairHeight}px`,
                       height: `${pairHeight}px`,
                     }}
-                    className={`w-full p-4 rounded-lg border-2 transition-all flex flex-col ${
+                    className={`w-full p-2 rounded-lg border-2 transition-all flex ${
                       matchedAnswer
                         ? "bg-slate-100 border-slate-400"
                         : "bg-slate-50 border-slate-300 border-dashed hover:border-blue-400"
                     }`}
                   >
                     {matchedAnswer ? (
-                      <div className="flex flex-col space-y-2 flex-1">
-                        <div className="flex items-center justify-end">
+                      <div className="flex flex-col flex-1">
+                        <div className="absolute">
                           <button
                             type="button"
                             onClick={() => handleRemoveMatch(matchedAnswer.id)}
@@ -353,7 +353,7 @@ export default function MatchPairsView({
                             {t("constructor.removeMatch")}
                           </button>
                         </div>
-                        <div className="flex flex-col items-center justify-center gap-2 flex-1">
+                        <div className="flex flex-col gap-2 flex-1">
                           {matchedAnswer.imageUrl && (
                             <div className="relative flex-1 w-full max-w-[80%] min-h-0">
                               <Image
@@ -372,6 +372,12 @@ export default function MatchPairsView({
                       </div>
                     ) : (
                       <div className="flex items-center justify-center flex-1">
+                        <div className="text-center bg-white w-full rounded-2xl ring ring-gray-300 h-full flex flex-col items-center justify-center">
+                          
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-center flex-1">
                         <div className="text-center w-full h-full flex flex-col items-center justify-center">
                           {pair.cell.imageUrl && (
                             <div className="relative flex-1 w-full max-w-[80%] min-h-0 mb-2">
@@ -389,7 +395,6 @@ export default function MatchPairsView({
                           </p>
                         </div>
                       </div>
-                    )}
                   </div>
                 </div>
               </div>

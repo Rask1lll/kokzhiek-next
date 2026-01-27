@@ -367,6 +367,9 @@
     "maxBooksPerUser": "Пайдаланушыға макс. кітаптар",
     "maxChaptersPerBook": "Кітапқа макс. тараулар"
   },
+  "constructor":{
+    "removeMatch":"Жұпты жою"
+  },
   "editBook": {
     "lang_level": "Тілді меңгеру деңгейі",
     "backToBook": "Кітапқа оралу",
@@ -591,7 +594,9 @@
     "embedRun": "Іске қосу",
     "embedEdit": "Өңдеу",
     "glossary_text": "Глоссарийлі мәтін",
-    "glossary_textDesc": "Сөздердің интерактивті аудармасы бар мәтін"
+    "glossary_textDesc": "Сөздердің интерактивті аудармасы бар мәтін",
+    "glossary": "Глоссарий",
+    "glossaryDesc": "Глоссарийдегі барлық сөздердің тізімі, алфавиттік ретпен орналастырылған"
   },
   "taskTypes": {
     "multiple_choice": "Тізімнен бірнешеуі",
