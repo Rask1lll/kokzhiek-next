@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { FiChevronRight, FiTrash2, FiEdit2, FiLock } from "react-icons/fi";
 import { MdMenuBook } from "react-icons/md";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import EditChapterModal from "./EditChapterModal";
-import { useAuth } from "@/app/hooks/useAuth";
-import { isAuthor } from "@/app/libs/roles";
 import { PresenceUser } from "@/app/hooks/useChapterPresence";
 
 type ChapterCardProps = {
@@ -18,6 +16,7 @@ type ChapterCardProps = {
   onDelete?: (chapterId: string) => Promise<void>;
   isOccupied?: boolean;
   occupiedBy?: PresenceUser[];
+  canEdit?: boolean;
 };
 
 export default function ChapterCard({
@@ -27,14 +26,11 @@ export default function ChapterCard({
   onDelete,
   isOccupied = false,
   occupiedBy = [],
+  canEdit = false,
 }: ChapterCardProps) {
   const t = useTranslations("chapters");
   const { addContent } = useModalWindowStore();
   const [isDeleting, setIsDeleting] = useState(false);
-  const { user } = useAuth();
-  const canEdit = useMemo(() => {
-    return isAuthor(user);
-  }, [user]);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();

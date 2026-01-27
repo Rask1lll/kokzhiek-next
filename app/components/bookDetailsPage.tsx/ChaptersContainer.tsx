@@ -11,6 +11,7 @@ import { PresenceUser } from "@/app/hooks/useChapterPresence";
 type ChaptersContainerProps = {
   isLoading: boolean;
   bookId: string;
+  isBookOwner?: boolean;
   isChapterOccupied?: (chapterId: string) => boolean;
   getChapterUsers?: (chapterId: string) => PresenceUser[];
 };
@@ -18,6 +19,7 @@ type ChaptersContainerProps = {
 export default function ChaptersContainer({
   isLoading: externalLoading,
   bookId,
+  isBookOwner = false,
   isChapterOccupied,
   getChapterUsers,
 }: ChaptersContainerProps) {
@@ -56,13 +58,14 @@ export default function ChaptersContainer({
                   chapterId={chapterId}
                   title={chapter.title}
                   bookid={bookId}
-                  onDelete={handleDeleteChapter}
+                  onDelete={isBookOwner ? handleDeleteChapter : undefined}
                   isOccupied={occupied}
                   occupiedBy={users}
+                  canEdit={isBookOwner}
                 />
               );
             })}
-            <CreateChapterButton />
+            {isBookOwner && <CreateChapterButton />}
           </>
         )}
       </div>

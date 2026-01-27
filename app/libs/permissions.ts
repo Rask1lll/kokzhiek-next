@@ -17,6 +17,13 @@ export function canEditBooks(user: UserData | null): boolean {
   return hasRole(user, ["author"]);
 }
 
+// Проверяет что пользователь может редактировать конкретную книгу
+// (имеет роль автора И является создателем книги)
+export function canEditBook(user: UserData | null, bookCreatedBy?: number): boolean {
+  if (!user || bookCreatedBy === undefined) return false;
+  return isAuthor(user) && user.id === bookCreatedBy;
+}
+
 export function canAccessDashboard(user: UserData | null): boolean {
   return hasRole(user, ["admin", "school_admin", "teacher"]);
 }

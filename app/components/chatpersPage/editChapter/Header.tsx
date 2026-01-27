@@ -5,9 +5,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BiArrowBack } from "react-icons/bi";
 import { FiDownload } from "react-icons/fi";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/app/hooks/useAuth";
-import { isAuthor } from "@/app/libs/roles";
+import { getAuthHeaders } from "@/app/libs/auth";
+import { canEditBook } from "@/app/libs/permissions";
 
 export default function ChapterHeader() {
   const t = useTranslations("chapterHeader");
@@ -17,9 +18,34 @@ export default function ChapterHeader() {
   const chapter = param.get("chapter");
   const isEdit = param.get("edit");
   const { user } = useAuth();
-  const canEdit = useMemo(() => {
-    return isAuthor(user);
-  }, [user]);
+  const [bookCreatedBy, setBookCreatedBy] = useState<number | null>(null);
+
+  // Загружаем created_by книги для проверки владельца
+  useEffect(() => {
+    if (!bookId) return;
+
+    async function fetchBookOwner() {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${bookId}`,
+          {
+            headers: getAuthHeaders(),
+            method: "GET",
+          }
+        );
+        const res = await response.json();
+        if (res.data?.created_by) {
+          setBookCreatedBy(res.data.created_by);
+        }
+      } catch (error) {
+        console.error("Error fetching book owner:", error);
+      }
+    }
+
+    fetchBookOwner();
+  }, [bookId]);
+
+  const canEdit = canEditBook(user, bookCreatedBy ?? undefined);
 
   const handleSaveAsPdf = () => {
     const header = document.querySelector("header");

@@ -13,6 +13,7 @@ import { getAuthHeaders } from "@/app/libs/auth";
 import { useChapterPresence } from "@/app/hooks/useChapterPresence";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isAuthor } from "@/app/libs/roles";
+import { canEditBook } from "@/app/libs/permissions";
 
 const LANGUAGE_MAP: Record<string, string> = {
   kk: "Қазақ тілі",
@@ -101,6 +102,7 @@ export default function BookPageClient() {
             coverUrl={book.cover_image_url}
             status={book.status}
             rejectionReason={book.rejection_reason}
+            createdBy={book.created_by}
             onDelete={onDeleteBook}
           />
         )}
@@ -110,6 +112,7 @@ export default function BookPageClient() {
         <ChaptersContainer
           bookId={id as string}
           isLoading={isLoading}
+          isBookOwner={canEditBook(user, book?.created_by)}
           isChapterOccupied={isAuthor(user) ? isChapterOccupied : undefined}
           getChapterUsers={isAuthor(user) ? getChapterUsers : undefined}
         />

@@ -20,7 +20,8 @@ import {
   UpdateBookStatusPayload,
 } from "@/app/services/book/booksApi";
 import { useAuth } from "@/app/hooks/useAuth";
-import { isModerator, isAuthor } from "@/app/libs/roles";
+import { isModerator } from "@/app/libs/roles";
+import { canEditBook } from "@/app/libs/permissions";
 
 type BookInfoCardProps = {
   bookId: number | string;
@@ -34,6 +35,7 @@ type BookInfoCardProps = {
   coverUrl?: string;
   status?: BookStatus;
   rejectionReason?: string | null;
+  createdBy?: number;
   onDelete?: () => void;
   onStatusChange?: (status: BookStatus) => void;
 };
@@ -52,6 +54,7 @@ export default function BookInfoCard({
   coverUrl,
   status = "draft",
   rejectionReason,
+  createdBy,
   onDelete,
   onStatusChange,
 }: BookInfoCardProps) {
@@ -65,7 +68,7 @@ export default function BookInfoCard({
   const tCommon = useTranslations("common");
 
   const canModerate = isModerator(user);
-  const canEdit = isAuthor(user);
+  const canEdit = canEditBook(user, createdBy);
 
   const STATUS_CONFIG: Record<
     BookStatus,
