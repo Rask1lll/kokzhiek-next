@@ -328,7 +328,7 @@ export default function MatchPairsView({
                 </div>
 
                 {/* Cell column */}
-                <div className="flex h-full">
+                <div className="flex h-full relative">
                   <div
                     onDragOver={handleDragOver}
                     onDrop={() => handleDrop(pair.id)}
@@ -343,8 +343,8 @@ export default function MatchPairsView({
                     }`}
                   >
                     {matchedAnswer ? (
-                      <div className="flex flex-col flex-1">
-                        <div className="absolute">
+                      <div className="flex flex-col flex-1 pt-2">
+                        <div className="absolute top-2 right-2">
                           <button
                             type="button"
                             onClick={() => handleRemoveMatch(matchedAnswer.id)}
@@ -353,7 +353,7 @@ export default function MatchPairsView({
                             {t("constructor.removeMatch")}
                           </button>
                         </div>
-                        <div className="flex flex-col gap-2 flex-1">
+                        <div className="flex flex-col gap-2 flex-1 items-center justify-center ring text-center bg-white w-full rounded-2xl ring-gray-300 h-full">
                           {matchedAnswer.imageUrl && (
                             <div className="relative flex-1 w-full max-w-[80%] min-h-0">
                               <Image
