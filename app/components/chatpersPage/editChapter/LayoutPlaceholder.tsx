@@ -4,7 +4,8 @@ import React, { useCallback, useState } from "react";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { useWidgets } from "@/app/hooks/useWidgets";
 import { useBlocksStore } from "@/app/store/blocksStore";
-import { moveWidget as moveWidgetApi } from "@/app/services/constructor/widgetApi";
+import { moveWidget as moveWidgetApi, moveWidgetToBlock as moveWidgetToBlockApi } from "@/app/services/constructor/widgetApi";
+import { getNextRow } from "./layoutUtils";
 import { getColumnsCount } from "./layoutUtils";
 import WidgetListModal from "./WidgetListModal";
 import WidgetMenu from "./WidgetMenu";
@@ -109,7 +110,7 @@ const LayoutPlaceholder = ({
   );
 
   // Move widget logic
-  const { blocks, moveWidgetLocal } = useBlocksStore();
+  const { blocks, moveWidgetLocal, moveWidgetToBlockLocal } = useBlocksStore();
 
   const currentBlock = blocks.find((b) => b.id === blockId);
   const columnsCount = currentBlock ? getColumnsCount(currentBlock.layout_type) : 1;
@@ -174,6 +175,29 @@ const LayoutPlaceholder = ({
       : 0;
     handleMoveWidget(newRow, targetColumn);
   }, [widget, canMoveRight, column, currentBlock, handleMoveWidget]);
+
+  // Cross-block movement
+  const blockIndex = blocks.findIndex((b) => b.id === blockId);
+  const prevBlock = blockIndex > 0 ? blocks[blockIndex - 1] : null;
+  const nextBlock = blockIndex < blocks.length - 1 ? blocks[blockIndex + 1] : null;
+  const canMoveToBlockUp = widget !== null && prevBlock !== null;
+  const canMoveToBlockDown = widget !== null && nextBlock !== null;
+
+  const handleMoveToBlockUp = useCallback(() => {
+    if (!widget || !prevBlock) return;
+    const targetWidgets = prevBlock.widgets.filter((w) => w.column === 0);
+    const newRow = getNextRow(targetWidgets);
+    moveWidgetToBlockLocal(widget.id, blockId, prevBlock.id, newRow, 0);
+    moveWidgetToBlockApi(widget.id, prevBlock.id, newRow, 0);
+  }, [widget, prevBlock, blockId, moveWidgetToBlockLocal]);
+
+  const handleMoveToBlockDown = useCallback(() => {
+    if (!widget || !nextBlock) return;
+    const targetWidgets = nextBlock.widgets.filter((w) => w.column === 0);
+    const newRow = getNextRow(targetWidgets);
+    moveWidgetToBlockLocal(widget.id, blockId, nextBlock.id, newRow, 0);
+    moveWidgetToBlockApi(widget.id, nextBlock.id, newRow, 0);
+  }, [widget, nextBlock, blockId, moveWidgetToBlockLocal]);
 
   if (widget) {
     const textValue = (widget.data?.text as string) || "";
@@ -386,10 +410,14 @@ const LayoutPlaceholder = ({
             onMoveDown={handleMoveDown}
             onMoveLeft={handleMoveLeft}
             onMoveRight={handleMoveRight}
+            onMoveToBlockUp={handleMoveToBlockUp}
+            onMoveToBlockDown={handleMoveToBlockDown}
             canMoveUp={canMoveUp}
             canMoveDown={canMoveDown}
             canMoveLeft={canMoveLeft}
             canMoveRight={canMoveRight}
+            canMoveToBlockUp={canMoveToBlockUp}
+            canMoveToBlockDown={canMoveToBlockDown}
             isDeleting={isDeleting}
           >
             {TASK_WIDGET_TYPES.has(widget.type) && (

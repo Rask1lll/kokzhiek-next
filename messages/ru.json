@@ -692,6 +692,8 @@
     "moveWidgetDown": "Переместить ниже",
     "moveWidgetLeft": "Переместить влево",
     "moveWidgetRight": "Переместить вправо",
+    "moveToBlockUp": "В блок выше",
+    "moveToBlockDown": "В блок ниже",
     "background": "Фон",
     "conditionalSign": "Условный знак",
     "hint": "Подсказка",

@@ -693,6 +693,8 @@
     "moveWidgetDown": "Төмен жылжыту",
     "moveWidgetLeft": "Солға жылжыту",
     "moveWidgetRight": "Оңға жылжыту",
+    "moveToBlockUp": "Жоғарғы блокқа",
+    "moveToBlockDown": "Төменгі блокқа",
     "background": "Фон",
     "conditionalSign": "Шартты белгі",
     "hint": "Кеңес",

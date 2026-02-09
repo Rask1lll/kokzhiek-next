@@ -7,6 +7,8 @@ import {
   FiArrowDown,
   FiArrowLeft,
   FiArrowRight,
+  FiChevronsUp,
+  FiChevronsDown,
 } from "react-icons/fi";
 import { CgOptions } from "react-icons/cg";
 import { useTranslations } from "next-intl";
@@ -17,10 +19,14 @@ type WidgetMenuProps = {
   onMoveDown?: () => void;
   onMoveLeft?: () => void;
   onMoveRight?: () => void;
+  onMoveToBlockUp?: () => void;
+  onMoveToBlockDown?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   canMoveLeft?: boolean;
   canMoveRight?: boolean;
+  canMoveToBlockUp?: boolean;
+  canMoveToBlockDown?: boolean;
   isDeleting?: boolean;
   children?: ReactNode;
 };
@@ -31,10 +37,14 @@ export default function WidgetMenu({
   onMoveDown,
   onMoveLeft,
   onMoveRight,
+  onMoveToBlockUp,
+  onMoveToBlockDown,
   canMoveUp = false,
   canMoveDown = false,
   canMoveLeft = false,
   canMoveRight = false,
+  canMoveToBlockUp = false,
+  canMoveToBlockDown = false,
   isDeleting = false,
   children,
 }: WidgetMenuProps) {
@@ -57,7 +67,7 @@ export default function WidgetMenu({
     };
   }, [isOpen]);
 
-  const hasMoveOptions = canMoveUp || canMoveDown || canMoveLeft || canMoveRight;
+  const hasMoveOptions = canMoveUp || canMoveDown || canMoveLeft || canMoveRight || canMoveToBlockUp || canMoveToBlockDown;
 
   return (
     <div className={`relative`} ref={menuRef}>
@@ -120,6 +130,30 @@ export default function WidgetMenu({
                 >
                   <FiArrowRight className="w-4 h-4" />
                   {t("moveWidgetRight")}
+                </button>
+              )}
+              {canMoveToBlockUp && (
+                <button
+                  onClick={() => {
+                    onMoveToBlockUp?.();
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2"
+                >
+                  <FiChevronsUp className="w-4 h-4" />
+                  {t("moveToBlockUp")}
+                </button>
+              )}
+              {canMoveToBlockDown && (
+                <button
+                  onClick={() => {
+                    onMoveToBlockDown?.();
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2"
+                >
+                  <FiChevronsDown className="w-4 h-4" />
+                  {t("moveToBlockDown")}
                 </button>
               )}
 

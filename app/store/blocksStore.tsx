@@ -19,6 +19,7 @@ type BlocksStore = {
   addWidgetLocal: (blockId: number, widget: Widget) => void;
   updateWidgetLocal: (widgetId: number, data: WidgetData) => void;
   moveWidgetLocal: (widgetId: number, newRow: number, newColumn: number) => void;
+  moveWidgetToBlockLocal: (widgetId: number, fromBlockId: number, toBlockId: number, newRow: number, newColumn: number) => void;
   removeWidgetLocal: (blockId: number, widgetId: number) => void;
 
   // Container widget children methods
@@ -171,6 +172,27 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
         ),
       })),
     })),
+
+  moveWidgetToBlockLocal: (widgetId, fromBlockId, toBlockId, newRow, newColumn) =>
+    set((state) => {
+      let movedWidget: Widget | null = null;
+      const blocks = state.blocks.map((block) => {
+        if (block.id === fromBlockId) {
+          const widget = block.widgets.find((w) => w.id === widgetId);
+          if (widget) movedWidget = { ...widget, row: newRow, column: newColumn };
+          return { ...block, widgets: block.widgets.filter((w) => w.id !== widgetId) };
+        }
+        return block;
+      });
+      if (!movedWidget) return { blocks };
+      return {
+        blocks: blocks.map((block) =>
+          block.id === toBlockId
+            ? { ...block, widgets: [...block.widgets, movedWidget!] }
+            : block
+        ),
+      };
+    }),
 
   removeWidgetLocal: (blockId, widgetId) =>
     set((state) => ({

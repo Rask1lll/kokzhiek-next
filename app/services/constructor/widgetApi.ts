@@ -123,6 +123,21 @@ export async function moveWidget(
   return res.json();
 }
 
+// Move widget to another block
+export async function moveWidgetToBlock(
+  widgetId: number,
+  blockId: number,
+  row: number,
+  column: number
+): Promise<ConstructorResponse<Widget>> {
+  const res = await fetch(`${API_BASE}/api/v1/widgets/${widgetId}/move-to-block`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ block_id: blockId, row, column }),
+  });
+  return res.json();
+}
+
 export async function deleteWidget(widgetId: number): Promise<void> {
   await fetch(`${API_BASE}/api/v1/widgets/${widgetId}`, {
     method: "DELETE",
