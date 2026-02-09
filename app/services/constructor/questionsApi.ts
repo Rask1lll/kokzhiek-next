@@ -223,6 +223,58 @@ export async function uploadQuestionImage(
   return res.json();
 }
 
+// Upload conditional sign image for a question
+export async function uploadSignImage(
+  questionId: number,
+  file: File
+): Promise<ConstructorResponse<{ sign_url: string; question: Question }>> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(`${API_BASE}/api/v1/questions/${questionId}/sign`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("uploadSignImage failed:", res.status, errorText);
+    return {
+      data: null as unknown as { sign_url: string; question: Question },
+      messages: [`HTTP ${res.status}: ${errorText}`],
+      success: false,
+    };
+  }
+
+  return res.json();
+}
+
+// Delete conditional sign image from a question
+export async function deleteSignImage(
+  questionId: number
+): Promise<ConstructorResponse<Question>> {
+  const res = await fetch(`${API_BASE}/api/v1/questions/${questionId}/sign`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("deleteSignImage failed:", res.status, errorText);
+    return {
+      data: null as unknown as Question,
+      messages: [`HTTP ${res.status}: ${errorText}`],
+      success: false,
+    };
+  }
+
+  return res.json();
+}
+
 // Delete image from a question
 export async function deleteQuestionImage(
   questionId: number

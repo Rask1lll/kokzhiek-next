@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Block } from "@/app/types/block";
-import { FiTrash2, FiDroplet, FiMaximize2, FiSquare } from "react-icons/fi";
+import { FiTrash2, FiDroplet, FiMaximize2, FiSquare, FiArrowUp, FiArrowDown } from "react-icons/fi";
 import { CgOptions } from "react-icons/cg";
 import { useTranslations } from "next-intl";
 
@@ -25,6 +25,10 @@ type BlockMenuProps = {
   onColorChange: (color: string) => void;
   onStyleChange: (style: Block["style"]) => void;
   onDelete: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 };
 
 export default function BlockMenu({
@@ -33,6 +37,10 @@ export default function BlockMenu({
   onColorChange,
   onStyleChange,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp = false,
+  canMoveDown = false,
 }: BlockMenuProps) {
   const t = useTranslations("blockEditor");
   const [isOpen, setIsOpen] = useState(false);
@@ -583,6 +591,35 @@ export default function BlockMenu({
               </div>
             )}
           </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100 my-1" />
+
+          {/* Move options */}
+          {canMoveUp && (
+            <button
+              onClick={() => {
+                onMoveUp?.();
+                setIsOpen(false);
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            >
+              <FiArrowUp className="w-4 h-4" />
+              {t("moveBlockUp")}
+            </button>
+          )}
+          {canMoveDown && (
+            <button
+              onClick={() => {
+                onMoveDown?.();
+                setIsOpen(false);
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            >
+              <FiArrowDown className="w-4 h-4" />
+              {t("moveBlockDown")}
+            </button>
+          )}
 
           {/* Divider */}
           <div className="border-t border-gray-100 my-1" />

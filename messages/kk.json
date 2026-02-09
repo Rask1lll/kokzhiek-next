@@ -685,7 +685,18 @@
     "tableBorderStyle_none": "Жоқ",
     "tableBorderColor": "Түсі",
     "tableCellPadding": "Шегініс",
-    "tableOuterBorder": "Сыртқы шекара"
+    "tableOuterBorder": "Сыртқы шекара",
+    "moveBlockUp": "Блокты жоғары жылжыту",
+    "moveBlockDown": "Блокты төмен жылжыту",
+    "widgetMenu": "Виджет мәзірі",
+    "moveWidgetUp": "Жоғары жылжыту",
+    "moveWidgetDown": "Төмен жылжыту",
+    "moveWidgetLeft": "Солға жылжыту",
+    "moveWidgetRight": "Оңға жылжыту",
+    "background": "Фон",
+    "conditionalSign": "Шартты белгі",
+    "hint": "Кеңес",
+    "points": "Ұпай"
   },
   "glossary": {
     "addWord": "Глоссарийге сөз қосу",

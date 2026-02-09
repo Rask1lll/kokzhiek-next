@@ -109,6 +109,20 @@ export async function updateWidgetWithFile(
   return res.json();
 }
 
+// Move widget to a new position (row/column) within the same block
+export async function moveWidget(
+  widgetId: number,
+  row: number,
+  column: number
+): Promise<ConstructorResponse<Widget>> {
+  const res = await fetch(`${API_BASE}/api/v1/widgets/${widgetId}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ row, column }),
+  });
+  return res.json();
+}
+
 export async function deleteWidget(widgetId: number): Promise<void> {
   await fetch(`${API_BASE}/api/v1/widgets/${widgetId}`, {
     method: "DELETE",

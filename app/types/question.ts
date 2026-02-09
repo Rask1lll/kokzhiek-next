@@ -20,6 +20,7 @@ export type Question = {
   order?: number;
   options?: QuestionOption[];
   image_url: string | null;
+  sign_url?: string | null;
 };
 
 export type CreateQuestionPayload = {

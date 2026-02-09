@@ -684,7 +684,18 @@
     "tableBorderStyle_none": "Нет",
     "tableBorderColor": "Цвет",
     "tableCellPadding": "Отступы",
-    "tableOuterBorder": "Внешняя рамка"
+    "tableOuterBorder": "Внешняя рамка",
+    "moveBlockUp": "Переместить блок выше",
+    "moveBlockDown": "Переместить блок ниже",
+    "widgetMenu": "Меню виджета",
+    "moveWidgetUp": "Переместить выше",
+    "moveWidgetDown": "Переместить ниже",
+    "moveWidgetLeft": "Переместить влево",
+    "moveWidgetRight": "Переместить вправо",
+    "background": "Фон",
+    "conditionalSign": "Условный знак",
+    "hint": "Подсказка",
+    "points": "Очки"
   },
   "glossary": {
     "addWord": "Добавить слово в глоссарий",

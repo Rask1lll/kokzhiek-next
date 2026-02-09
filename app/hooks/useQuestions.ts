@@ -9,6 +9,8 @@ import {
   deleteOptionImage,
   uploadQuestionImage,
   deleteQuestionImage,
+  uploadSignImage,
+  deleteSignImage,
 } from "@/app/services/constructor/questionsApi";
 import {
   Question,
@@ -57,6 +59,20 @@ export function useQuestions(widgetId: number | null) {
     loadedRef.current = true;
     loadQuestions();
   }, [loadQuestions]);
+
+  // Listen for cross-instance invalidation events
+  useEffect(() => {
+    if (typeof window === "undefined" || !widgetId) return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.widgetId === widgetId) {
+        loadedRef.current = false;
+        loadQuestions();
+      }
+    };
+    window.addEventListener("questionsInvalidated", handler);
+    return () => window.removeEventListener("questionsInvalidated", handler);
+  }, [widgetId, loadQuestions]);
 
   /** CREATE */
   const create = useCallback(
@@ -176,6 +192,36 @@ export function useQuestions(widgetId: number | null) {
     []
   );
 
+  /** SIGN IMAGE UPLOAD */
+  const uploadSign = useCallback(
+    async (questionId: number, file: File): Promise<string | null> => {
+      const res = await uploadSignImage(questionId, file);
+      if (!res.success) return null;
+
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? res.data.question : q))
+      );
+
+      return res.data.sign_url;
+    },
+    []
+  );
+
+  /** SIGN IMAGE DELETE */
+  const removeSign = useCallback(
+    async (questionId: number): Promise<boolean> => {
+      const res = await deleteSignImage(questionId);
+      if (!res.success) return false;
+
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? res.data : q))
+      );
+
+      return true;
+    },
+    []
+  );
+
   return {
     questions,
     loading,
@@ -189,5 +235,7 @@ export function useQuestions(widgetId: number | null) {
     removeImage,
     uploadQuestionImage: uploadQuestionImageFn,
     removeQuestionImage,
+    uploadSign,
+    removeSign,
   };
 }

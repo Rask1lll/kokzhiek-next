@@ -28,7 +28,7 @@ export default function Layout({
   const groupedWidgets = groupWidgetsByColumn(widgets, columnsCount);
   const params = useSearchParams();
   const isEdit = params.get("edit");
-  const { remove: removeBlock, updateStyle } = useBlocks();
+  const { blocks, remove: removeBlock, swap: swapBlocks, updateStyle } = useBlocks();
   const layOurRef = useRef<HTMLDivElement | null>(null);
 
   const blockColor = style?.color || "";
@@ -138,6 +138,22 @@ export default function Layout({
     };
   };
 
+  const blockIndex = blocks.findIndex((b) => b.id === id);
+  const canMoveUp = blockIndex > 0;
+  const canMoveDown = blockIndex < blocks.length - 1;
+
+  const handleMoveUp = () => {
+    if (canMoveUp) {
+      swapBlocks(id, blocks[blockIndex - 1].id);
+    }
+  };
+
+  const handleMoveDown = () => {
+    if (canMoveDown) {
+      swapBlocks(id, blocks[blockIndex + 1].id);
+    }
+  };
+
   const renderEditControls = () => {
     if (!isEdit) return null;
 
@@ -149,6 +165,10 @@ export default function Layout({
           onColorChange={handleColorChange}
           onStyleChange={handleStyleChange}
           onDelete={handleDelete}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
         />
         <div
           {...dragHandleProps}
