@@ -22,6 +22,7 @@ const PRESET_COLOR_KEYS = [
 type BlockMenuProps = {
   currentColor: string;
   currentStyle: Block["style"];
+  columnsCount: number;
   onColorChange: (color: string) => void;
   onStyleChange: (style: Block["style"]) => void;
   onDelete: () => void;
@@ -34,6 +35,7 @@ type BlockMenuProps = {
 export default function BlockMenu({
   currentColor,
   currentStyle,
+  columnsCount,
   onColorChange,
   onStyleChange,
   onDelete,
@@ -47,6 +49,7 @@ export default function BlockMenu({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showSizeControls, setShowSizeControls] = useState(false);
   const [showBorderControls, setShowBorderControls] = useState(false);
+  const [showColumnColors, setShowColumnColors] = useState(false);
   const [tempColor, setTempColor] = useState<string | null>(null);
   const [tempBorderColor, setTempBorderColor] = useState<string | null>(null);
   const [isColorPicking, setIsColorPicking] = useState(false);
@@ -150,6 +153,7 @@ export default function BlockMenu({
         setIsBorderColorPicking(false);
         setIsOpen(false);
         setShowColorPicker(false);
+        setShowColumnColors(false);
         setShowSizeControls(false);
         setShowBorderControls(false);
         if (tempBorderColor !== null) {
@@ -268,6 +272,100 @@ export default function BlockMenu({
               </div>
             )}
           </div>
+
+          {/* Column colors option (only for multi-column) */}
+          {columnsCount > 1 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowColumnColors(!showColumnColors)}
+                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              >
+                <FiDroplet className="w-4 h-4" />
+                Цвет колонок
+                <div className="flex gap-0.5 ml-auto">
+                  {Array.from({ length: columnsCount }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-3 h-3 rounded border border-gray-300"
+                      style={{
+                        backgroundColor:
+                          currentStyle?.columnColors?.[i] || "transparent",
+                      }}
+                    />
+                  ))}
+                </div>
+              </button>
+
+              {showColumnColors && (
+                <div className="absolute right-full top-0 mr-1 p-3 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[220px] z-30">
+                  {Array.from({ length: columnsCount }).map((_, colIndex) => {
+                    const colColor =
+                      currentStyle?.columnColors?.[colIndex] || "";
+                    return (
+                      <div key={colIndex} className="mb-3 last:mb-0">
+                        <label className="text-xs font-semibold text-gray-700 block mb-1.5">
+                          Колонка {colIndex + 1}
+                        </label>
+                        <div className="grid grid-cols-4 gap-1 mb-1.5">
+                          {PRESET_COLOR_KEYS.slice(0, 8).map((color) => (
+                            <button
+                              key={color.value || "default"}
+                              onClick={() => {
+                                const newColors = [
+                                  ...(currentStyle?.columnColors ||
+                                    Array(columnsCount).fill("")),
+                                ];
+                                newColors[colIndex] = color.value;
+                                onStyleChange({
+                                  ...currentStyle,
+                                  columnColors: newColors,
+                                });
+                              }}
+                              className={`w-7 h-7 rounded border-2 transition-transform hover:scale-105 ${
+                                colColor === color.value
+                                  ? "border-blue-500 ring-1 ring-blue-200"
+                                  : "border-gray-200"
+                              }`}
+                              style={{
+                                backgroundColor: color.value || "transparent",
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <input
+                          type="color"
+                          value={colColor || "#ffffff"}
+                          onChange={(e) => {
+                            const newColors = [
+                              ...(currentStyle?.columnColors ||
+                                Array(columnsCount).fill("")),
+                            ];
+                            newColors[colIndex] = e.target.value;
+                            onStyleChange({
+                              ...currentStyle,
+                              columnColors: newColors,
+                            });
+                          }}
+                          className="w-full h-6 rounded cursor-pointer"
+                        />
+                      </div>
+                    );
+                  })}
+                  <button
+                    onClick={() => {
+                      onStyleChange({
+                        ...currentStyle,
+                        columnColors: Array(columnsCount).fill(""),
+                      });
+                    }}
+                    className="w-full mt-2 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 border border-gray-200 rounded"
+                  >
+                    Сбросить
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Size option */}
           <div className="relative">

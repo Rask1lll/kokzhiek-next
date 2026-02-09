@@ -158,10 +158,11 @@ export default function Layout({
     if (!isEdit) return null;
 
     return (
-      <div className="flex-shrink-0 flex flex-col items-center ml-2">
+      <div className="flex-shrink-0 flex flex-col items-center ml-1">
         <BlockMenu
           currentColor={blockColor}
           currentStyle={style}
+          columnsCount={columnsCount}
           onColorChange={handleColorChange}
           onStyleChange={handleStyleChange}
           onDelete={handleDelete}
@@ -222,12 +223,17 @@ export default function Layout({
           const widthPercent = columnWidths[colIndex] || 100 / columnsCount;
           const isLastColumn = colIndex === columnsCount - 1;
 
+          const colColor = style?.columnColors?.[colIndex] || "";
+
           return (
             <Fragment key={colIndex}>
               {/* Колонка */}
               <div
-                className="p-0.5 mb-2 min-w-0"
-                style={{ flex: `${widthPercent} 0 0%` }}
+                className="p-0.5 min-w-0"
+                style={{
+                  flex: `${widthPercent} 0 0%`,
+                  ...(colColor ? { backgroundColor: colColor } : {}),
+                }}
               >
                 <Column
                   blockId={id}
