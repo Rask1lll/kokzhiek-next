@@ -60,7 +60,7 @@ export default function WidgetMenu({
   const hasMoveOptions = canMoveUp || canMoveDown || canMoveLeft || canMoveRight;
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className={`relative`} ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-1.5 bg-white/90 backdrop-blur rounded-md shadow-sm border border-gray-200 hover:bg-gray-100 transition-colors"

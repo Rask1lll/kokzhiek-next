@@ -194,7 +194,7 @@ export default function BlockMenu({
   ]);
 
   return (
-    <div className="relative mt-2" ref={menuRef}>
+    <div className="relative z-20 mt-2" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-1.5 hover:bg-gray-200 rounded-md transition-colors"
