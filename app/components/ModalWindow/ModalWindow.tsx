@@ -9,9 +9,14 @@ export default function ModalWindow() {
     return <></>;
   }
   return (
-    <div className="w-full h-full flex items-center justify-center fixed top-0 z-50 bg-gray-600/60">
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-gray-600/60"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) removeContent();
+      }}
+    >
       <div className="relative">
-        {content}{" "}
+        {content}
         <button
           onClick={() => {
             removeContent();

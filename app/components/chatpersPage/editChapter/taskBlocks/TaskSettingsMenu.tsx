@@ -2,12 +2,10 @@
 
 import { FiImage, FiHelpCircle, FiType, FiStar } from "react-icons/fi";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
-import {
-  BgSettingsModal,
-  SignSettingsModal,
-  HintSettingsModal,
-  PointsSettingsModal,
-} from "./TaskSettingModals";
+import { BgSettingsModal } from "./BgSettingsModal";
+import { SignSettingsModal } from "./SignSettingsModal";
+import { HintSettingsModal } from "./HintSettingsModal";
+import { PointsSettingsModal } from "./PointsSettingsModal";
 
 type TaskSettingsMenuProps = {
   widgetId: number;
