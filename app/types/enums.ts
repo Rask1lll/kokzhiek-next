@@ -29,6 +29,7 @@ export enum WidgetType {
   FORMULA = "formula",
   DIVIDER = "divider",
   EMBED = "embed",
+  BANNER = "banner",
 }
 
 // Общий тип блока (задание или виджет)

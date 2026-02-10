@@ -17,6 +17,7 @@ import AudioView from "./viewBlocks/AudioView";
 import FormulaView from "./viewBlocks/FormulaView";
 import DividerView from "./viewBlocks/DividerView";
 import EmbedView from "./viewBlocks/EmbedView";
+import BannerView from "./viewBlocks/BannerView";
 import TableView from "./viewBlocks/TableView";
 import CarouselView from "./viewBlocks/CarouselView";
 
@@ -101,6 +102,20 @@ export default function ViewPlaceholder({
       break;
     case "embed":
       content = <EmbedView value={textValue} />;
+      break;
+    case "banner":
+      const bannerData = widget.data as { text?: string; bgColor?: string; textColor?: string; fontSize?: string; height?: number } | undefined;
+      content = (
+        <BannerView
+          value={{
+            text: bannerData?.text || "",
+            bgColor: bannerData?.bgColor || "#1e40af",
+            textColor: bannerData?.textColor || "#ffffff",
+            fontSize: bannerData?.fontSize || "2xl",
+            height: bannerData?.height || 200,
+          }}
+        />
+      );
       break;
 
     // Task widgets (interactive)

@@ -23,6 +23,7 @@ import AudioWidget from "./widgetBlocks/AudioWidget";
 import FormulaWidget from "./widgetBlocks/FormulaWidget";
 import DividerWidget from "./widgetBlocks/DividerWidget";
 import EmbedWidget from "./widgetBlocks/EmbedWidget";
+import BannerWidget, { BannerSettings } from "./widgetBlocks/BannerWidget";
 import { Widget } from "@/app/types/widget";
 import { useTranslations } from "next-intl";
 import MultipleChoice from "./taskBlocks/MultipleChoice";
@@ -294,6 +295,21 @@ const LayoutPlaceholder = ({
           <EmbedWidget value={textValue} onChange={handleChange} />
         );
         break;
+      case "banner":
+        const bannerData = (widget.data as { text?: string; bgColor?: string; textColor?: string; fontSize?: string; height?: number }) || {};
+        widgetContent = (
+          <BannerWidget
+            value={{
+              text: bannerData.text || "",
+              bgColor: bannerData.bgColor || "#1e40af",
+              textColor: bannerData.textColor || "#ffffff",
+              fontSize: (bannerData.fontSize as "sm" | "base" | "lg" | "xl" | "2xl" | "3xl") || "2xl",
+              height: bannerData.height || 200,
+            }}
+            onChange={(data) => updateWidget(widget.id, data)}
+          />
+        );
+        break;
       case "multiple_choice":
         widgetContent = (
           <TaskBlockWrapper widgetId={widget.id}>
@@ -422,6 +438,18 @@ const LayoutPlaceholder = ({
           >
             {TASK_WIDGET_TYPES.has(widget.type) && (
               <TaskSettingsMenu widgetId={widget.id} />
+            )}
+            {widget.type === "banner" && (
+              <BannerSettings
+                value={{
+                  text: ((widget.data as Record<string, unknown>)?.text as string) || "",
+                  bgColor: ((widget.data as Record<string, unknown>)?.bgColor as string) || "#1e40af",
+                  textColor: ((widget.data as Record<string, unknown>)?.textColor as string) || "#ffffff",
+                  fontSize: (((widget.data as Record<string, unknown>)?.fontSize as string) || "2xl") as "sm" | "base" | "lg" | "xl" | "2xl" | "3xl",
+                  height: ((widget.data as Record<string, unknown>)?.height as number) || 200,
+                }}
+                onChange={(data) => updateWidget(widget.id, data)}
+              />
             )}
           </WidgetMenu>
         </div>

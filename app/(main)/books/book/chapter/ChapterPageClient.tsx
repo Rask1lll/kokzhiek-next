@@ -72,7 +72,8 @@ function SortableBlock({ block, isEditMode }: { block: Block; isEditMode: boolea
       ref={setNodeRef}
       style={style}
       className={`
-        bg-white flex w-full gap-2 rounded-lg p-1 cursor-default group
+        bg-white flex w-full gap-2 cursor-default group
+        ${block.widgets?.some((w) => w.type === "banner") ? "p-0 overflow-hidden" : "p-1 rounded-lg"}
         ${isDragging ? "shadow-2xl ring-2 ring-blue-400" : ""}
       `}
     >
@@ -87,7 +88,7 @@ function SortableBlock({ block, isEditMode }: { block: Block; isEditMode: boolea
 // Drag overlay component - follows cursor during drag
 function DragOverlayContent({ block }: { block: Block }) {
   return (
-    <div className="bg-white flex w-full gap-2 rounded-lg p-1 shadow-2xl ring-2 ring-blue-400 opacity-90 scale-[0.93] transition-transform">
+    <div className={`bg-white flex w-full gap-2 shadow-2xl ring-2 ring-blue-400 opacity-90 scale-[0.93] transition-transform ${block.widgets?.some((w) => w.type === "banner") ? "p-0 overflow-hidden" : "p-1 rounded-lg"}`}>
       <Layout block={block} />
     </div>
   );

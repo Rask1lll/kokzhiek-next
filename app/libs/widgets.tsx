@@ -11,6 +11,7 @@ import {
   FiBookOpen,
   FiGrid,
   FiLayers,
+  FiFlag,
 } from "react-icons/fi";
 export const widgets = [
   {
@@ -90,6 +91,12 @@ export const widgets = [
     title: "Встраивание",
     description: "Встраивание внешнего контента через iframe",
     icon: <FiGlobe className="w-5 h-5 text-cyan-500" />,
+  },
+  {
+    type: "banner",
+    title: "Баннер",
+    description: "Декоративный баннер с цветным фоном и крупным текстом",
+    icon: <FiFlag className="w-5 h-5 text-orange-500" />,
   },
 ];
 
