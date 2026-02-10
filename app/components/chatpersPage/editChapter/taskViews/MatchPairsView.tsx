@@ -391,7 +391,7 @@ export default function MatchPairsView({
                             </div>
                           )}
                           <p className="text-base md:text-lg lg:text-xl text-slate-500">
-                            {pair.cell.text || "Перетащите сюда"}
+                            {pair.cell.text}
                           </p>
                         </div>
                       </div>
