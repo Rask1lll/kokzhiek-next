@@ -73,7 +73,7 @@ export default function MatchPairsView({
     
     switch (pairSizeMode) {
       case "small":
-        return 150;
+        return 80;
       case "medium":
         return 200;
       case "large":
@@ -380,7 +380,7 @@ export default function MatchPairsView({
                     <div className="flex items-center justify-center flex-1">
                         <div className="text-center w-full h-full flex flex-col items-center justify-center">
                           {pair.cell.imageUrl && (
-                            <div className="relative flex-1 w-full max-w-[80%] min-h-0 mb-2">
+                            <div className="relative flex-1 w-full max-w-[80%] min-h-0">
                               <Image
                                 src={pair.cell.imageUrl}
                                 alt=""
