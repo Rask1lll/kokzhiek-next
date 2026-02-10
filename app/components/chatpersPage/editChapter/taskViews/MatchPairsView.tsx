@@ -256,9 +256,9 @@ export default function MatchPairsView({
     <TaskViewWrapper widgetId={widgetId}>
       <div className="w-full space-y-4">
         {/* Header */}
-        <div className="text-base md:text-lg lg:text-xl text-slate-600 text-center">
+        {/* <div className="text-base md:text-lg lg:text-xl text-slate-600 text-center">
           Перетащите варианты ответа в соответствующие ячейки
-        </div>
+        </div> */}
 
         {/* Grid layout: each row = answer + arrow + cell */}
         <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
