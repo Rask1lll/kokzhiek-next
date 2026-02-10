@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Block } from "@/app/types/block";
-import { FiTrash2, FiDroplet, FiMaximize2, FiSquare, FiArrowUp, FiArrowDown } from "react-icons/fi";
+import { FiTrash2, FiDroplet, FiMaximize2, FiSquare, FiArrowUp, FiArrowDown, FiGrid } from "react-icons/fi";
+import { getColumnsCount } from "./layoutUtils";
 import { CgOptions } from "react-icons/cg";
 import { useTranslations } from "next-intl";
 
@@ -19,12 +20,24 @@ const PRESET_COLOR_KEYS = [
   { key: "colorOrange", value: "#ffedd5" },
 ];
 
+const LAYOUT_OPTIONS = [
+  { code: "full", label: "1", cols: 1 },
+  { code: "two_equal", label: "1 | 1", cols: 2 },
+  // { code: "left_wide", label: "2 | 1", cols: 2 },
+  // { code: "right_wide", label: "1 | 2", cols: 2 },
+  { code: "three_cols", label: "1|1|1", cols: 3 },
+  // { code: "three_center_wide", label: "1|2|1", cols: 3 },
+];
+
 type BlockMenuProps = {
   currentColor: string;
   currentStyle: Block["style"];
+  currentLayoutType: string;
   columnsCount: number;
+  widgets: Block["widgets"];
   onColorChange: (color: string) => void;
   onStyleChange: (style: Block["style"]) => void;
+  onLayoutChange: (layoutType: string, newColumnsCount: number) => void;
   onDelete: () => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
@@ -35,9 +48,12 @@ type BlockMenuProps = {
 export default function BlockMenu({
   currentColor,
   currentStyle,
+  currentLayoutType,
   columnsCount,
+  widgets,
   onColorChange,
   onStyleChange,
+  onLayoutChange,
   onDelete,
   onMoveUp,
   onMoveDown,
@@ -50,6 +66,7 @@ export default function BlockMenu({
   const [showSizeControls, setShowSizeControls] = useState(false);
   const [showBorderControls, setShowBorderControls] = useState(false);
   const [showColumnColors, setShowColumnColors] = useState(false);
+  const [showLayoutPicker, setShowLayoutPicker] = useState(false);
   const [tempColor, setTempColor] = useState<string | null>(null);
   const [tempBorderColor, setTempBorderColor] = useState<string | null>(null);
   const [isColorPicking, setIsColorPicking] = useState(false);
@@ -156,6 +173,7 @@ export default function BlockMenu({
         setShowColumnColors(false);
         setShowSizeControls(false);
         setShowBorderControls(false);
+        setShowLayoutPicker(false);
         if (tempBorderColor !== null) {
           handleBorderChange("color", tempBorderColor);
           setTempBorderColor(null);
@@ -194,7 +212,7 @@ export default function BlockMenu({
   ]);
 
   return (
-    <div className="relative z-20 mt-2" ref={menuRef}>
+    <div className="relative z-20" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-1.5 hover:bg-gray-200 rounded-md transition-colors"
@@ -366,6 +384,51 @@ export default function BlockMenu({
               )}
             </div>
           )}
+
+          {/* Layout type option */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLayoutPicker(!showLayoutPicker)}
+              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            >
+              <FiGrid className="w-4 h-4" />
+              {t("blockLayout")}
+              <span className="ml-auto text-xs text-gray-400">{columnsCount} col</span>
+            </button>
+
+            {showLayoutPicker && (
+              <div className="absolute right-full top-0 mr-1 p-2 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[180px] z-30">
+                {LAYOUT_OPTIONS.map((opt) => {
+                  const isActive = opt.code === currentLayoutType;
+                  return (
+                    <button
+                      key={opt.code}
+                      onClick={() => {
+                        if (opt.code === currentLayoutType) return;
+                        const newCols = getColumnsCount(opt.code);
+                        if (newCols < columnsCount) {
+                          const widgetsInRemovedCols = widgets.filter((w) => w.column >= newCols);
+                          if (widgetsInRemovedCols.length > 0) {
+                            if (!confirm(t("confirmColumnDelete"))) return;
+                          }
+                        }
+                        onLayoutChange(opt.code, getColumnsCount(opt.code));
+                        setShowLayoutPicker(false);
+                      }}
+                      className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 rounded ${
+                        isActive
+                          ? "bg-blue-50 text-blue-700 font-medium"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span className="font-mono text-xs w-12">{opt.label}</span>
+                      <span className="text-xs text-gray-400">{opt.cols} col</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Size option */}
           <div className="relative">

@@ -8,6 +8,7 @@ import {
   deleteBlock,
   updateBlocksOrder,
   updateBlockStyle,
+  updateBlockLayout,
 } from "@/app/services/constructor/blocksApi";
 
 export function useBlocks() {
@@ -18,6 +19,7 @@ export function useBlocks() {
     removeBlockLocal,
     swapBlocksLocal,
     updateBlockStyleLocal,
+    updateBlockLayoutLocal,
   } = useBlocksStore();
 
   const debounceTimers = useRef<Map<number, NodeJS.Timeout>>(new Map());
@@ -140,6 +142,19 @@ export function useBlocks() {
     [updateBlockStyleLocal]
   );
 
+  // Update block layout type
+  const updateLayout = useCallback(
+    async (blockId: number, layoutType: string, newColumnsCount: number) => {
+      updateBlockLayoutLocal(blockId, layoutType, newColumnsCount);
+      try {
+        await updateBlockLayout(blockId, layoutType);
+      } catch (err) {
+        console.error("Error updating block layout:", err);
+      }
+    },
+    [updateBlockLayoutLocal]
+  );
+
   return {
     blocks,
     create,
@@ -147,5 +162,6 @@ export function useBlocks() {
     swap,
     getById,
     updateStyle,
+    updateLayout,
   };
 }

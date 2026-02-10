@@ -694,6 +694,8 @@
     "moveWidgetRight": "Переместить вправо",
     "moveToBlockUp": "В блок выше",
     "moveToBlockDown": "В блок ниже",
+    "blockLayout": "Тип блока",
+    "confirmColumnDelete": "Виджеты в удаляемых колонках будут удалены. Продолжить?",
     "background": "Фон",
     "conditionalSign": "Условный знак",
     "hint": "Подсказка",

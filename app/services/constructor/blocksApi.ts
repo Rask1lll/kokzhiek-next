@@ -37,6 +37,18 @@ export async function deleteBlock(blockId: number): Promise<void> {
   });
 }
 
+export async function updateBlockLayout(
+  blockId: number,
+  layoutType: string
+): Promise<ConstructorResponse<Block>> {
+  const res = await fetch(`${API_BASE}/api/v1/blocks/${blockId}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ layout_type: layoutType }),
+  });
+  return res.json();
+}
+
 export async function updateBlockStyle(
   blockId: number,
   style: BlockStyle

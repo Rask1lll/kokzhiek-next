@@ -44,7 +44,7 @@ export default function Column({
       {widgets.map((widget) => (
         <LayoutPlaceholder
           key={widget.id}
-          className="min-h-[60px]"
+          className="min-h-[90px]"
           blockId={blockId}
           row={widget.row}
           column={columnIndex}
@@ -54,7 +54,7 @@ export default function Column({
 
       {/* Add new widget button / empty placeholder */}
       <LayoutPlaceholder
-        className="min-h-[60px]"
+        className="min-h-[90px]"
         blockId={blockId}
         row={nextRow}
         column={columnIndex}

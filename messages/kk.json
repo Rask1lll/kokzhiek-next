@@ -695,6 +695,8 @@
     "moveWidgetRight": "Оңға жылжыту",
     "moveToBlockUp": "Жоғарғы блокқа",
     "moveToBlockDown": "Төменгі блокқа",
+    "blockLayout": "Блок түрі",
+    "confirmColumnDelete": "Жойылатын бағандардағы виджеттер жойылады. Жалғастыру керек пе?",
     "background": "Фон",
     "conditionalSign": "Шартты белгі",
     "hint": "Кеңес",

@@ -15,6 +15,7 @@ type BlocksStore = {
   removeBlockLocal: (blockId: number) => void;
   swapBlocksLocal: (firstId: number, secondId: number) => void;
   updateBlockStyleLocal: (blockId: number, style: BlockStyle) => void;
+  updateBlockLayoutLocal: (blockId: number, layoutType: string, newColumnsCount: number) => void;
 
   addWidgetLocal: (blockId: number, widget: Widget) => void;
   updateWidgetLocal: (widgetId: number, data: WidgetData) => void;
@@ -100,6 +101,21 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
           ? block
           : { ...block, style: { ...block.style, ...style } }
       ),
+    })),
+
+  updateBlockLayoutLocal: (blockId, layoutType, newColumnsCount) =>
+    set((state) => ({
+      blocks: state.blocks.map((block) => {
+        if (block.id !== blockId) return block;
+        const filteredWidgets = block.widgets.filter((w) => w.column < newColumnsCount);
+        const { columnWidths, columnColors, ...restStyle } = block.style || {};
+        return {
+          ...block,
+          layout_type: layoutType,
+          widgets: filteredWidgets,
+          style: restStyle,
+        };
+      }),
     })),
 
   addWidgetLocal: (blockId, widget) =>

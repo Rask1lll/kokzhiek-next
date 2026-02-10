@@ -28,7 +28,7 @@ export default function Layout({
   const groupedWidgets = groupWidgetsByColumn(widgets, columnsCount);
   const params = useSearchParams();
   const isEdit = params.get("edit");
-  const { blocks, remove: removeBlock, swap: swapBlocks, updateStyle } = useBlocks();
+  const { blocks, remove: removeBlock, swap: swapBlocks, updateStyle, updateLayout } = useBlocks();
   const layOurRef = useRef<HTMLDivElement | null>(null);
 
   const blockColor = style?.color || "";
@@ -43,8 +43,10 @@ export default function Layout({
   useEffect(() => {
     if (style?.columnWidths) {
       setColumnWidths(style.columnWidths);
+    } else {
+      setColumnWidths(getDefaultColumnWidths(layout_type));
     }
-  }, [style?.columnWidths]);
+  }, [style?.columnWidths, layout_type]);
 
   // Минимальная ширина колонки в процентах
   const MIN_COLUMN_WIDTH = 15;
@@ -98,6 +100,10 @@ export default function Layout({
     if (newStyle) {
       updateStyle(id, newStyle);
     }
+  };
+
+  const handleLayoutChange = (layoutType: string, newColumnsCount: number) => {
+    updateLayout(id, layoutType, newColumnsCount);
   };
 
   const handleDelete = async () => {
@@ -162,9 +168,12 @@ export default function Layout({
         <BlockMenu
           currentColor={blockColor}
           currentStyle={style}
+          currentLayoutType={layout_type}
           columnsCount={columnsCount}
+          widgets={widgets}
           onColorChange={handleColorChange}
           onStyleChange={handleStyleChange}
+          onLayoutChange={handleLayoutChange}
           onDelete={handleDelete}
           onMoveUp={handleMoveUp}
           onMoveDown={handleMoveDown}
