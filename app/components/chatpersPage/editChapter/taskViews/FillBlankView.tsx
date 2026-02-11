@@ -6,48 +6,64 @@ import { useAttempt } from "@/app/hooks/useAttempt";
 import TaskViewWrapper from "./TaskViewWrapper";
 import { getNegativeFeedback, getPositiveFeedback } from "@/app/libs/feedback";
 
-// Auto-resizing input component
-function AutoWidthInput({
+// Inline editable span that flows with text and wraps naturally
+function InlineBlankInput({
   value,
   onChange,
   placeholder,
-  className,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-  className?: string;
 }) {
-  const spanRef = useRef<HTMLSpanElement>(null);
-  const [width, setWidth] = useState(70); // минимальная ширина
+  const ref = useRef<HTMLSpanElement>(null);
+  const isComposing = useRef(false);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   useEffect(() => {
-    if (spanRef.current) {
-      const newWidth = Math.min(200, Math.max(70, spanRef.current.offsetWidth + 16));
-      setWidth(newWidth);
+    if (ref.current && ref.current.textContent !== value) {
+      ref.current.textContent = value;
     }
   }, [value]);
 
+  const handleInput = () => {
+    if (isComposing.current) return;
+    onChangeRef.current(ref.current?.textContent || "");
+  };
+
+  // Native DOM listener to reliably capture Tab before browser focus logic
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        document.execCommand("insertText", false, "\u00A0\u00A0\u00A0\u00A0");
+        onChangeRef.current(el.textContent || "");
+      }
+    };
+    el.addEventListener("keydown", onKeyDown, true);
+    return () => el.removeEventListener("keydown", onKeyDown, true);
+  }, []);
+
   return (
-    <span className="relative inline-block align-baseline">
-      {/* Скрытый span для измерения ширины текста */}
-      <span
-        ref={spanRef}
-        className="invisible absolute whitespace-pre text-base md:text-lg lg:text-xl"
-        aria-hidden="true"
-      >
-        {value || placeholder}
-      </span>
-      <input
-        type="text"
-        spellCheck={true}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        style={{ width: `${width}px` }}
-        className={className}
-      />
-    </span>
+    <span
+      ref={ref}
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck={true}
+      onInput={handleInput}
+      onCompositionStart={() => { isComposing.current = true; }}
+      onCompositionEnd={() => {
+        isComposing.current = false;
+        handleInput();
+      }}
+      data-placeholder={placeholder}
+      className="inline-block min-w-[80px] px-1 border-b-2 border-gray-400 focus:border-blue-500 focus:outline-none transition-colors text-center empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400"
+    />
   );
 }
 
@@ -138,12 +154,11 @@ export default function FillBlankView({
         const blankId = match[1];
         if (blanks.includes(blankId)) {
           return (
-            <AutoWidthInput
+            <InlineBlankInput
               key={index}
               value={answers[blankId] || ""}
-              onChange={(val) => handleInput(blankId, val)}
+              onChange={(val: string) => handleInput(blankId, val)}
               placeholder="..."
-              className="mx-1 px-2 py-0.5 text-center text-base md:text-lg lg:text-xl bg-white border-b-2 border-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
             />
           );
         }
@@ -158,7 +173,7 @@ export default function FillBlankView({
 
   return (
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
-      <div className="sm:text-lg text-sm md:text-xl text-gray-800 leading-loose">
+      <div className="sm:text-lg text-sm md:text-xl text-gray-800 leading-loose whitespace-pre-wrap">
         {renderContent()}
       </div>
 

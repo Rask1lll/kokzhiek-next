@@ -238,7 +238,7 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
           <span className="text-sm md:text-base lg:text-lg text-slate-400 mb-3 block">
             {t("fillCorrectAnswers")}
           </span>
-          <div className="text-lg md:text-xl lg:text-2xl text-slate-800 leading-loose">
+          <div className="text-lg md:text-xl lg:text-2xl text-slate-800 leading-loose whitespace-pre-wrap">
             {renderPreview()}
           </div>
         </div>
