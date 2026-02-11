@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BiArrowBack } from "react-icons/bi";
-import { FiDownload } from "react-icons/fi";
+import { FiDownload, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/hooks/useAuth";
 import { getAuthHeaders } from "@/app/libs/auth";
 import { canEditBook } from "@/app/libs/permissions";
+import { useBlocksStore } from "@/app/store/blocksStore";
 
 export default function ChapterHeader() {
   const t = useTranslations("chapterHeader");
@@ -18,6 +19,7 @@ export default function ChapterHeader() {
   const chapter = param.get("chapter");
   const isEdit = param.get("edit");
   const { user } = useAuth();
+  const { prevChapter, nextChapter } = useBlocksStore();
   const [bookCreatedBy, setBookCreatedBy] = useState<number | null>(null);
 
   // Загружаем created_by книги для проверки владельца
@@ -61,13 +63,46 @@ export default function ChapterHeader() {
   return (
     <header className="fixed top-0 left-0 z-50 w-full h-14 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
       <div className="mx-auto h-full w-5/6 flex items-center justify-between">
-        <Link
-          href={`/books/book?book=${bookId}`}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md text-gray-700 font-medium hover:bg-gray-100 transition"
-        >
-          <BiArrowBack className="text-lg" />
-          <span>{t("back")}</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/books/book?book=${bookId}`}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-gray-700 font-medium hover:bg-gray-100 transition"
+          >
+            <BiArrowBack className="text-lg" />
+            <span>{t("back")}</span>
+          </Link>
+
+          <div className="flex items-center gap-1">
+            {prevChapter ? (
+              <Link
+                href={`${path}?chapter=${prevChapter.id}&book=${bookId}${isEdit ? "&edit=1" : ""}`}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
+                title={prevChapter.title}
+              >
+                <FiChevronLeft className="text-base" />
+                <span className="hidden sm:inline max-w-[120px] truncate">{prevChapter.title}</span>
+              </Link>
+            ) : (
+              <span className="flex items-center px-2 py-1.5 text-gray-300 text-sm cursor-default">
+                <FiChevronLeft className="text-base" />
+              </span>
+            )}
+            {nextChapter ? (
+              <Link
+                href={`${path}?chapter=${nextChapter.id}&book=${bookId}${isEdit ? "&edit=1" : ""}`}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
+                title={nextChapter.title}
+              >
+                <span className="hidden sm:inline max-w-[120px] truncate">{nextChapter.title}</span>
+                <FiChevronRight className="text-base" />
+              </Link>
+            ) : (
+              <span className="flex items-center px-2 py-1.5 text-gray-300 text-sm cursor-default">
+                <FiChevronRight className="text-base" />
+              </span>
+            )}
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
           {!isEdit && (

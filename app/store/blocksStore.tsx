@@ -2,14 +2,18 @@
 
 import { create } from "zustand";
 import { Block, BlockStyle } from "../types/block";
+import { Chapter } from "../types/chapter";
 import { Widget, WidgetData } from "../types/widget";
 
 type BlocksStore = {
   blocks: Block[];
   chapterId: number | null;
+  prevChapter: Chapter | null;
+  nextChapter: Chapter | null;
 
   setChapterId: (chapterId: number | null) => void;
   setBlocks: (Blocks: Block[]) => void;
+  setAdjacentChapters: (prev: Chapter | null, next: Chapter | null) => void;
 
   addBlockLocal: (block: Block) => void;
   removeBlockLocal: (blockId: number) => void;
@@ -56,7 +60,10 @@ function BlockToLocal(Block: Block): Block {
 export const useBlocksStore = create<BlocksStore>((set) => ({
   blocks: [],
   chapterId: null,
+  prevChapter: null,
+  nextChapter: null,
   setChapterId: (chapterId) => set({ chapterId }),
+  setAdjacentChapters: (prev, next) => set({ prevChapter: prev, nextChapter: next }),
 
   setBlocks: (Blocks) =>
     set({
@@ -282,5 +289,5 @@ export const useBlocksStore = create<BlocksStore>((set) => ({
       })),
     })),
 
-  clearBlocks: () => set({ blocks: [], chapterId: null }),
+  clearBlocks: () => set({ blocks: [], chapterId: null, prevChapter: null, nextChapter: null }),
 }));

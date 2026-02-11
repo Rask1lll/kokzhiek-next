@@ -10,7 +10,7 @@ type UseConstructorOptions = {
 };
 
 export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
-  const { blocks, setBlocks, setChapterId, clearBlocks } = useBlocksStore();
+  const { blocks, setBlocks, setChapterId, setAdjacentChapters, clearBlocks } = useBlocksStore();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetch = useCallback(async () => {
@@ -23,6 +23,10 @@ export function useConstructor({ bookId, chapterId }: UseConstructorOptions) {
       if (response.success) {
         setChapterId(response.data.current_chapter.id);
         setBlocks(response.data.blocks);
+        setAdjacentChapters(
+          response.data.prev_chapter ?? null,
+          response.data.next_chapter ?? null
+        );
       } else {
         console.error("Failed to fetch constructor state:", response.messages);
       }
