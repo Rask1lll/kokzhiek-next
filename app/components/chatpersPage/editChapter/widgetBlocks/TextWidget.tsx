@@ -11,6 +11,15 @@ import {
   FiList,
 } from "react-icons/fi";
 
+const highlightColors = [
+  { color: "#FEF08A", label: "Жёлтый" },
+  { color: "#BBF7D0", label: "Зелёный" },
+  { color: "#BAE6FD", label: "Голубой" },
+  { color: "#FBCFE8", label: "Розовый" },
+  { color: "#FED7AA", label: "Оранжевый" },
+  { color: "#DDD6FE", label: "Фиолетовый" },
+];
+
 type TextWidgetProps = {
   value: string;
   onChange: (value: string) => void;
@@ -55,6 +64,10 @@ function ToolbarButton({
 export default function TextWidget({ value, onChange }: TextWidgetProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
+  const [showHighlight, setShowHighlight] = useState(false);
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const highlightBtnRef = useRef<HTMLButtonElement>(null);
+  const [highlightPos, setHighlightPos] = useState({ top: 0, left: 0 });
 
   // Initialize content from value
   useEffect(() => {
@@ -89,6 +102,31 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
 
   const handleSelectionChange = () => {
     updateActiveFormats();
+  };
+
+  // Close highlight popup on click outside
+  useEffect(() => {
+    if (!showHighlight) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (highlightRef.current && !highlightRef.current.contains(e.target as Node)) {
+        setShowHighlight(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showHighlight]);
+
+  const toggleHighlight = () => {
+    if (!showHighlight && highlightBtnRef.current) {
+      const rect = highlightBtnRef.current.getBoundingClientRect();
+      setHighlightPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setShowHighlight((v) => !v);
+  };
+
+  const applyHighlight = (color: string) => {
+    execCommand("hiliteColor", color);
+    setShowHighlight(false);
   };
 
   const setFontSize = (size: FontSize) => {
@@ -197,7 +235,7 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
         </div>
 
         {/* Lists */}
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 border-r border-gray-200 pr-2 mr-1">
           <ToolbarButton
             onClick={() => execCommand("insertUnorderedList")}
             title="Маркированный список"
@@ -211,7 +249,70 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
             <span className="text-xs font-medium">1.</span>
           </ToolbarButton>
         </div>
+
+        {/* Highlight */}
+        <div className="flex items-center gap-0.5">
+          <button
+            ref={highlightBtnRef}
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={toggleHighlight}
+            title="Выделить цветом"
+            className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+              showHighlight ? "bg-blue-100 text-blue-600" : "text-gray-600"
+            }`}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* Highlight popup (rendered outside toolbar to avoid overflow clip) */}
+      {showHighlight && (
+        <div
+          ref={highlightRef}
+          className="fixed p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 flex items-center gap-1.5"
+          style={{ top: highlightPos.top, left: highlightPos.left }}
+        >
+          {highlightColors.map((h) => (
+            <button
+              key={h.color}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => applyHighlight(h.color)}
+              title={h.label}
+              className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform"
+              style={{ backgroundColor: h.color }}
+            />
+          ))}
+          <label
+            title="Свой цвет"
+            className="w-6 h-6 rounded-full border border-dashed border-gray-400 hover:scale-110 transition-transform flex items-center justify-center cursor-pointer bg-gradient-to-br from-red-200 via-yellow-200 to-blue-200"
+          >
+            <span className="text-[10px] font-bold text-gray-500">+</span>
+            <input
+              type="color"
+              className="sr-only"
+              onMouseDown={(e) => e.stopPropagation()}
+              onChange={(e) => applyHighlight(e.target.value)}
+            />
+          </label>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applyHighlight("transparent")}
+            title="Убрать выделение"
+            className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform flex items-center justify-center bg-white"
+          >
+            <svg className="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Editor */}
       <div
