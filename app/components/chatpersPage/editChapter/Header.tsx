@@ -21,8 +21,9 @@ export default function ChapterHeader() {
   const { user } = useAuth();
   const { prevChapter, nextChapter } = useBlocksStore();
   const [bookCreatedBy, setBookCreatedBy] = useState<number | null>(null);
+  const [collaboratorIds, setCollaboratorIds] = useState<number[]>([]);
 
-  // Загружаем created_by книги для проверки владельца
+  // Загружаем данные книги для проверки прав
   useEffect(() => {
     if (!bookId) return;
 
@@ -39,6 +40,11 @@ export default function ChapterHeader() {
         if (res.data?.created_by) {
           setBookCreatedBy(res.data.created_by);
         }
+        if (res.data?.collaborators) {
+          setCollaboratorIds(
+            res.data.collaborators.map((c: { id: number }) => c.id)
+          );
+        }
       } catch (error) {
         console.error("Error fetching book owner:", error);
       }
@@ -47,7 +53,7 @@ export default function ChapterHeader() {
     fetchBookOwner();
   }, [bookId]);
 
-  const canEdit = canEditBook(user, bookCreatedBy ?? undefined);
+  const canEdit = canEditBook(user, bookCreatedBy ?? undefined, collaboratorIds);
 
   const handleSaveAsPdf = () => {
     const header = document.querySelector("header");

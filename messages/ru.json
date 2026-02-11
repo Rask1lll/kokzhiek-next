@@ -723,5 +723,13 @@
   },
   "constructor": {
     "removeMatch": "Убрать"
+  },
+  "collaborators": {
+    "title": "Соавторы",
+    "add": "Добавить",
+    "emailPlaceholder": "Email пользователя",
+    "addSuccess": "Соавтор успешно добавлен",
+    "removeSuccess": "Соавтор {name} удалён",
+    "empty": "Соавторов пока нет"
   }
 }

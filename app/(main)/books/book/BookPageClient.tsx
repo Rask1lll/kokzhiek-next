@@ -103,6 +103,7 @@ export default function BookPageClient() {
             status={book.status}
             rejectionReason={book.rejection_reason}
             createdBy={book.created_by}
+            collaboratorIds={book.collaborators?.map((c) => c.id)}
             onDelete={onDeleteBook}
           />
         )}
@@ -112,7 +113,7 @@ export default function BookPageClient() {
         <ChaptersContainer
           bookId={id as string}
           isLoading={isLoading}
-          isBookOwner={canEditBook(user, book?.created_by)}
+          isBookOwner={canEditBook(user, book?.created_by, book?.collaborators?.map((c) => c.id))}
           isChapterOccupied={isAuthor(user) ? isChapterOccupied : undefined}
           getChapterUsers={isAuthor(user) ? getChapterUsers : undefined}
         />

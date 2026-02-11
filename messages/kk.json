@@ -724,5 +724,13 @@
   },
   "constructor": {
     "removeMatch": "Алып тастау"
+  },
+  "collaborators": {
+    "title": "Тең авторлар",
+    "add": "Қосу",
+    "emailPlaceholder": "Пайдаланушы email",
+    "addSuccess": "Тең автор сәтті қосылды",
+    "removeSuccess": "{name} тең авторы жойылды",
+    "empty": "Тең авторлар жоқ"
   }
 }

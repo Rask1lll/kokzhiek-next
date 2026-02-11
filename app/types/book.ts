@@ -15,6 +15,12 @@ export type BookSettings = {
   difficulty?: string;
 };
 
+export type Collaborator = {
+  id: number;
+  name: string;
+  email: string;
+};
+
 export type Book = {
   id: number;
   title: string;
@@ -38,4 +44,5 @@ export type Book = {
   updated_at?: string;
   created_by?: number;
   updated_by?: number | null;
+  collaborators?: Collaborator[];
 };

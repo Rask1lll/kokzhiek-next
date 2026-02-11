@@ -21,7 +21,8 @@ import {
 } from "@/app/services/book/booksApi";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isModerator } from "@/app/libs/roles";
-import { canEditBook } from "@/app/libs/permissions";
+import { canEditBook, isBookOwner } from "@/app/libs/permissions";
+import CollaboratorsSection from "./CollaboratorsSection";
 
 type BookInfoCardProps = {
   bookId: number | string;
@@ -36,6 +37,7 @@ type BookInfoCardProps = {
   status?: BookStatus;
   rejectionReason?: string | null;
   createdBy?: number;
+  collaboratorIds?: number[];
   onDelete?: () => void;
   onStatusChange?: (status: BookStatus) => void;
 };
@@ -55,6 +57,7 @@ export default function BookInfoCard({
   status = "draft",
   rejectionReason,
   createdBy,
+  collaboratorIds,
   onDelete,
   onStatusChange,
 }: BookInfoCardProps) {
@@ -68,7 +71,8 @@ export default function BookInfoCard({
   const tCommon = useTranslations("common");
 
   const canModerate = isModerator(user);
-  const canEdit = canEditBook(user, createdBy);
+  const canEdit = canEditBook(user, createdBy, collaboratorIds);
+  const isOwner = isBookOwner(user, createdBy);
 
   const STATUS_CONFIG: Record<
     BookStatus,
@@ -219,7 +223,7 @@ export default function BookInfoCard({
                 <span>{t("edit")}</span>
               </Link>
             )}
-            {canEdit && onDelete && (
+            {isOwner && onDelete && (
               <button
                 type="button"
                 onClick={onDelete}
@@ -283,6 +287,8 @@ export default function BookInfoCard({
             </div>
           </div>
         )}
+        <CollaboratorsSection bookId={Number(bookId)} isOwner={isOwner} />
+
         <div className="mt-auto flex justify-end">
           {canEdit && (
             <Link
