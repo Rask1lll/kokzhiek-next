@@ -296,7 +296,7 @@ const LayoutPlaceholder = ({
         );
         break;
       case "banner":
-        const bannerData = (widget.data as { text?: string; bgColor?: string; textColor?: string; fontSize?: string; height?: number }) || {};
+        const bannerData = (widget.data as { text?: string; bgColor?: string; textColor?: string; fontSize?: string; height?: number; bgImage?: string }) || {};
         widgetContent = (
           <BannerWidget
             value={{
@@ -305,6 +305,7 @@ const LayoutPlaceholder = ({
               textColor: bannerData.textColor || "#ffffff",
               fontSize: (bannerData.fontSize as "sm" | "base" | "lg" | "xl" | "2xl" | "3xl") || "2xl",
               height: bannerData.height || 200,
+              bgImage: bannerData.bgImage,
             }}
             onChange={(data) => updateWidget(widget.id, data)}
           />
@@ -447,8 +448,10 @@ const LayoutPlaceholder = ({
                   textColor: ((widget.data as Record<string, unknown>)?.textColor as string) || "#ffffff",
                   fontSize: (((widget.data as Record<string, unknown>)?.fontSize as string) || "2xl") as "sm" | "base" | "lg" | "xl" | "2xl" | "3xl",
                   height: ((widget.data as Record<string, unknown>)?.height as number) || 200,
+                  bgImage: ((widget.data as Record<string, unknown>)?.bgImage as string) || undefined,
                 }}
                 onChange={(data) => updateWidget(widget.id, data)}
+                onFileUpload={handleFileUpload}
               />
             )}
           </WidgetMenu>

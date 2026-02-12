@@ -104,7 +104,7 @@ export default function ViewPlaceholder({
       content = <EmbedView value={textValue} />;
       break;
     case "banner":
-      const bannerData = widget.data as { text?: string; bgColor?: string; textColor?: string; fontSize?: string; height?: number } | undefined;
+      const bannerData = widget.data as { text?: string; bgColor?: string; textColor?: string; fontSize?: string; height?: number; bgImage?: string } | undefined;
       content = (
         <BannerView
           value={{
@@ -113,6 +113,7 @@ export default function ViewPlaceholder({
             textColor: bannerData?.textColor || "#ffffff",
             fontSize: bannerData?.fontSize || "2xl",
             height: bannerData?.height || 200,
+            bgImage: bannerData?.bgImage,
           }}
         />
       );

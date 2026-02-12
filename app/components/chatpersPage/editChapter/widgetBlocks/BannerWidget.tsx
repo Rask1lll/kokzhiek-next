@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { FiDroplet } from "react-icons/fi";
+import { useMemo, useState, useRef } from "react";
+import { FiDroplet, FiImage, FiX } from "react-icons/fi";
 
 export type BannerData = {
   text: string;
@@ -9,11 +9,13 @@ export type BannerData = {
   textColor: string;
   fontSize: "sm" | "base" | "lg" | "xl" | "2xl" | "3xl";
   height: number;
+  bgImage?: string;
 };
 
 type BannerWidgetProps = {
   value: BannerData;
   onChange: (data: BannerData) => void;
+  onFileUpload?: (file: File) => Promise<string | null>;
 };
 
 const FONT_SIZES = [
@@ -65,6 +67,13 @@ export default function BannerWidget({ value, onChange }: BannerWidgetProps) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          ...(data.bgImage
+            ? {
+                backgroundImage: `url(${data.bgImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+            : {}),
         }}
       >
         {data.text || "Баннер"}
@@ -83,15 +92,73 @@ export default function BannerWidget({ value, onChange }: BannerWidgetProps) {
 }
 
 /** Settings panel for WidgetMenu dropdown */
-export function BannerSettings({ value, onChange }: BannerWidgetProps) {
+export function BannerSettings({ value, onChange, onFileUpload }: BannerWidgetProps) {
   const data = useMemo(() => ({ ...getDefaultBanner(), ...value }), [value]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const update = (patch: Partial<BannerData>) => {
     onChange({ ...data, ...patch });
   };
 
+  const handleBgImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onFileUpload) return;
+
+    setIsUploading(true);
+    try {
+      const url = await onFileUpload(file);
+      if (url) {
+        update({ bgImage: url });
+      }
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="px-3 py-2 space-y-3">
+      {/* Background image */}
+      <div>
+        <label className="text-xs font-medium text-gray-600 flex items-center gap-1 mb-1">
+          <FiImage className="w-3 h-3" /> Фоновое изображение
+        </label>
+        {data.bgImage ? (
+          <div className="flex items-center gap-2">
+            <img
+              src={data.bgImage}
+              alt="Фон"
+              className="w-16 h-10 object-cover rounded border border-gray-200"
+            />
+            <button
+              type="button"
+              onClick={() => update({ bgImage: undefined })}
+              className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+              title="Убрать фон"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <label
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-dashed border-gray-300 rounded cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors ${
+              isUploading ? "opacity-50 pointer-events-none" : ""
+            }`}
+          >
+            {isUploading ? "Загрузка..." : "Загрузить фото"}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleBgImageUpload}
+              disabled={isUploading}
+            />
+          </label>
+        )}
+      </div>
+
       {/* Background color */}
       <div>
         <label className="text-xs font-medium text-gray-600 flex items-center gap-1 mb-1">

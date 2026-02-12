@@ -6,6 +6,7 @@ type BannerData = {
   textColor: string;
   fontSize: string;
   height: number;
+  bgImage?: string;
 };
 
 type BannerViewProps = {
@@ -32,6 +33,13 @@ export default function BannerView({ value }: BannerViewProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        ...(value.bgImage
+          ? {
+              backgroundImage: `url(${value.bgImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+          : {}),
       }}
     >
       {value.text}
