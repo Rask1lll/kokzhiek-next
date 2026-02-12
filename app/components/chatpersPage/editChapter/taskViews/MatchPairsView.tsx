@@ -50,6 +50,7 @@ export default function MatchPairsView({
   const { loading, error, submit } = useAttempt(widgetId);
   const [matches, setMatches] = useState<Record<string, string>>({}); // answer_id -> cell_id
   const [draggedAnswerId, setDraggedAnswerId] = useState<string | null>(null);
+  const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [result, setResult] = useState<{
     is_correct: boolean;
     points_earned: number;
@@ -71,7 +72,7 @@ export default function MatchPairsView({
     if (pairSizeMode === "custom" && customHeight) {
       return customHeight;
     }
-    
+
     switch (pairSizeMode) {
       case "small":
         return 80;
@@ -161,30 +162,49 @@ export default function MatchPairsView({
     e.preventDefault();
   };
 
-  const handleDrop = (cellMatchId: string) => {
-    if (draggedAnswerId) {
-      // Находим option.id для answer (left) и cell (right)
-      const answerOption = options.find(
-        (opt) => opt.match_id === draggedAnswerId && opt.group === "left"
-      );
-      const cellOption = options.find(
-        (opt) => opt.match_id === cellMatchId && opt.group === "right"
-      );
+  const applyMatch = (answerMatchId: string, cellMatchId: string) => {
+    const answerOption = options.find(
+      (opt) => opt.match_id === answerMatchId && opt.group === "left"
+    );
+    const cellOption = options.find(
+      (opt) => opt.match_id === cellMatchId && opt.group === "right"
+    );
 
-      if (answerOption?.id && cellOption?.id) {
-        const answerId = answerOption.id.toString();
-        const cellId = cellOption.id.toString();
-        const newMatches = { ...matches, [answerId]: cellId };
-        setMatches(newMatches);
-        setResult(null);
+    if (answerOption?.id && cellOption?.id) {
+      const answerId = answerOption.id.toString();
+      const cellId = cellOption.id.toString();
+      const newMatches = { ...matches, [answerId]: cellId };
+      setMatches(newMatches);
+      setResult(null);
 
-        if (onChange) {
-          const answer: UserAnswer = { matches: newMatches };
-          onChange(JSON.stringify(answer));
-        }
+      if (onChange) {
+        const answer: UserAnswer = { matches: newMatches };
+        onChange(JSON.stringify(answer));
       }
     }
+  };
+
+  const handleDrop = (cellMatchId: string) => {
+    if (draggedAnswerId) {
+      applyMatch(draggedAnswerId, cellMatchId);
+    }
     setDraggedAnswerId(null);
+  };
+
+  // Tap-to-match: select answer, then tap cell
+  const handleAnswerTap = (answerMatchId: string) => {
+    if (isAnswerMatched(answerMatchId)) return;
+    setSelectedAnswerId(
+      selectedAnswerId === answerMatchId ? null : answerMatchId
+    );
+  };
+
+  const handleCellTap = (cellMatchId: string) => {
+    if (!selectedAnswerId) return;
+    // Don't place if cell already has a match
+    if (getMatchedAnswerForCell(cellMatchId)) return;
+    applyMatch(selectedAnswerId, cellMatchId);
+    setSelectedAnswerId(null);
   };
 
   const handleRemoveMatch = (answerMatchId: string) => {
@@ -256,140 +276,128 @@ export default function MatchPairsView({
   return (
     <TaskViewWrapper widgetId={widgetId}>
       <div className="w-full space-y-4">
-        {/* Header */}
-        {/* <div className="text-base md:text-lg lg:text-xl text-slate-600 text-center">
-          Перетащите варианты ответа в соответствующие ячейки
-        </div> */}
-
-        {/* Grid layout: each row = answer + arrow + cell */}
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-
-          {/* Content rows */}
-          {data.pairs.map((pair, index) => {
-            const matchedAnswer = getMatchedAnswerForCell(pair.id);
-
-            // Find the answer that should be shown in this row (from shuffled answers)
-            // We'll show shuffled answers in order, one per row
-            const answerForRow = shuffledAnswers[index] || null;
-            const answerIsMatched = answerForRow
-              ? isAnswerMatched(answerForRow.id)
-              : false;
-
-            return (
-              <div key={pair.id} className="contents">
-                {/* Answer column */}
-                <div className="flex h-full">
-                  {answerForRow && (
-                    <div
-                      draggable={!answerIsMatched}
-                      onDragStart={() => handleDragStart(answerForRow.id)}
-                      style={{
-                        minHeight: `${pairHeight}px`,
-                        height: `${pairHeight}px`,
-                      }}
-                      className={`w-full px-2 py-1 rounded-lg border-2 transition-all flex flex-col ${
-                        answerIsMatched
-                          ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
-                          : draggedAnswerId === answerForRow.id
-                          ? "bg-blue-100 border-blue-400 scale-105 cursor-grabbing"
-                          : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-move"
-                      }`}
-                    >
-                      <div className="flex flex-col items-center justify-center gap-2 flex-1">
-                        {answerForRow.imageUrl && (
-                          <div className="relative flex-1 w-full max-w-[80%] min-h-0">
-                            <Image
-                              src={answerForRow.imageUrl}
-                              alt=""
-                              fill
-                              className="object-contain rounded"
-                              unoptimized
-                            />
-                          </div>
-                        )}
-                        <span className="text-base text-center md:text-lg lg:text-xl font-medium text-gray-800 wrap-break-word">
-                          {answerForRow.text || "Пусто"}
-                        </span>
-                      </div>
+        {/* Pool of unmatched answers */}
+        {shuffledAnswers.some((a) => !isAnswerMatched(a.id)) && (
+          <div className="flex flex-wrap gap-2 justify-center">
+            {shuffledAnswers.map((answer) => {
+              if (isAnswerMatched(answer.id)) return null;
+              const isSelected = selectedAnswerId === answer.id;
+              return (
+                <div
+                  key={answer.id}
+                  draggable
+                  onDragStart={() => handleDragStart(answer.id)}
+                  onClick={() => handleAnswerTap(answer.id)}
+                  className={`px-3 py-2 rounded-lg border-2 transition-all cursor-pointer select-none flex items-center gap-2 ${
+                    isSelected
+                      ? "bg-blue-100 border-blue-500 ring-2 ring-blue-300 scale-105"
+                      : draggedAnswerId === answer.id
+                      ? "bg-blue-50 border-blue-400 scale-105"
+                      : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md active:bg-blue-50"
+                  }`}
+                >
+                  {answer.imageUrl && (
+                    <div className="relative w-10 h-10 md:w-12 md:h-12 shrink-0">
+                      <Image
+                        src={answer.imageUrl}
+                        alt=""
+                        fill
+                        className="object-contain rounded"
+                        unoptimized
+                      />
                     </div>
                   )}
+                  <span className="text-sm md:text-base font-medium text-gray-800">
+                    {answer.text || "\u00A0"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Cell rows */}
+        <div className="space-y-3">
+          {data.pairs.map((pair) => {
+            const matchedAnswer = getMatchedAnswerForCell(pair.id);
+
+            return (
+              <div
+                key={pair.id}
+                onClick={() => handleCellTap(pair.id)}
+                onDragOver={handleDragOver}
+                onDrop={() => handleDrop(pair.id)}
+                style={{ minHeight: `${pairHeight}px` }}
+                className={`relative w-full p-2 rounded-lg border-2 transition-all flex items-stretch gap-2 ${
+                  matchedAnswer
+                    ? "bg-slate-50 border-slate-400"
+                    : selectedAnswerId
+                    ? "bg-blue-50/50 border-blue-300 border-dashed cursor-pointer hover:border-blue-500"
+                    : "bg-slate-50 border-slate-300 border-dashed"
+                }`}
+              >
+                {/* Cell label */}
+                <div className="flex items-center justify-center flex-1">
+                  <div className="text-center w-full h-full flex flex-col items-center justify-center">
+                    {pair.cell.imageUrl && (
+                      <div className="relative flex-1 w-full max-w-[80%] min-h-0">
+                        <Image
+                          src={pair.cell.imageUrl}
+                          alt=""
+                          fill
+                          className="object-contain rounded"
+                          unoptimized
+                        />
+                      </div>
+                    )}
+                    <p className="text-base md:text-lg lg:text-xl text-slate-500">
+                      {pair.cell.text}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Arrow column */}
-                <div className="flex items-center justify-center px-2 h-full self-stretch">
+                {/* Arrow */}
+                <div className="flex items-center px-1">
                   <CgArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
                 </div>
 
-                {/* Cell column */}
-                <div className="flex h-full relative">
-                  <div
-                    onDragOver={handleDragOver}
-                    onDrop={() => handleDrop(pair.id)}
-                    style={{
-                      minHeight: `${pairHeight}px`,
-                      height: `${pairHeight}px`,
-                    }}
-                    className={`w-full p-2 rounded-lg border-2 transition-all flex ${
-                      matchedAnswer
-                        ? "bg-slate-100 border-slate-400"
-                        : "bg-slate-50 border-slate-300 border-dashed hover:border-blue-400"
-                    }`}
-                  >
-                    {matchedAnswer ? (
-                      <div className="flex flex-col flex-1">
-                        <div className="absolute top-1 right-1 md:top-1.5 md:right-1.5 z-10">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMatch(matchedAnswer.id)}
-                            className="p-1.5 md:p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 active:bg-red-100 transition-colors"
-                            title={t("constructor.removeMatch")}
-                          >
-                            <FiX className="w-7 h-7 md:w-5 md:h-5" />
-                          </button>
-                        </div>
-                        <div className="flex flex-col gap-2 flex-1 items-center justify-center ring text-center bg-white w-full rounded-2xl ring-gray-300 h-full">
-                          {matchedAnswer.imageUrl && (
-                            <div className="relative flex-1 w-full max-w-[80%] min-h-0">
-                              <Image
-                                src={matchedAnswer.imageUrl}
-                                alt=""
-                                fill
-                                className="object-contain rounded"
-                                unoptimized
-                              />
-                            </div>
-                          )}
-                          <span className="text-base md:text-lg lg:text-xl font-medium text-gray-800 wrap-break-word">
-                            {matchedAnswer.text}
-                          </span>
-                        </div>
+                {/* Matched answer or empty slot */}
+                <div className="flex items-center justify-center flex-1">
+                  {matchedAnswer ? (
+                    <div className="relative flex flex-col gap-2 flex-1 items-center justify-center text-center bg-white w-full rounded-2xl ring ring-gray-300 h-full p-2">
+                      <div className="absolute -top-2 -right-2 z-10">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveMatch(matchedAnswer.id);
+                          }}
+                          className="p-1.5 md:p-1 rounded-full bg-white shadow border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 active:bg-red-100 transition-colors"
+                          title={t("constructor.removeMatch")}
+                        >
+                          <FiX className="w-4 h-4 md:w-3.5 md:h-3.5" />
+                        </button>
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-center flex-1">
-                        <div className="text-center bg-white w-full rounded-2xl ring ring-gray-300 h-full flex flex-col items-center justify-center">
-                          
+                      {matchedAnswer.imageUrl && (
+                        <div className="relative flex-1 w-full max-w-[80%] min-h-0">
+                          <Image
+                            src={matchedAnswer.imageUrl}
+                            alt=""
+                            fill
+                            className="object-contain rounded"
+                            unoptimized
+                          />
                         </div>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-center flex-1">
-                        <div className="text-center w-full h-full flex flex-col items-center justify-center">
-                          {pair.cell.imageUrl && (
-                            <div className="relative flex-1 w-full max-w-[80%] min-h-0">
-                              <Image
-                                src={pair.cell.imageUrl}
-                                alt=""
-                                fill
-                                className="object-contain rounded"
-                                unoptimized
-                              />
-                            </div>
-                          )}
-                          <p className="text-base md:text-lg lg:text-xl text-slate-500">
-                            {pair.cell.text}
-                          </p>
-                        </div>
-                      </div>
-                  </div>
+                      )}
+                      <span className="text-sm md:text-base lg:text-lg font-medium text-gray-800 break-words">
+                        {matchedAnswer.text}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center bg-white w-full rounded-2xl ring ring-gray-200 h-full min-h-[48px]">
+                      <span className="text-sm text-gray-300">...</span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
