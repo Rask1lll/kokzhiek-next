@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CgArrowRight } from "react-icons/cg";
+import { FiX } from "react-icons/fi";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useQuestions } from "@/app/hooks/useQuestions";
@@ -262,14 +263,6 @@ export default function MatchPairsView({
 
         {/* Grid layout: each row = answer + arrow + cell */}
         <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-          {/* Header row */}
-          <div className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
-            Варианты ответа:
-          </div>
-          <div></div>
-          <div className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
-            Ячейки:
-          </div>
 
           {/* Content rows */}
           {data.pairs.map((pair, index) => {
@@ -343,14 +336,15 @@ export default function MatchPairsView({
                     }`}
                   >
                     {matchedAnswer ? (
-                      <div className="flex flex-col flex-1 pt-2">
-                        <div className="absolute top-2 right-2">
+                      <div className="flex flex-col flex-1">
+                        <div className="absolute top-1 right-1 md:top-1.5 md:right-1.5 z-10">
                           <button
                             type="button"
                             onClick={() => handleRemoveMatch(matchedAnswer.id)}
-                            className="text-sm md:text-base lg:text-lg text-red-500 hover:text-red-700"
+                            className="p-1.5 md:p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 active:bg-red-100 transition-colors"
+                            title={t("constructor.removeMatch")}
                           >
-                            {t("constructor.removeMatch")}
+                            <FiX className="w-7 h-7 md:w-5 md:h-5" />
                           </button>
                         </div>
                         <div className="flex flex-col gap-2 flex-1 items-center justify-center ring text-center bg-white w-full rounded-2xl ring-gray-300 h-full">
