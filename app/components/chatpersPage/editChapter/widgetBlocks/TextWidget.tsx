@@ -10,6 +10,7 @@ import {
   FiAlignRight,
   FiList,
 } from "react-icons/fi";
+import { HexColorPicker } from "react-colorful";
 
 const highlightColors = [
   { color: "#FEF08A", label: "Жёлтый" },
@@ -18,6 +19,15 @@ const highlightColors = [
   { color: "#FBCFE8", label: "Розовый" },
   { color: "#FED7AA", label: "Оранжевый" },
   { color: "#DDD6FE", label: "Фиолетовый" },
+];
+
+const textColors = [
+  { color: "#000000", label: "Чёрный" },
+  { color: "#DC2626", label: "Красный" },
+  { color: "#2563EB", label: "Синий" },
+  { color: "#16A34A", label: "Зелёный" },
+  { color: "#9333EA", label: "Фиолетовый" },
+  { color: "#EA580C", label: "Оранжевый" },
 ];
 
 type TextWidgetProps = {
@@ -68,9 +78,22 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
   const highlightRef = useRef<HTMLDivElement>(null);
   const highlightBtnRef = useRef<HTMLButtonElement>(null);
   const [highlightPos, setHighlightPos] = useState({ top: 0, left: 0 });
+  const [showTextColor, setShowTextColor] = useState(false);
+  const textColorRef = useRef<HTMLDivElement>(null);
+  const textColorBtnRef = useRef<HTMLButtonElement>(null);
+  const [textColorPos, setTextColorPos] = useState({ top: 0, left: 0 });
+  const savedSelectionRef = useRef<Range | null>(null);
+  const skipSyncRef = useRef(false);
+  const [customHighlightColor, setCustomHighlightColor] = useState("#FEF08A");
+  const [customTextColor, setCustomTextColor] = useState("#DC2626");
+  const [colorPickerModal, setColorPickerModal] = useState<"highlight" | "textColor" | null>(null);
 
   // Initialize content from value
   useEffect(() => {
+    if (skipSyncRef.current) {
+      skipSyncRef.current = false;
+      return;
+    }
     if (editorRef.current && value && editorRef.current.innerHTML !== value) {
       editorRef.current.innerHTML = value;
     }
@@ -78,6 +101,7 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
 
   const handleInput = () => {
     if (editorRef.current) {
+      skipSyncRef.current = true;
       onChange(editorRef.current.innerHTML);
     }
   };
@@ -116,7 +140,25 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showHighlight]);
 
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      savedSelectionRef.current = sel.getRangeAt(0).cloneRange();
+    }
+  };
+
+  const restoreSelection = () => {
+    if (savedSelectionRef.current) {
+      const sel = window.getSelection();
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(savedSelectionRef.current);
+      }
+    }
+  };
+
   const toggleHighlight = () => {
+    saveSelection();
     if (!showHighlight && highlightBtnRef.current) {
       const rect = highlightBtnRef.current.getBoundingClientRect();
       setHighlightPos({ top: rect.bottom + 4, left: rect.left });
@@ -125,8 +167,38 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
   };
 
   const applyHighlight = (color: string) => {
+    restoreSelection();
     execCommand("hiliteColor", color);
     setShowHighlight(false);
+    savedSelectionRef.current = null;
+  };
+
+  // Close text color popup on click outside
+  useEffect(() => {
+    if (!showTextColor) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (textColorRef.current && !textColorRef.current.contains(e.target as Node)) {
+        setShowTextColor(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showTextColor]);
+
+  const toggleTextColor = () => {
+    saveSelection();
+    if (!showTextColor && textColorBtnRef.current) {
+      const rect = textColorBtnRef.current.getBoundingClientRect();
+      setTextColorPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setShowTextColor((v) => !v);
+  };
+
+  const applyTextColor = (color: string) => {
+    restoreSelection();
+    execCommand("foreColor", color);
+    setShowTextColor(false);
+    savedSelectionRef.current = null;
   };
 
   const setFontSize = (size: FontSize) => {
@@ -250,7 +322,7 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
           </ToolbarButton>
         </div>
 
-        {/* Highlight */}
+        {/* Highlight & Text color */}
         <div className="flex items-center gap-0.5">
           <button
             ref={highlightBtnRef}
@@ -265,6 +337,22 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+          </button>
+          <button
+            ref={textColorBtnRef}
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={toggleTextColor}
+            title="Цвет текста"
+            className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+              showTextColor ? "bg-blue-100 text-blue-600" : "text-gray-600"
+            }`}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 18h14" />
+              <path d="M8 18l4-12 4 12" />
+              <path d="M9.5 14h5" />
             </svg>
           </button>
         </div>
@@ -288,18 +376,6 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
               style={{ backgroundColor: h.color }}
             />
           ))}
-          <label
-            title="Свой цвет"
-            className="w-6 h-6 rounded-full border border-dashed border-gray-400 hover:scale-110 transition-transform flex items-center justify-center cursor-pointer bg-gradient-to-br from-red-200 via-yellow-200 to-blue-200"
-          >
-            <span className="text-[10px] font-bold text-gray-500">+</span>
-            <input
-              type="color"
-              className="sr-only"
-              onMouseDown={(e) => e.stopPropagation()}
-              onChange={(e) => applyHighlight(e.target.value)}
-            />
-          </label>
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
@@ -311,6 +387,94 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => { setShowHighlight(false); setColorPickerModal("highlight"); }}
+            title="Свой цвет"
+            className="w-6 h-6 rounded-full border border-dashed border-gray-400 hover:scale-110 transition-transform flex items-center justify-center bg-white text-gray-500 text-sm font-bold"
+          >
+            
+          </button>
+        </div>
+      )}
+
+      {/* Text color popup */}
+      {showTextColor && (
+        <div
+          ref={textColorRef}
+          className="fixed p-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 flex items-center gap-1.5"
+          style={{ top: textColorPos.top, left: textColorPos.left }}
+        >
+          {textColors.map((tc) => (
+            <button
+              key={tc.color}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => applyTextColor(tc.color)}
+              title={tc.label}
+              className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform flex items-center justify-center"
+              style={{ backgroundColor: tc.color }}
+            >
+              <span className="text-[10px] font-bold" style={{ color: tc.color === "#000000" ? "#fff" : "#fff" }}>A</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applyTextColor("#1f2937")}
+            title="Убрать цвет"
+            className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform flex items-center justify-center bg-white"
+          >
+            <svg className="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => { setShowTextColor(false); setColorPickerModal("textColor"); }}
+            title="Свой цвет"
+            className="w-6 h-6 rounded-full border border-dashed border-gray-400 hover:scale-110 transition-transform flex items-center justify-center bg-white text-gray-500 text-sm font-bold"
+          >
+            
+          </button>
+        </div>
+      )}
+
+      {/* Color picker modal */}
+      {colorPickerModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onMouseDown={(e) => { if (e.target === e.currentTarget) setColorPickerModal(null); }}>
+          <div className="bg-white rounded-lg p-5 shadow-xl">
+            <h3 className="text-sm font-medium mb-3">
+              {colorPickerModal === "highlight" ? "Цвет выделения" : "Цвет текста"}
+            </h3>
+            <HexColorPicker
+              color={colorPickerModal === "highlight" ? customHighlightColor : customTextColor}
+              onChange={colorPickerModal === "highlight" ? setCustomHighlightColor : setCustomTextColor}
+            />
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => setColorPickerModal(null)}
+                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={() => {
+                  if (colorPickerModal === "highlight") {
+                    applyHighlight(customHighlightColor);
+                  } else {
+                    applyTextColor(customTextColor);
+                  }
+                  setColorPickerModal(null);
+                }}
+                className="flex-1 px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                Применить
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
