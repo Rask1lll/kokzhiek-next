@@ -1,7 +1,10 @@
 "use client";
 
 import { Widget } from "@/app/types/widget";
+import { TaskType } from "@/app/types/enums";
 import { useTranslations } from "next-intl";
+
+const TASK_WIDGET_TYPES = new Set<string>(Object.values(TaskType));
 
 // View components for widgets
 import HeadingView from "./viewBlocks/HeadingView";
@@ -178,5 +181,29 @@ export default function ViewPlaceholder({
       );
   }
 
-  return <div className="w-full">{content}</div>;
+  // Sign display for content widgets
+  const wd = widget.data as Record<string, unknown> | undefined;
+  const wSignUrl = !TASK_WIDGET_TYPES.has(widget.type) ? (wd?.signUrl as string | undefined) : undefined;
+  const wSignSize = (wd?.signSize as string) || "md";
+  const wSignMode = (wd?.signMode as string) || "inline";
+  const signSizeClass: Record<string, string> = { sm: "w-6 h-6", md: "w-8 h-8", lg: "w-12 h-12", xl: "w-16 h-16" };
+  const signImg = wSignUrl ? (
+    <img src={wSignUrl} alt="Условный знак" className={`${signSizeClass[wSignSize] || signSizeClass.md} object-contain flex-shrink-0`} />
+  ) : null;
+
+  const wrappedContent = signImg ? (
+    wSignMode === "absolute" ? (
+      <div className="relative">
+        <div className="absolute -left-10 top-0">{signImg}</div>
+        <div>{content}</div>
+      </div>
+    ) : (
+      <div className="flex items-start gap-2">
+        {signImg}
+        <div className="flex-1">{content}</div>
+      </div>
+    )
+  ) : content;
+
+  return <div className="w-full">{wrappedContent}</div>;
 }
