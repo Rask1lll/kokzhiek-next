@@ -38,7 +38,7 @@ export default function BookPageClient() {
   const id = searchParams.get("book");
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { setChapters } = useChaptersStore();
+  const { setChapters, setSections } = useChaptersStore();
   const { user } = useAuth();
   const { isConnected, requestBookPresence, isChapterOccupied, getChapterUsers } = useChapterPresence(user);
 
@@ -66,6 +66,7 @@ export default function BookPageClient() {
           }
         );
         const res = await response.json();
+        setSections(res.data?.sections ?? []);
         setChapters(res.data?.chapters ?? []);
         setBook(res.data);
       } catch (error) {

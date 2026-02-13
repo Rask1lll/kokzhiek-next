@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FiChevronRight, FiTrash2, FiEdit2, FiLock } from "react-icons/fi";
+import { PiDotsNine } from "react-icons/pi";
 import { MdMenuBook } from "react-icons/md";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -17,6 +18,7 @@ type ChapterCardProps = {
   isOccupied?: boolean;
   occupiedBy?: PresenceUser[];
   canEdit?: boolean;
+  dragHandleProps?: Record<string, unknown>;
 };
 
 export default function ChapterCard({
@@ -27,6 +29,7 @@ export default function ChapterCard({
   isOccupied = false,
   occupiedBy = [],
   canEdit = false,
+  dragHandleProps,
 }: ChapterCardProps) {
   const t = useTranslations("chapters");
   const { addContent } = useModalWindowStore();
@@ -107,12 +110,21 @@ export default function ChapterCard({
             ? `/books/book/chapter?chapter=${chapterId}&book=${bookid}&edit=1`
             : `/books/book/chapter?chapter=${chapterId}&book=${bookid}`
         }
-        className={`flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50/60 ${
+        className={`flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50/60 ${
           isDeleting ? "opacity-50 pointer-events-none" : ""
         }`}
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
+          {dragHandleProps && (
+            <div
+              {...dragHandleProps}
+              onClick={(e: React.MouseEvent) => e.preventDefault()}
+              className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors"
+            >
+              <PiDotsNine className="w-5 h-5" />
+            </div>
+          )}
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700 shrink-0">
             <MdMenuBook />
           </div>
           <div>
