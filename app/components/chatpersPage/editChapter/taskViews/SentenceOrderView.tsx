@@ -217,14 +217,15 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
 
         {/* Sentence area - where words are placed */}
         <div className="min-h-[80px] p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="text-sm text-gray-500 mb-3">Составьте предложение:</p>
+          {/* <p className="text-sm text-gray-500 mb-3">Составьте предложение:</p> */}
           <div
             className="flex flex-wrap gap-2 min-h-[60px] items-center"
             onDragOver={(e) => handleDragOver(e)}
             onDrop={(e) => handleDrop(e)}
           >
             {sentenceWords.length === 0 ? (
-              <span className="text-gray-400 italic">Перетащите слова сюда</span>
+              // <span className="text-gray-400 italic">Перетащите слова сюда</span>
+              <span className="text-gray-400 italic"></span>
             ) : (
               sentenceWords.map((optionId, index) => (
                 <div
@@ -245,7 +246,7 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
 
         {/* Available words area */}
         <div>
-          <p className="text-sm text-gray-500 mb-3">Доступные слова:</p>
+          {/* <p className="text-sm text-gray-500 mb-3">Доступные слова:</p> */}
           <div className="flex flex-wrap gap-2">
             {availableWords.map((optionId) =>
               renderWord(

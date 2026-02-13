@@ -94,7 +94,15 @@
     "save": "Сақтау",
     "cancel": "Болдырмау",
     "occupiedBy": "Өңдеп жатыр: {name}",
-    "someone": "Біреу"
+    "someone": "Біреу",
+    "addSection": "Бөлім қосу",
+    "createSectionTitle": "Жаңа бөлім құру",
+    "sectionTitlePlaceholder": "Бөлім атауы",
+    "lessonCount_one": "тарау",
+    "lessonCount_other": "тарау",
+    "deleteSection": "Бөлімді жою",
+    "deleteSectionConfirm": "\"{title}\" бөлімін жоюды қалайсыз ба? Тараулар бөлімсіз қалады.",
+    "section": "Бөлім"
   },
   "common": {
     "save": "Сақтау",

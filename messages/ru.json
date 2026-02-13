@@ -94,7 +94,15 @@
     "save": "Сохранить",
     "cancel": "Отмена",
     "occupiedBy": "Редактирует: {name}",
-    "someone": "Кто-то"
+    "someone": "Кто-то",
+    "addSection": "Добавить раздел",
+    "createSectionTitle": "Создание нового раздела",
+    "sectionTitlePlaceholder": "Название раздела",
+    "lessonCount_one": "глава",
+    "lessonCount_other": "глав",
+    "deleteSection": "Удалить раздел",
+    "deleteSectionConfirm": "Вы уверены, что хотите удалить раздел \"{title}\"? Главы останутся без раздела.",
+    "section": "Раздел"
   },
   "common": {
     "save": "Сохранить",

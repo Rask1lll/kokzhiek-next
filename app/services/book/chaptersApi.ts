@@ -7,13 +7,17 @@ import { Book } from "../../types/book";
 
 export async function handleUpdateChapter(
   chapterId: number | string,
-  title: string
+  title: string,
+  sectionId?: number | null
 ): Promise<ConstructorResponse<Chapter> | null> {
   try {
+    const body: Record<string, unknown> = {};
+    if (title.trim()) body.title = title.trim();
+    if (sectionId !== undefined) body.section_id = sectionId;
     const res = await fetch(`${API_BASE}/api/v1/chapters/${chapterId}`, {
       method: "PUT",
       headers: getAuthHeaders(),
-      body: JSON.stringify({ title: title.trim() }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -46,7 +50,8 @@ export async function handleDeleteChapter(
 
 export const handleCreateChapter = async (
   bookId: string,
-  title: string
+  title: string,
+  sectionId?: number | null
 ): Promise<ConstructorResponse<Chapter> | undefined> => {
   if (!bookId) {
     console.error("Book id is missing in search params");
@@ -58,28 +63,85 @@ export const handleCreateChapter = async (
     return;
   }
 
-  const data = JSON.stringify({ title: title.trim() });
-
-  console.log("Create chapter payload:", data);
+  const body: Record<string, unknown> = { title: title.trim() };
+  if (sectionId) body.section_id = sectionId;
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${bookId}/chapters`,
+      `${API_BASE}/api/v1/books/${bookId}/chapters`,
       {
         headers: getAuthHeaders(),
         method: "POST",
-        body: data,
+        body: JSON.stringify(body),
       }
     );
 
     return res.json();
-    //   addChapter({
-    //     id: resData.data.id,
-    //     title: resData.data.title,
-    //     order: resData.data.order,
-    //   });
-    //   removeContent();
   } catch (error) {
     console.error("Failed to create chapter:", error);
   }
 };
+
+type ContentOrderItem =
+  | { type: "section"; id: number; order: number; chapters?: { id: number; order: number }[] }
+  | { type: "chapter"; id: number; order: number };
+
+export async function handleReorderContent(
+  bookId: string,
+  order: ContentOrderItem[]
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/v1/books/${bookId}/content/order`,
+      {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(order),
+      }
+    );
+    return res.ok;
+  } catch (error) {
+    console.error("Failed to reorder content:", error);
+    return false;
+  }
+}
+
+export async function handleReorderChapters(
+  bookId: string,
+  order: { id: number; order: number }[]
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/v1/books/${bookId}/chapters/order`,
+      {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(order),
+      }
+    );
+    return res.ok;
+  } catch (error) {
+    console.error("Failed to reorder chapters:", error);
+    return false;
+  }
+}
+
+export async function handleReorderSectionChapters(
+  sectionId: number | string,
+  order: { id: number; order: number }[]
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/v1/sections/${sectionId}/chapters/order`,
+      {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(order),
+      }
+    );
+    return res.ok;
+  } catch (error) {
+    console.error("Failed to reorder section chapters:", error);
+    return false;
+  }
+}
