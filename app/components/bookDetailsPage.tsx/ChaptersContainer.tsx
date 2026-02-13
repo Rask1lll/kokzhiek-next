@@ -39,7 +39,6 @@ import EditSectionModal from "./EditSectionModal";
 import { Section, Chapter } from "@/app/types/chapter";
 import {
   handleReorderContent,
-  handleReorderSectionChapters,
   handleUpdateChapter,
 } from "@/app/services/book/chaptersApi";
 
@@ -51,10 +50,11 @@ type ChaptersContainerProps = {
   getChapterUsers?: (chapterId: string) => PresenceUser[];
 };
 
-// A unified content item: either a section or a standalone chapter
+// A unified content item: section, standalone chapter, or ghost (invisible drop target)
 type ContentItem =
   | { type: "section"; id: string; data: Section; order: number }
-  | { type: "chapter"; id: string; data: Chapter; order: number };
+  | { type: "chapter"; id: string; data: Chapter; order: number }
+  | { type: "ghost"; id: string; order: number };
 
 // Sortable wrapper for SectionCard
 function SortableSection({
@@ -159,6 +159,15 @@ function SortableChapter({
   );
 }
 
+// Invisible zero-height sortable item used as drop target around sections
+function SortableGhost({ id }: { id: string }) {
+  const { setNodeRef, attributes, listeners } = useSortable({
+    id,
+    disabled: true,
+  });
+  return <div ref={setNodeRef} {...attributes} {...listeners} className="h-0" />;
+}
+
 // Helper: find which container a chapter belongs to
 function findContainer(
   chapterId: string,
@@ -175,6 +184,25 @@ function findContainer(
     return { type: "standalone" };
   }
   return null;
+}
+
+// Build full content order payload for the API
+function buildContentOrder(sections: Section[], chapters: Chapter[]) {
+  const items = [
+    ...sections.map((s) => ({
+      type: "section" as const,
+      id: s.id,
+      order: s.order ?? 0,
+      chapters: s.chapters.map((c, i) => ({ id: c.id, order: c.order ?? i })),
+    })),
+    ...chapters.map((c) => ({
+      type: "chapter" as const,
+      id: c.id,
+      order: c.order ?? 0,
+    })),
+  ].sort((a, b) => a.order - b.order);
+
+  return items.map((item, i) => ({ ...item, order: i }));
 }
 
 export default function ChaptersContainer({
@@ -202,8 +230,8 @@ export default function ChaptersContainer({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Build unified content list sorted by order
-  const contentItems: ContentItem[] = [
+  // Build unified content list sorted by order, with ghost items around sections
+  const sortedItems: ContentItem[] = [
     ...sections.map((s) => ({
       type: "section" as const,
       id: `section-${s.id}`,
@@ -217,6 +245,18 @@ export default function ChaptersContainer({
       order: c.order ?? 0,
     })),
   ].sort((a, b) => a.order - b.order);
+
+  const contentItems: ContentItem[] = [];
+  for (const item of sortedItems) {
+    if (item.type === "section") {
+      const sId = (item.data as Section).id;
+      contentItems.push({ type: "ghost", id: `ghost-before-${sId}`, order: item.order });
+      contentItems.push(item);
+      contentItems.push({ type: "ghost", id: `ghost-after-${sId}`, order: item.order });
+    } else {
+      contentItems.push(item);
+    }
+  }
 
   const contentIds = contentItems.map((item) => item.id);
 
@@ -408,12 +448,13 @@ export default function ChaptersContainer({
         findContainer(activeStr, curSections, curChapters)?.type === "standalone");
     const isTopLevelOver =
       overStr.startsWith("section-") ||
+      overStr.startsWith("ghost-") ||
       (overStr.startsWith("ch-") &&
         findContainer(overStr, curSections, curChapters)?.type === "standalone");
 
     if (isTopLevelActive && isTopLevelOver) {
-      // Build current content list
-      const curItems: ContentItem[] = [
+      // Build current content list with ghosts for correct arrayMove indexing
+      const curSorted: ContentItem[] = [
         ...curSections.map((s) => ({
           type: "section" as const,
           id: `section-${s.id}`,
@@ -428,6 +469,18 @@ export default function ChaptersContainer({
         })),
       ].sort((a, b) => a.order - b.order);
 
+      const curItems: ContentItem[] = [];
+      for (const ci of curSorted) {
+        if (ci.type === "section") {
+          const sId = (ci.data as Section).id;
+          curItems.push({ type: "ghost", id: `ghost-before-${sId}`, order: ci.order });
+          curItems.push(ci);
+          curItems.push({ type: "ghost", id: `ghost-after-${sId}`, order: ci.order });
+        } else {
+          curItems.push(ci);
+        }
+      }
+
       const curIds = curItems.map((item) => item.id);
       const oldIndex = curIds.indexOf(activeStr);
       const newIndex = curIds.indexOf(overStr);
@@ -435,7 +488,7 @@ export default function ChaptersContainer({
       if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
         const reordered = arrayMove(curItems, oldIndex, newIndex);
 
-        // Update orders
+        // Update orders (ghosts are skipped — only sections & chapters get order)
         const newSections = curSections.map((s) => {
           const idx = reordered.findIndex((item) => item.id === `section-${s.id}`);
           return idx !== -1 ? { ...s, order: idx } : s;
@@ -448,19 +501,14 @@ export default function ChaptersContainer({
         setSections(newSections);
         setChapters(newChapters);
 
-        // Call new unified reorder endpoint
-        handleReorderContent(
-          bookId,
-          reordered.map((item, i) => ({
-            type: item.type,
-            id: item.type === "section"
-              ? (item.data as Section).id
-              : (item.data as Chapter).id,
-            order: i,
-          }))
-        );
+        // Call unified reorder endpoint
+        handleReorderContent(bookId, buildContentOrder(newSections, newChapters));
       }
 
+      // Persist cross-container move if chapter was dragged out of / into a section
+      if (movedChapterRef.current) {
+        persistChapterMove(movedChapterRef.current);
+      }
       movedChapterRef.current = null;
       return;
     }
@@ -487,15 +535,11 @@ export default function ChaptersContainer({
             const reordered = arrayMove(sec.chapters, oldIdx, newIdx).map(
               (c, i) => ({ ...c, order: i })
             );
-            setSections(
-              curSections.map((s) =>
-                s.id === sec.id ? { ...s, chapters: reordered } : s
-              )
+            const updatedSections = curSections.map((s) =>
+              s.id === sec.id ? { ...s, chapters: reordered } : s
             );
-            handleReorderSectionChapters(
-              sec.id,
-              reordered.map((c, i) => ({ id: c.id, order: i }))
-            );
+            setSections(updatedSections);
+            handleReorderContent(bookId, buildContentOrder(updatedSections, curChapters));
           }
         }
       }
@@ -508,55 +552,25 @@ export default function ChaptersContainer({
     }
   };
 
-  const persistChapterMove = (move: {
+  const persistChapterMove = async (move: {
     chapterId: number;
     fromSectionId: number | null;
     toSectionId: number | null;
   }) => {
     const { chapterId, toSectionId } = move;
-    const { sections: curSections, chapters: curChapters } =
+    const { sections: curSections, chapters: curChapters, updateChapter } =
       useChaptersStore.getState();
 
-    handleUpdateChapter(chapterId, "", toSectionId).catch((err) =>
-      console.error("Failed to move chapter:", err)
-    );
-
-    if (toSectionId !== null) {
-      const sec = curSections.find((s) => s.id === toSectionId);
-      if (sec) {
-        handleReorderSectionChapters(
-          sec.id,
-          sec.chapters.map((c, i) => ({ id: c.id, order: i }))
-        );
+    try {
+      const res = await handleUpdateChapter(chapterId, "", toSectionId);
+      if (res?.data) {
+        updateChapter(chapterId, res.data);
       }
-    } else {
-      // Also update top-level content order
-      const items: ContentItem[] = [
-        ...curSections.map((s) => ({
-          type: "section" as const,
-          id: `section-${s.id}`,
-          data: s,
-          order: s.order ?? 0,
-        })),
-        ...curChapters.map((c) => ({
-          type: "chapter" as const,
-          id: `ch-${c.id}`,
-          data: c,
-          order: c.order ?? 0,
-        })),
-      ].sort((a, b) => a.order - b.order);
-
-      handleReorderContent(
-        bookId,
-        items.map((item, i) => ({
-          type: item.type,
-          id: item.type === "section"
-            ? (item.data as Section).id
-            : (item.data as Chapter).id,
-          order: i,
-        }))
-      );
+    } catch (err) {
+      console.error("Failed to move chapter:", err);
     }
+
+    handleReorderContent(bookId, buildContentOrder(curSections, curChapters));
   };
 
   const handleDragCancel = () => {
@@ -612,6 +626,9 @@ export default function ChaptersContainer({
           <SortableContext items={contentIds} strategy={verticalListSortingStrategy}>
             <div className="space-y-4">
               {contentItems.map((item) => {
+                if (item.type === "ghost") {
+                  return <SortableGhost key={item.id} id={item.id} />;
+                }
                 if (item.type === "section") {
                   const section = item.data as Section;
                   return (

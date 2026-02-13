@@ -73,11 +73,20 @@ export const useChaptersStore = create<ChaptersStore>((set) => ({
     })),
 
   updateChapter: (chapterId, updates) =>
-    set((state) => ({
-      chapters: state.chapters.map((ch) =>
-        ch.id === chapterId ? { ...ch, ...updates } : ch
-      ),
-    })),
+    set((state) => {
+      const numId = typeof chapterId === "string" ? Number(chapterId) : chapterId;
+      return {
+        chapters: state.chapters.map((ch) =>
+          ch.id === numId ? { ...ch, ...updates } : ch
+        ),
+        sections: state.sections.map((s) => ({
+          ...s,
+          chapters: s.chapters.map((ch) =>
+            ch.id === numId ? { ...ch, ...updates } : ch
+          ),
+        })),
+      };
+    }),
 
   removeChapter: (chapterId) =>
     set((state) => ({

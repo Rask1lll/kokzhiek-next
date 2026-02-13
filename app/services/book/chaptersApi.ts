@@ -82,9 +82,13 @@ export const handleCreateChapter = async (
   }
 };
 
+type ContentOrderItem =
+  | { type: "section"; id: number; order: number; chapters?: { id: number; order: number }[] }
+  | { type: "chapter"; id: number; order: number };
+
 export async function handleReorderContent(
   bookId: string,
-  order: { type: "section" | "chapter"; id: number; order: number }[]
+  order: ContentOrderItem[]
 ): Promise<boolean> {
   try {
     const res = await fetch(
