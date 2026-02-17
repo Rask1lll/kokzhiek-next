@@ -47,7 +47,7 @@ export default function TaskViewWrapper({
             conditionalSignMode?: string;
           }
         ).conditionalSignMode
-      : "absolute";
+      : "inline";
   const { showAlert } = useAlert();
 
   useEffect(() => {

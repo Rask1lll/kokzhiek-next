@@ -38,7 +38,7 @@ export function SignSettingsModal({ widgetId }: { widgetId: number }) {
       .conditionalSignMode === "string"
       ? (currentQuestion.data as { conditionalSignMode?: string })
           .conditionalSignMode
-      : "absolute";
+      : "inline";
 
   const handleImageUpload = async (file: File) => {
     if (!currentQuestion.id) return;

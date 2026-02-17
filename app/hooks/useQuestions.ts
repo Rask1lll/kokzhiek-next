@@ -198,11 +198,15 @@ export function useQuestions(widgetId: number | null) {
       const res = await uploadSignImage(questionId, file);
       if (!res.success) return null;
 
+      // Handle both { sign_url, question } and direct Question response formats
+      const question = res.data.question ?? res.data;
+      const signUrl = res.data.sign_url ?? (question as Question).sign_url;
+
       setQuestions((prev) =>
-        prev.map((q) => (q.id === questionId ? res.data.question : q))
+        prev.map((q) => (q.id === questionId ? (question as Question) : q))
       );
 
-      return res.data.sign_url;
+      return signUrl ?? null;
     },
     []
   );
@@ -214,7 +218,11 @@ export function useQuestions(widgetId: number | null) {
       if (!res.success) return false;
 
       setQuestions((prev) =>
-        prev.map((q) => (q.id === questionId ? res.data : q))
+        prev.map((q) =>
+          q.id === questionId
+            ? (res.data ?? { ...q, sign_url: null })
+            : q
+        )
       );
 
       return true;

@@ -272,7 +272,12 @@ export async function deleteSignImage(
     };
   }
 
-  return res.json();
+  // Handle 204 No Content or empty body
+  const text = await res.text();
+  if (!text) {
+    return { data: null as unknown as Question, messages: [], success: true };
+  }
+  return JSON.parse(text);
 }
 
 // Delete image from a question
