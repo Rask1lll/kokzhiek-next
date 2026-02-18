@@ -89,7 +89,7 @@ export default function TaskViewWrapper({
 
   return (
     <div
-      className="w-full p-2 relative min-h-[200px]"
+      className="w-full p-2 relative"
       style={{
         backgroundColor: bgColor,
       }}
