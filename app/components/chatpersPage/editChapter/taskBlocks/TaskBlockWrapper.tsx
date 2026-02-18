@@ -59,7 +59,7 @@ export default function TaskBlockWrapper({
             conditionalSignMode?: string;
           }
         ).conditionalSignMode
-      : "absolute";
+      : "inline";
 
   const signSize =
     currentQuestion.data &&

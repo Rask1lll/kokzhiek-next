@@ -12,14 +12,19 @@ type WidgetSignSettingsProps = {
 };
 
 export default function WidgetSignSettings({
-  signUrl,
-  signSize = "md",
-  signMode = "inline",
+  signUrl: initialSignUrl,
+  signSize: initialSignSize = "md",
+  signMode: initialSignMode = "inline",
   onChange,
   onFileUpload,
 }: WidgetSignSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Local state so the modal UI updates immediately (props are a snapshot from addContent)
+  const [signUrl, setSignUrl] = useState(initialSignUrl);
+  const [signSize, setSignSize] = useState(initialSignSize);
+  const [signMode, setSignMode] = useState(initialSignMode);
 
   const handleUpload = async (file: File) => {
     if (!onFileUpload) return;
@@ -28,12 +33,28 @@ export default function WidgetSignSettings({
     try {
       const url = await onFileUpload(file);
       if (url) {
+        setSignUrl(url);
         onChange({ signUrl: url });
       }
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleDelete = () => {
+    setSignUrl(undefined);
+    onChange({ signUrl: undefined });
+  };
+
+  const handleSizeChange = (size: string) => {
+    setSignSize(size);
+    onChange({ signSize: size });
+  };
+
+  const handleModeChange = (mode: string) => {
+    setSignMode(mode);
+    onChange({ signMode: mode });
   };
 
   return (
@@ -49,7 +70,7 @@ export default function WidgetSignSettings({
           />
           <span className="text-sm text-green-700">Текущий знак</span>
           <button
-            onClick={() => onChange({ signUrl: undefined })}
+            onClick={handleDelete}
             className="ml-auto text-sm text-red-500 hover:text-red-600 flex items-center gap-1"
           >
             <FiTrash2 className="w-3.5 h-3.5" /> Убрать
@@ -95,7 +116,7 @@ export default function WidgetSignSettings({
                       ? "bg-green-100 border-green-300 text-green-800"
                       : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
-                  onClick={() => onChange({ signSize: s.key })}
+                  onClick={() => handleSizeChange(s.key)}
                 >
                   {s.label}
                 </button>
@@ -112,7 +133,7 @@ export default function WidgetSignSettings({
                     ? "bg-green-100 border-green-300 text-green-800"
                     : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                 }`}
-                onClick={() => onChange({ signMode: "absolute" })}
+                onClick={() => handleModeChange("absolute")}
               >
                 Слева
               </button>
@@ -122,7 +143,7 @@ export default function WidgetSignSettings({
                     ? "bg-green-100 border-green-300 text-green-800"
                     : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                 }`}
-                onClick={() => onChange({ signMode: "inline" })}
+                onClick={() => handleModeChange("inline")}
               >
                 В строке
               </button>
