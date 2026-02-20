@@ -81,8 +81,8 @@ export default function TaskViewWrapper({
 
   const bgColor =
     currentQuestion.data &&
-    typeof currentQuestion.data === "object" &&
     "bgColor" in currentQuestion.data &&
+    typeof currentQuestion.data === "object" &&
     typeof currentQuestion.data.bgColor === "string"
       ? currentQuestion.data.bgColor
       : "#ffffff";
