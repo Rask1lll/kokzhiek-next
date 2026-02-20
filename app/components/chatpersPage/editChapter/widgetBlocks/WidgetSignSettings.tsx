@@ -34,7 +34,7 @@ export default function WidgetSignSettings({
       const url = await onFileUpload(file);
       if (url) {
         setSignUrl(url);
-        onChange({ signUrl: url });
+        onChange({ signUrl: url, signSize, signMode });
       }
     } finally {
       setIsUploading(false);
@@ -44,17 +44,17 @@ export default function WidgetSignSettings({
 
   const handleDelete = () => {
     setSignUrl(undefined);
-    onChange({ signUrl: undefined });
+    onChange({ signUrl: undefined, signSize, signMode });
   };
 
   const handleSizeChange = (size: string) => {
     setSignSize(size);
-    onChange({ signSize: size });
+    onChange({ signUrl, signSize: size, signMode });
   };
 
   const handleModeChange = (mode: string) => {
     setSignMode(mode);
-    onChange({ signMode: mode });
+    onChange({ signUrl, signSize, signMode: mode });
   };
 
   return (
