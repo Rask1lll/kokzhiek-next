@@ -95,8 +95,9 @@ export default function FillBlankView({
   const currentQuestion = questionsArray.length > 0 ? questionsArray[0] : null;
   const body = currentQuestion?.body || "";
   const data = currentQuestion?.data as
-    | { blanks?: string[] | Array<{ id: string }> }
+    | { blanks?: string[] | Array<{ id: string }>; question?: string }
     | undefined;
+  const questionText = data?.question || "";
   // Handle both string[] and object[] formats
   const blanks = useMemo(() => {
     const blanksArray = data?.blanks || [];
@@ -173,6 +174,11 @@ export default function FillBlankView({
 
   return (
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
+      {questionText && (
+        <div className="text-lg font-medium text-gray-800 mb-4">
+          {questionText}
+        </div>
+      )}
       <div className="sm:text-lg text-sm md:text-xl text-gray-800 leading-loose whitespace-pre-wrap">
         {renderContent()}
       </div>

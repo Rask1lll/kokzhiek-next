@@ -33,14 +33,15 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
   }, [questions]);
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const questionDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timers on unmount
   useEffect(() => {
     const debounceTimer = debounceTimerRef.current;
+    const questionTimer = questionDebounceRef.current;
     return () => {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
+      if (debounceTimer) clearTimeout(debounceTimer);
+      if (questionTimer) clearTimeout(questionTimer);
     };
   }, []);
 
@@ -64,6 +65,33 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
         if (trimmedBody.length === 0) return;
 
         update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
+  const questionText =
+    (currentQuestion?.data as Record<string, unknown> | undefined)?.question as
+      | string
+      | undefined;
+
+  const updateQuestion = useCallback(
+    (question: string) => {
+      if (!currentQuestion?.id) return;
+
+      setCurrentQuestion((prev) =>
+        prev
+          ? { ...prev, data: { ...(prev.data as object), question } }
+          : prev
+      );
+
+      if (questionDebounceRef.current) clearTimeout(questionDebounceRef.current);
+
+      const questionId = currentQuestion.id;
+      questionDebounceRef.current = setTimeout(() => {
+        update(questionId, {
+          data: { ...(currentQuestion.data as object), question },
+        });
       }, 500);
     },
     [currentQuestion, update]
@@ -209,6 +237,21 @@ export default function FillBlank({ widgetId }: FillBlankProps) {
 
   return (
     <div className="w-full space-y-4">
+      {/* Question / instruction */}
+      <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">
+          {t("questionLabel")}
+        </div>
+        <input
+          spellCheck
+          type="text"
+          placeholder={t("questionPlaceholder")}
+          className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
+          value={questionText || ""}
+          onChange={(e) => updateQuestion(e.target.value)}
+        />
+      </div>
+
       {/* Text editor */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
