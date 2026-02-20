@@ -2,7 +2,8 @@
 
 import Button from "@/app/components/Button/Button";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { FiX, FiImage, FiTrash2 } from "react-icons/fi";
+import { FiX, FiImage, FiTrash2, FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { CgArrowRight } from "react-icons/cg";
 import Image from "next/image";
 import { useQuestions } from "@/app/hooks/useQuestions";
 import { Question, QuestionOption } from "@/app/types/question";
@@ -24,6 +25,7 @@ type PairItem = {
   };
 };
 
+type PairSide = "answer" | "cell";
 type PairSizeMode = "small" | "medium" | "large" | "custom";
 
 type MatchPairsData = {
@@ -33,21 +35,57 @@ type MatchPairsData = {
   pairHeight?: number;
 };
 
+/** Convert internal PairItem[] to server QuestionOption[], preserving existing IDs */
+function pairsToOptions(
+  pairs: PairItem[],
+  existingOptions: QuestionOption[]
+): QuestionOption[] {
+  const options: QuestionOption[] = [];
+  let order = 0;
+
+  pairs.forEach((pair) => {
+    const existingLeft = existingOptions.find(
+      (opt) => opt.match_id === pair.id && opt.group === "left"
+    );
+    const existingRight = existingOptions.find(
+      (opt) => opt.match_id === pair.id && opt.group === "right"
+    );
+
+    options.push({
+      id: existingLeft?.id,
+      body: pair.answer.text,
+      image_url: pair.answer.imageUrl || null,
+      is_correct: false,
+      match_id: pair.id,
+      group: "left",
+      order: order++,
+    });
+
+    options.push({
+      id: existingRight?.id,
+      body: pair.cell.text,
+      image_url: pair.cell.imageUrl || null,
+      is_correct: false,
+      match_id: pair.id,
+      group: "right",
+      order: order++,
+    });
+  });
+
+  return options;
+}
+
 export default function MatchPairs({ widgetId }: MatchPairsProps) {
   const t = useTranslations("taskEditor");
   const { questions, loading, update, uploadImage, removeImage } =
     useQuestions(widgetId);
 
-  // Get first question from array
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(
     Array.isArray(questions) && questions.length > 0 ? questions[0] : null
   );
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const answerDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(
-    new Map()
-  );
-  const cellDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const sideDebounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const dataDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
@@ -58,8 +96,6 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     }
 
     const options = currentQuestion.options;
-
-    // Group options by match_id
     const pairsMap = new Map<
       string,
       { left?: QuestionOption; right?: QuestionOption }
@@ -71,15 +107,11 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           pairsMap.set(opt.match_id, {});
         }
         const pair = pairsMap.get(opt.match_id)!;
-        if (opt.group === "left") {
-          pair.left = opt;
-        } else if (opt.group === "right") {
-          pair.right = opt;
-        }
+        if (opt.group === "left") pair.left = opt;
+        else if (opt.group === "right") pair.right = opt;
       }
     });
 
-    // Convert to pairs array, sorted by order
     const pairs: PairItem[] = [];
     Array.from(pairsMap.entries())
       .sort(([, a], [, b]) => {
@@ -103,134 +135,77 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         }
       });
 
-    const shuffleInOpiq =
-      (currentQuestion.data as { shuffle?: boolean })?.shuffle ?? true;
-
-    const pairSizeMode = (currentQuestion.data as { pairSizeMode?: PairSizeMode })?.pairSizeMode || "medium";
-    const pairHeight = (currentQuestion.data as { pairHeight?: number })?.pairHeight;
+    const qData = currentQuestion.data as Record<string, unknown> | undefined;
+    const shuffleInOpiq = (qData?.shuffle as boolean) ?? true;
+    const pairSizeMode = (qData?.pairSizeMode as PairSizeMode) || "medium";
+    const pairHeight = qData?.pairHeight as number | undefined;
 
     return { pairs, shuffleInOpiq, pairSizeMode, pairHeight };
   }, [currentQuestion]);
 
+  const pairHeight = useMemo(
+    () => computePairHeight(data.pairSizeMode, data.pairHeight),
+    [data.pairSizeMode, data.pairHeight]
+  );
+
   useEffect(() => {
     if (Array.isArray(questions) && questions.length > 0) {
       const firstQuestion = questions[0];
-      // Only update if question ID changed
       if (!currentQuestion || currentQuestion.id !== firstQuestion.id) {
-        setTimeout(() => {
-          setCurrentQuestion(firstQuestion);
-        }, 0);
+        setTimeout(() => setCurrentQuestion(firstQuestion), 0);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions]);
 
   useEffect(() => {
-    const debounceTimer = debounceTimerRef.current;
-    const dataDebounceTimer = dataDebounceTimerRef.current;
-    const answerTimers = answerDebounceTimersRef.current;
-    const cellTimers = cellDebounceTimersRef.current;
-
     return () => {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-      if (dataDebounceTimer) {
-        clearTimeout(dataDebounceTimer);
-      }
-      answerTimers.forEach((timer) => {
-        clearTimeout(timer);
-      });
-      answerTimers.clear();
-      cellTimers.forEach((timer) => {
-        clearTimeout(timer);
-      });
-      cellTimers.clear();
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (dataDebounceTimerRef.current) clearTimeout(dataDebounceTimerRef.current);
+      sideDebounceTimersRef.current.forEach((timer) => clearTimeout(timer));
+      sideDebounceTimersRef.current.clear();
     };
   }, []);
+
+  /** Build the data payload for server updates */
+  const buildDataPayload = useCallback(
+    (d: MatchPairsData) => ({
+      shuffle: d.shuffleInOpiq,
+      pairSizeMode: d.pairSizeMode,
+      pairHeight: d.pairHeight,
+    }),
+    []
+  );
 
   const updateData = useCallback(
     (newData: MatchPairsData, immediate = false) => {
       if (!currentQuestion?.id) return;
 
-      // Convert pairs back to options
-      const options: QuestionOption[] = [];
-      let order = 0;
+      const options = pairsToOptions(
+        newData.pairs,
+        currentQuestion.options || []
+      );
 
-      newData.pairs.forEach((pair) => {
-        // Find existing options by match_id (pair.id is match_id)
-        const existingLeft = currentQuestion.options?.find(
-          (opt) => opt.match_id === pair.id && opt.group === "left"
-        );
-        const existingRight = currentQuestion.options?.find(
-          (opt) => opt.match_id === pair.id && opt.group === "right"
-        );
-
-        // Use pair.id as match_id (it's the match_id from data structure)
-        const matchId = pair.id;
-
-        options.push({
-          id: existingLeft?.id,
-          body: pair.answer.text,
-          image_url: pair.answer.imageUrl || null,
-          is_correct: false,
-          match_id: matchId,
-          group: "left",
-          order: order++,
-        });
-
-        options.push({
-          id: existingRight?.id,
-          body: pair.cell.text,
-          image_url: pair.cell.imageUrl || null,
-          is_correct: false,
-          match_id: matchId,
-          group: "right",
-          order: order++,
-        });
-      });
-
-      // Update UI immediately (optimistic update)
       setCurrentQuestion((prev) =>
         prev
-          ? {
-              ...prev,
-              options,
-              data: {
-                ...prev.data,
-                shuffle: newData.shuffleInOpiq,
-                pairSizeMode: newData.pairSizeMode,
-                pairHeight: newData.pairHeight,
-              },
-            }
+          ? { ...prev, options, data: { ...prev.data, ...buildDataPayload(newData) } }
           : null
       );
 
-      // Clear existing timer
-      if (dataDebounceTimerRef.current) {
-        clearTimeout(dataDebounceTimerRef.current);
-      }
+      if (dataDebounceTimerRef.current) clearTimeout(dataDebounceTimerRef.current);
 
       const questionId = currentQuestion.id;
       const sendUpdate = () => {
-        update(questionId, {
-          options,
-          data: {
-            shuffle: newData.shuffleInOpiq,
-            pairSizeMode: newData.pairSizeMode,
-            pairHeight: newData.pairHeight,
-          },
-        });
+        update(questionId, { options, data: buildDataPayload(newData) });
       };
 
       if (immediate) {
         sendUpdate();
       } else {
-        // Debounce for non-immediate updates
         dataDebounceTimerRef.current = setTimeout(sendUpdate, 300);
       }
     },
-    [currentQuestion, update]
+    [currentQuestion, update, buildDataPayload]
   );
 
   const updateQuestionBody = useCallback(
@@ -239,9 +214,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
 
       setCurrentQuestion((prev) => (prev ? { ...prev, body } : null));
 
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
       const questionId = currentQuestion.id;
       debounceTimerRef.current = setTimeout(async () => {
@@ -250,9 +223,7 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         if (trimmedBody.length === 0) return;
 
         const updated = await update(questionId, { body: trimmedBody });
-        if (updated) {
-          setCurrentQuestion(updated);
-        }
+        if (updated) setCurrentQuestion(updated);
       }, 500);
     },
     [currentQuestion, update]
@@ -261,63 +232,24 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
   const addPair = useCallback(async () => {
     if (!currentQuestion?.id) return;
 
-    // Generate unique match_id for new pair
-    const newMatchId = `${data.pairs.length}-${Math.ceil(
-      Math.random() * 1000
-    )}`;
+    const newMatchId = `${data.pairs.length}-${Math.ceil(Math.random() * 1000)}`;
     const newPair: PairItem = {
       id: newMatchId,
       answer: { text: "" },
       cell: { text: "" },
     };
 
-    // Convert pairs to options including new pair
-    const options: QuestionOption[] = [];
-    let order = 0;
+    const allPairs = [...data.pairs, newPair];
+    const options = pairsToOptions(allPairs, currentQuestion.options || []);
 
-    [...data.pairs, newPair].forEach((pair) => {
-      // Find existing options by match_id
-      const existingLeft = currentQuestion.options?.find(
-        (opt) => opt.match_id === pair.id && opt.group === "left"
-      );
-      const existingRight = currentQuestion.options?.find(
-        (opt) => opt.match_id === pair.id && opt.group === "right"
-      );
-
-      options.push({
-        id: existingLeft?.id,
-        body: pair.answer.text,
-        image_url: pair.answer.imageUrl || null,
-        is_correct: false,
-        match_id: pair.id,
-        group: "left",
-        order: order++,
-      });
-
-      options.push({
-        id: existingRight?.id,
-        body: pair.cell.text,
-        image_url: pair.cell.imageUrl || null,
-        is_correct: false,
-        match_id: pair.id,
-        group: "right",
-        order: order++,
-      });
-    });
-
-    // Update UI immediately
     setCurrentQuestion((prev) => (prev ? { ...prev, options } : null));
 
-    // Send to server and wait for response to get IDs for new options
     const updated = await update(currentQuestion.id, {
       options,
-      data: { shuffle: data.shuffleInOpiq },
+      data: buildDataPayload(data),
     });
-
-    if (updated) {
-      setCurrentQuestion(updated);
-    }
-  }, [data, currentQuestion, update]);
+    if (updated) setCurrentQuestion(updated);
+  }, [data, currentQuestion, update, buildDataPayload]);
 
   const removePair = useCallback(
     (id: string) => {
@@ -329,231 +261,98 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     [data, updateData]
   );
 
-  const updateAnswer = useCallback(
-    (id: string, field: "text" | "imageUrl", value: string) => {
-      const pair = data.pairs.find((p) => p.id === id);
-      if (!pair || !currentQuestion?.id) return;
+  const movePair = useCallback(
+    (pairId: string, direction: "up" | "down") => {
+      const pairs = [...data.pairs];
+      const index = pairs.findIndex((p) => p.id === pairId);
+      if (index === -1) return;
+      if (direction === "up" && index === 0) return;
+      if (direction === "down" && index === pairs.length - 1) return;
 
-      const newPair = {
-        ...pair,
-        answer: { ...pair.answer, [field]: value },
-      };
-      const newPairs = data.pairs.map((p) => (p.id === id ? newPair : p));
-
-      // Convert pairs to options
-      const options: QuestionOption[] = [];
-      let order = 0;
-
-      newPairs.forEach((p) => {
-        // Find existing options by match_id (pair.id is match_id)
-        const existingLeft = currentQuestion.options?.find(
-          (opt) => opt.match_id === p.id && opt.group === "left"
-        );
-        const existingRight = currentQuestion.options?.find(
-          (opt) => opt.match_id === p.id && opt.group === "right"
-        );
-
-        options.push({
-          id: existingLeft?.id,
-          body: p.answer.text,
-          image_url: p.answer.imageUrl || null,
-          is_correct: false,
-          match_id: p.id,
-          group: "left",
-          order: order++,
-        });
-
-        options.push({
-          id: existingRight?.id,
-          body: p.cell.text,
-          image_url: p.cell.imageUrl || null,
-          is_correct: false,
-          match_id: p.id,
-          group: "right",
-          order: order++,
-        });
-      });
-
-      // Update UI immediately
-      setCurrentQuestion((prev) => (prev ? { ...prev, options } : null));
-
-      // Debounce text updates, immediate for imageUrl
-      if (field === "text") {
-        const timerKey = `answer-${id}`;
-        const existingTimer = answerDebounceTimersRef.current.get(timerKey);
-        if (existingTimer) {
-          clearTimeout(existingTimer);
-        }
-
-        const questionId = currentQuestion.id;
-        const timer = setTimeout(async () => {
-          const updated = await update(questionId, {
-            options,
-            data: { shuffle: data.shuffleInOpiq },
-          });
-          if (updated) {
-            setCurrentQuestion(updated);
-          }
-          answerDebounceTimersRef.current.delete(timerKey);
-        }, 500);
-
-        answerDebounceTimersRef.current.set(timerKey, timer);
-      } else {
-        // Immediate update for imageUrl
-        update(currentQuestion.id, {
-          options,
-          data: { shuffle: data.shuffleInOpiq },
-        }).then((updated) => {
-          if (updated) {
-            setCurrentQuestion(updated);
-          }
-        });
-      }
+      const swapIndex = direction === "up" ? index - 1 : index + 1;
+      [pairs[index], pairs[swapIndex]] = [pairs[swapIndex], pairs[index]];
+      updateData({ ...data, pairs }, true);
     },
-    [data, currentQuestion, update]
+    [data, updateData]
   );
 
-  const updateCell = useCallback(
-    (id: string, field: "text" | "imageUrl", value: string) => {
+  /** Unified update for answer or cell side */
+  const updateSide = useCallback(
+    (id: string, side: PairSide, field: "text" | "imageUrl", value: string) => {
       const pair = data.pairs.find((p) => p.id === id);
       if (!pair || !currentQuestion?.id) return;
 
       const newPair = {
         ...pair,
-        cell: { ...pair.cell, [field]: value },
+        [side]: { ...pair[side], [field]: value },
       };
       const newPairs = data.pairs.map((p) => (p.id === id ? newPair : p));
+      const options = pairsToOptions(newPairs, currentQuestion.options || []);
 
-      // Convert pairs to options
-      const options: QuestionOption[] = [];
-      let order = 0;
-
-      newPairs.forEach((p) => {
-        // Find existing options by match_id (pair.id is match_id)
-        const existingLeft = currentQuestion.options?.find(
-          (opt) => opt.match_id === p.id && opt.group === "left"
-        );
-        const existingRight = currentQuestion.options?.find(
-          (opt) => opt.match_id === p.id && opt.group === "right"
-        );
-
-        options.push({
-          id: existingLeft?.id,
-          body: p.answer.text,
-          image_url: p.answer.imageUrl || null,
-          is_correct: false,
-          match_id: p.id,
-          group: "left",
-          order: order++,
-        });
-
-        options.push({
-          id: existingRight?.id,
-          body: p.cell.text,
-          image_url: p.cell.imageUrl || null,
-          is_correct: false,
-          match_id: p.id,
-          group: "right",
-          order: order++,
-        });
-      });
-
-      // Update UI immediately
       setCurrentQuestion((prev) => (prev ? { ...prev, options } : null));
 
-      // Debounce text updates, immediate for imageUrl
       if (field === "text") {
-        const timerKey = `cell-${id}`;
-        const existingTimer = cellDebounceTimersRef.current.get(timerKey);
-        if (existingTimer) {
-          clearTimeout(existingTimer);
-        }
+        const timerKey = `${side}-${id}`;
+        const existingTimer = sideDebounceTimersRef.current.get(timerKey);
+        if (existingTimer) clearTimeout(existingTimer);
 
         const questionId = currentQuestion.id;
         const timer = setTimeout(async () => {
           const updated = await update(questionId, {
             options,
-            data: { shuffle: data.shuffleInOpiq },
+            data: buildDataPayload(data),
           });
-          if (updated) {
-            setCurrentQuestion(updated);
-          }
-          cellDebounceTimersRef.current.delete(timerKey);
+          if (updated) setCurrentQuestion(updated);
+          sideDebounceTimersRef.current.delete(timerKey);
         }, 500);
 
-        cellDebounceTimersRef.current.set(timerKey, timer);
+        sideDebounceTimersRef.current.set(timerKey, timer);
       } else {
-        // Immediate update for imageUrl
         update(currentQuestion.id, {
           options,
-          data: { shuffle: data.shuffleInOpiq },
+          data: buildDataPayload(data),
         }).then((updated) => {
-          if (updated) {
-            setCurrentQuestion(updated);
-          }
+          if (updated) setCurrentQuestion(updated);
         });
       }
     },
-    [data, currentQuestion, update]
+    [data, currentQuestion, update, buildDataPayload]
   );
 
   const handleImageDelete = useCallback(
-    async (pairId: string, side: "answer" | "cell") => {
-      const pair = data.pairs.find((p) => p.id === pairId);
-      if (!pair || !currentQuestion?.id) return;
+    async (pairId: string, side: PairSide) => {
+      if (!currentQuestion?.id) return;
 
       const options = currentQuestion.options || [];
-      const targetOption = options.find((opt) => {
-        // Find by match_id (pairId is match_id) and group
-        return (
+      const targetOption = options.find(
+        (opt) =>
           opt.match_id === pairId &&
           opt.group === (side === "answer" ? "left" : "right")
-        );
-      });
-
+      );
       if (!targetOption?.id) return;
 
-      // Update UI immediately (optimistic)
-      if (side === "answer") {
-        updateAnswer(pairId, "imageUrl", "");
-      } else {
-        updateCell(pairId, "imageUrl", "");
-      }
-
-      // Send to server
+      updateSide(pairId, side, "imageUrl", "");
       removeImage(targetOption.id);
     },
-    [data.pairs, currentQuestion, removeImage, updateAnswer, updateCell]
+    [currentQuestion, removeImage, updateSide]
   );
 
   const handleImageUpload = useCallback(
-    async (pairId: string, side: "answer" | "cell", file: File) => {
-      const pair = data.pairs.find((p) => p.id === pairId);
-
-      if (!pair) return;
-
-      // Find the corresponding option by match_id (pairId is match_id)
+    async (pairId: string, side: PairSide, file: File) => {
       const options = currentQuestion?.options || [];
-      const targetOption = options.find((opt) => {
-        // Find by match_id and group
-        return (
+      const targetOption = options.find(
+        (opt) =>
           opt.match_id === pairId &&
           opt.group === (side === "answer" ? "left" : "right")
-        );
-      });
-
+      );
       if (!targetOption?.id) return;
 
       const imageUrl = await uploadImage(targetOption.id, file);
       if (imageUrl) {
-        if (side === "answer") {
-          updateAnswer(pairId, "imageUrl", imageUrl);
-        } else {
-          updateCell(pairId, "imageUrl", imageUrl);
-        }
+        updateSide(pairId, side, "imageUrl", imageUrl);
       }
     },
-    [data.pairs, currentQuestion, uploadImage, updateAnswer, updateCell]
+    [currentQuestion, uploadImage, updateSide]
   );
 
   if (loading) {
@@ -576,7 +375,9 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
     <div className="w-full space-y-4">
       {/* Question input */}
       <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="text-base md:text-lg lg:text-xl text-gray-600">{t("questionLabel")}</div>
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">
+          {t("questionLabel")}
+        </div>
         <input
           spellCheck
           type="text"
@@ -603,69 +404,35 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
           </span>
         </label>
 
-        {/* Pair sizes */}
         <div className="space-y-3 pt-2 border-t border-slate-200">
           <span className="text-base md:text-lg lg:text-xl text-slate-600 block">
             {t("pairSize")}
           </span>
-          
-          {/* Size mode buttons */}
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                updateData({ ...data, pairSizeMode: "small" }, false)
-              }
-              className={`px-3 py-1.5 text-sm rounded transition-colors ${
-                data.pairSizeMode === "small"
-                  ? "bg-blue-500 text-white"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-              }`}
-            >
-              {t("sizeSmall")}
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                updateData({ ...data, pairSizeMode: "medium" }, false)
-              }
-              className={`px-3 py-1.5 text-sm rounded transition-colors ${
-                data.pairSizeMode === "medium"
-                  ? "bg-blue-500 text-white"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-              }`}
-            >
-              {t("sizeMedium")}
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                updateData({ ...data, pairSizeMode: "large" }, false)
-              }
-              className={`px-3 py-1.5 text-sm rounded transition-colors ${
-                data.pairSizeMode === "large"
-                  ? "bg-blue-500 text-white"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-              }`}
-            >
-              {t("sizeLarge")}
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                updateData({ ...data, pairSizeMode: "custom" }, false)
-              }
-              className={`px-3 py-1.5 text-sm rounded transition-colors ${
-                data.pairSizeMode === "custom"
-                  ? "bg-blue-500 text-white"
-                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-              }`}
-            >
-              {t("sizeCustom")}
-            </button>
+            {(["small", "medium", "large", "custom"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => updateData({ ...data, pairSizeMode: mode }, false)}
+                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                  data.pairSizeMode === mode
+                    ? "bg-blue-500 text-white"
+                    : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                }`}
+              >
+                {t(
+                  mode === "small"
+                    ? "sizeSmall"
+                    : mode === "medium"
+                    ? "sizeMedium"
+                    : mode === "large"
+                    ? "sizeLarge"
+                    : "sizeCustom"
+                )}
+              </button>
+            ))}
           </div>
 
-          {/* Custom height input (only shown when custom mode is selected) */}
           {data.pairSizeMode === "custom" && (
             <div className="flex items-center gap-2 pt-2">
               <label className="text-sm md:text-base lg:text-lg text-slate-500">
@@ -690,20 +457,13 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         </div>
       </div>
 
-      {/* Pairs list */}
+      {/* Pairs list — visual preview cards */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-base md:text-lg lg:text-xl font-medium text-slate-700">
             {t("pairsLabel")}
           </span>
-          <div className="flex gap-2">
-            <Button
-              content={t("addPair")}
-              color="green"
-              size="sm"
-              onClick={addPair}
-            />
-          </div>
+          <Button content={t("addPair")} color="green" size="sm" onClick={addPair} />
         </div>
 
         {data.pairs.length === 0 && (
@@ -715,188 +475,174 @@ export default function MatchPairs({ widgetId }: MatchPairsProps) {
         {data.pairs.map((pair, index) => (
           <div
             key={pair.id}
-            className="p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+            className="bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors overflow-hidden"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm md:text-base lg:text-lg text-slate-400 font-medium">
+            {/* Pair toolbar */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-slate-50 border-b border-slate-200">
+              <span className="text-xs text-slate-400 font-medium">
                 {t("pairNumber", { number: index + 1 })}
               </span>
-              <div className="flex gap-1">
+              <div className="flex gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => movePair(pair.id, "up")}
+                  disabled={index === 0}
+                  className="p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
+                  title={t("movePairUp")}
+                >
+                  <FiChevronUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => movePair(pair.id, "down")}
+                  disabled={index === data.pairs.length - 1}
+                  className="p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded transition-colors disabled:opacity-30"
+                  title={t("movePairDown")}
+                >
+                  <FiChevronDown className="w-3.5 h-3.5" />
+                </button>
                 <button
                   type="button"
                   onClick={() => removePair(pair.id)}
                   className="p-1 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors"
                   title={t("removePair")}
                 >
-                  <FiX className="w-4 h-4" />
+                  <FiX className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block">
-                  <span className="text-sm md:text-base lg:text-lg text-slate-500 mb-1 block">
-                    {t("answerVariant")}
-                  </span>
-                  <input
-                    spellCheck={false}
-                    type="text"
-                    value={pair.answer.text}
-                    onChange={(e) =>
-                      updateAnswer(pair.id, "text", e.target.value)
-                    }
-                    placeholder={t("answerPlaceholder")}
-                    className="w-full px-3 py-2 text-base md:text-lg lg:text-xl bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={(el) => {
-                    if (el) {
-                      fileInputRefs.current.set(`answer-${pair.id}`, el);
-                    }
-                  }}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleImageUpload(pair.id, "answer", file);
-                    }
-                    if (e.target) {
-                      e.target.value = "";
-                    }
-                  }}
-                  className="hidden"
-                />
-                {!pair.answer.imageUrl && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const input = fileInputRefs.current.get(
-                        `answer-${pair.id}`
-                      );
-                      input?.click();
-                    }}
-                    className="flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                  >
-                    <FiImage className="w-3 h-3" />
-                    {t("addImage")}
-                  </button>
-                )}
-                {pair.answer.imageUrl && (
-                  <div className="relative mt-2">
-                    <div className="relative w-40 h-40 border-2 border-slate-300 rounded-lg overflow-hidden bg-slate-50">
-                      <Image
-                        src={pair.answer.imageUrl}
-                        alt={pair.answer.text}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleImageDelete(pair.id, "answer")}
-                      className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
-                      title={t("removeImage")}
-                    >
-                      <FiTrash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+            {/* Pair visual preview: left ↔ right */}
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-3 p-3">
+              <PairCardEditor
+                pair={pair}
+                side="answer"
+                placeholder={t("answerPlaceholder")}
+                pairHeight={pairHeight}
+                fileInputRefs={fileInputRefs}
+                onTextChange={(v) => updateSide(pair.id, "answer", "text", v)}
+                onImageUpload={(f) => handleImageUpload(pair.id, "answer", f)}
+                onImageDelete={() => handleImageDelete(pair.id, "answer")}
+              />
+
+              <div className="flex items-center justify-center">
+                <CgArrowRight className="w-5 h-5 text-slate-300" />
               </div>
 
-              <div className="space-y-2">
-                <label className="block">
-                  <span className="text-sm md:text-base lg:text-lg text-slate-500 mb-1 block">
-                    {t("cell")}
-                  </span>
-                  <input
-                    spellCheck
-                    type="text"
-                    value={pair.cell.text}
-                    onChange={(e) =>
-                      updateCell(pair.id, "text", e.target.value)
-                    }
-                    placeholder={t("cellPlaceholder")}
-                    className="w-full px-3 py-2 text-base md:text-lg lg:text-xl bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={(el) => {
-                    if (el) {
-                      fileInputRefs.current.set(`cell-${pair.id}`, el);
-                    }
-                  }}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleImageUpload(pair.id, "cell", file);
-                    }
-                    if (e.target) {
-                      e.target.value = "";
-                    }
-                  }}
-                  className="hidden"
-                />
-                {!pair.cell.imageUrl && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const input = fileInputRefs.current.get(`cell-${pair.id}`);
-                      input?.click();
-                    }}
-                    className="flex items-center gap-2 px-2 py-1 text-sm md:text-base lg:text-lg rounded transition-colors text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                  >
-                    <FiImage className="w-3 h-3" />
-                    {t("addImage")}
-                  </button>
-                )}
-                {pair.cell.imageUrl && (
-                  <div className="relative mt-2">
-                    <div className="relative w-40 h-40 border-2 border-slate-300 rounded-lg overflow-hidden bg-slate-50">
-                      <Image
-                        src={pair.cell.imageUrl}
-                        alt={pair.cell.text}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleImageDelete(pair.id, "cell")}
-                      className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
-                      title={t("removeImage")}
-                    >
-                      <FiTrash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center mt-3 text-slate-300">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
+              <PairCardEditor
+                pair={pair}
+                side="cell"
+                placeholder={t("cellPlaceholder")}
+                pairHeight={pairHeight}
+                fileInputRefs={fileInputRefs}
+                onTextChange={(v) => updateSide(pair.id, "cell", "text", v)}
+                onImageUpload={(f) => handleImageUpload(pair.id, "cell", f)}
+                onImageDelete={() => handleImageDelete(pair.id, "cell")}
+              />
             </div>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** Computed pair height from mode */
+function computePairHeight(mode?: PairSizeMode, custom?: number): number {
+  if (mode === "custom" && custom) return custom;
+  switch (mode) {
+    case "small":
+      return 80;
+    case "large":
+      return 300;
+    default:
+      return 200;
+  }
+}
+
+/** Visual card editor for one side of a pair — looks like the student preview */
+function PairCardEditor({
+  pair,
+  side,
+  placeholder,
+  pairHeight,
+  fileInputRefs,
+  onTextChange,
+  onImageUpload,
+  onImageDelete,
+}: {
+  pair: PairItem;
+  side: PairSide;
+  placeholder: string;
+  pairHeight: number;
+  fileInputRefs: React.MutableRefObject<Map<string, HTMLInputElement>>;
+  onTextChange: (value: string) => void;
+  onImageUpload: (file: File) => void;
+  onImageDelete: () => void;
+}) {
+  const sideData = pair[side];
+  const refKey = `${side}-${pair.id}`;
+
+  return (
+    <div
+      className="relative rounded-xl border-2 border-slate-200 bg-white flex flex-col items-center justify-center p-2 transition-all duration-200 group hover:border-slate-300"
+      style={{ minHeight: `${pairHeight}px` }}
+    >
+      {/* Image area */}
+      {sideData.imageUrl && (
+        <div className="relative w-full flex-1 min-h-0 mb-2 max-h-[60%]">
+          <Image
+            src={sideData.imageUrl}
+            alt={sideData.text}
+            fill
+            className="object-contain rounded"
+            unoptimized
+          />
+          <button
+            type="button"
+            onClick={onImageDelete}
+            className="absolute -top-1.5 -right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-md opacity-0 group-hover:opacity-100"
+          >
+            <FiTrash2 className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+
+      {/* Text input — centered, transparent */}
+      <input
+        spellCheck={side === "cell"}
+        type="text"
+        value={sideData.text}
+        onChange={(e) => onTextChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full text-center text-sm md:text-base lg:text-lg text-slate-700 bg-transparent border-0 outline-none focus:ring-0 placeholder:text-slate-300"
+      />
+
+      {/* Image upload button — bottom, appears on hover */}
+      {!sideData.imageUrl && (
+        <button
+          type="button"
+          onClick={() => fileInputRefs.current.get(refKey)?.click()}
+          className="absolute bottom-1.5 right-1.5 p-1.5 rounded-lg text-slate-300 hover:text-slate-500 hover:bg-slate-100 transition-all opacity-0 group-hover:opacity-100"
+        >
+          <FiImage className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Hidden file input */}
+      <input
+        type="file"
+        accept="image/*"
+        ref={(el) => {
+          if (el) fileInputRefs.current.set(refKey, el);
+        }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onImageUpload(file);
+          if (e.target) e.target.value = "";
+        }}
+        className="hidden"
+      />
     </div>
   );
 }

@@ -497,6 +497,8 @@
     "answerPlaceholder": "Введите вариант ответа...",
     "cell": "Ячейка:",
     "cellPlaceholder": "Введите текст ячейки...",
+    "movePairUp": "Переместить вверх",
+    "movePairDown": "Переместить вниз",
     "tableSize": "Размеры таблицы",
     "width": "Ширина:",
     "height": "Высота:",
@@ -732,7 +734,8 @@
     "empty": "Словарь пуст"
   },
   "constructor": {
-    "removeMatch": "Убрать"
+    "removeMatch": "Убрать",
+    "pairsConnected": "пар соединено"
   },
   "collaborators": {
     "title": "Соавторы",

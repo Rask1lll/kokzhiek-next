@@ -500,6 +500,8 @@
     "answerPlaceholder": "Жауап нұсқасын енгізіңіз...",
     "cell": "Ұяшық:",
     "cellPlaceholder": "Ұяшық мәтінін енгізіңіз...",
+    "movePairUp": "Жоғары жылжыту",
+    "movePairDown": "Төмен жылжыту",
     "tableSize": "Кесте өлшемдері",
     "width": "Ені:",
     "height": "Биіктігі:",
@@ -733,7 +735,8 @@
     "empty": "Сөздік бос"
   },
   "constructor": {
-    "removeMatch": "Алып тастау"
+    "removeMatch": "Алып тастау",
+    "pairsConnected": "жұп қосылды"
   },
   "collaborators": {
     "title": "Тең авторлар",
