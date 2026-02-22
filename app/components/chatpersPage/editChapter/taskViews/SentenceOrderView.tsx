@@ -206,15 +206,6 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
   return (
     <TaskViewWrapper widgetId={widgetId}>
       <div className="w-full space-y-6">
-        {/* Question body */}
-        {currentQuestion.body && (
-          <div className="mb-4">
-            <p className="text-base md:text-lg lg:text-xl text-slate-700 font-medium">
-              {currentQuestion.body}
-            </p>
-          </div>
-        )}
-
         {/* Sentence area - where words are placed */}
         <div className="min-h-[80px] p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
           {/* <p className="text-sm text-gray-500 mb-3">Составьте предложение:</p> */}

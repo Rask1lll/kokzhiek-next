@@ -352,7 +352,7 @@ export default function TableWidget({
 
       {/* Table */}
       <div
-        className="grid bg-white rounded-lg overflow-hidden"
+        className="grid bg-white rounded-lg overflow-x-auto"
         style={{
           gridTemplateColumns: `repeat(${columns}, 1fr)`,
           border: outerBorderStyle,
