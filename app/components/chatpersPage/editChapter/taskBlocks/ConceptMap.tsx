@@ -287,6 +287,24 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
     };
   }, []);
 
+  const updateQuestionBody = useCallback(
+    (body: string) => {
+      if (!currentQuestion?.id) return;
+
+      setCurrentQuestion((prev) => (prev ? { ...prev, body } : prev));
+
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+
+      const questionId = currentQuestion.id;
+      debounceTimerRef.current = setTimeout(() => {
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) return;
+        update(questionId, { body: trimmedBody });
+      }, 500);
+    },
+    [currentQuestion, update]
+  );
+
   // Convert question data to ConceptMap structure
   const table = useMemo((): ConceptMap => {
     if (!currentQuestion?.data) {
@@ -540,7 +558,22 @@ export default function ConceptMap({ widgetId }: ConceptMapProps) {
   }
 
   return (
-    <div className="w-full max-w-full">
+    <div className="w-full max-w-full space-y-4">
+      {/* Question input */}
+      <div className="flex flex-wrap items-center w-4/5 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-base md:text-lg lg:text-xl text-gray-600">
+          {t("questionLabel")}
+        </div>
+        <input
+          spellCheck
+          type="text"
+          placeholder={t("questionPlaceholder")}
+          className="w-full h-full outline-0 border-0 ring-0 bg-slate-200 p-2 focus:ring-2 focus:ring-blue-500"
+          value={currentQuestion.body || ""}
+          onChange={(e) => updateQuestionBody(e.target.value)}
+        />
+      </div>
+
       <div className="flex items-center justify-between">
         <span className="text-lg text-stone-700 font-semibold">
           {t("tableSize")}

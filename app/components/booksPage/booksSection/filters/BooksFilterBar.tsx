@@ -52,9 +52,10 @@ const GRADES = [
 
 type BooksFilterBarProps = {
   onChange?: (state: BooksFilterState) => void;
+  hideStatuses?: StatusFilterId[];
 };
 
-export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
+export default function BooksFilterBar({ onChange, hideStatuses }: BooksFilterBarProps) {
   const t = useTranslations("filters");
   const tStatus = useTranslations("status");
   const [search, setSearch] = useState("");
@@ -73,13 +74,12 @@ export default function BooksFilterBar({ onChange }: BooksFilterBarProps) {
     });
   }, []);
 
-  const STATUS_FILTERS = [
+  const STATUS_FILTERS = ([
     { id: "all", label: t("allBooks") },
     { id: "draft", label: tStatus("draft") },
     { id: "pending", label: tStatus("pending") },
     { id: "published", label: tStatus("published") },
-    { id: "archived", label: tStatus("archived") },
-  ] as const;
+  ] as const).filter((f) => !hideStatuses?.includes(f.id));
 
   const SORT_OPTIONS = [
     { id: "recent-desc", label: t("newestFirst") },

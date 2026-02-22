@@ -15,7 +15,7 @@ import { BookStatus } from "@/app/types/book";
 import style from "@/app/components/booksPage/booksSection/booksList/BooksList.module.css";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { isAuthor } from "@/app/libs/roles";
+import { isAuthor, isStudent } from "@/app/libs/roles";
 
 export default function BooksPageClient() {
   const { books } = useBooksStore();
@@ -74,7 +74,10 @@ export default function BooksPageClient() {
 
   return (
     <>
-      <BooksFilterBar onChange={handleFilterChange} />
+      <BooksFilterBar
+        onChange={handleFilterChange}
+        hideStatuses={isStudent(user) ? ["draft", "pending"] : undefined}
+      />
       <div
         className={`w-full px-14 min-h-[calc(100vh-330px)] ${
           viewMode === "list"
