@@ -112,10 +112,11 @@ export default function DragDrop({ widgetId }: DragDropProps) {
     async (cellId: string, answer: string) => {
       if (!currentQuestion?.id) return;
 
-      const cellIndex = parseInt(cellId);
-      // Find option by position (position corresponds to cellId index)
+      const cells = (currentQuestion.data?.cells as string[]) || [];
+      const cellArrayIndex = cells.indexOf(cellId);
+      // Find option by array index (position renumbers after deletion)
       const existingOption = (currentQuestion.options || []).find(
-        (opt) => opt.position === cellIndex
+        (opt) => opt.position === cellArrayIndex
       );
 
       if (existingOption?.id) {
@@ -141,7 +142,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
             is_correct: true,
             match_id: null,
             group: null,
-            order: cellIndex,
+            order: cellArrayIndex,
           },
         ];
 
@@ -163,11 +164,11 @@ export default function DragDrop({ widgetId }: DragDropProps) {
       if (!currentQuestion?.id) return;
 
       const cells = (currentQuestion.data?.cells as string[]) || [];
-      const cellIndex = parseInt(cellId);
+      const cellArrayIndex = cells.indexOf(cellId);
 
-      // Find option by position (position corresponds to cellId index)
+      // Find option by array index (position renumbers after deletion)
       const optionToDelete = (currentQuestion.options || []).find(
-        (opt) => opt.position === cellIndex
+        (opt) => opt.position === cellArrayIndex
       );
 
       if (!optionToDelete?.id) return;
@@ -186,8 +187,7 @@ export default function DragDrop({ widgetId }: DragDropProps) {
 
       // Update order for remaining options (position is read-only from server)
       const reorderedOptions = newOptions.map((opt) => {
-        // Use position to determine which options need order update
-        if (opt.position !== undefined && opt.position > cellIndex) {
+        if (opt.position !== undefined && opt.position > cellArrayIndex) {
           return { ...opt, order: opt.position - 1 };
         }
         return opt;
@@ -319,11 +319,10 @@ export default function DragDrop({ widgetId }: DragDropProps) {
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            {cells.map((cellId) => {
-              const cellIndex = parseInt(cellId);
-              // Find option by position (position corresponds to cellId index)
+            {cells.map((cellId, cellArrayIndex) => {
+              // Find option by array index (position renumbers after deletion)
               const option = (currentQuestion.options || []).find(
-                (opt) => opt.position === cellIndex
+                (opt) => opt.position === cellArrayIndex
               );
               return (
                 <div
