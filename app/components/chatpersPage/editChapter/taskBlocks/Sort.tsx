@@ -175,7 +175,6 @@ export default function Sort({ widgetId }: SortProps) {
   const removeColumn = useCallback(
     (columnId: string) => {
       if (!currentQuestion?.id) return;
-      if (columns.length <= 2) return; // Минимум 2 столбца
 
       const currentColumns =
         (currentQuestion.data as { columns?: Column[] })?.columns || [];
@@ -188,7 +187,7 @@ export default function Sort({ widgetId }: SortProps) {
 
       syncToServer(newColumns, newOptions);
     },
-    [currentQuestion, columns.length, syncToServer]
+    [currentQuestion, syncToServer]
   );
 
   const updateColumnQuestion = useCallback(
@@ -422,8 +421,7 @@ export default function Sort({ widgetId }: SortProps) {
                 <button
                   type="button"
                   onClick={() => removeColumn(column.id)}
-                  disabled={columns.length <= 2}
-                  className="p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors"
                   title={t("deleteColumn")}
                 >
                   <FiX className="w-4 h-4" />

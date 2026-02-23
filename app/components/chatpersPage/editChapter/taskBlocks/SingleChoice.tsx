@@ -133,7 +133,6 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
   const removeOption = useCallback(
     async (optionId: number | undefined) => {
       if (!currentQuestion?.id || !optionId) return;
-      if ((currentQuestion.options?.length || 0) <= 2) return;
 
       const newOptions = (currentQuestion.options || []).filter(
         (opt) => opt.id !== optionId
@@ -412,8 +411,7 @@ export default function SingleChoice({ widgetId }: SingleChoiceProps) {
               <button
                 type="button"
                 onClick={() => removeOption(option.id)}
-                disabled={options.length <= 2}
-                className="p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600 rounded transition-colors"
                 title={t("removeOption")}
               >
                 <FiX className="w-4 h-4" />

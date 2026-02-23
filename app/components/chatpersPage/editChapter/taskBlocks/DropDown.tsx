@@ -211,7 +211,6 @@ export default function DropDown({ widgetId }: DropDownProps) {
       const dropdownOptions = (currentQuestion.options || []).filter(
         (opt) => opt.match_id === dropdownId
       );
-      if (dropdownOptions.length <= 2) return;
 
       // Get dropdown data to update correct_index if needed
       const dropdowns =
@@ -460,8 +459,7 @@ export default function DropDown({ widgetId }: DropDownProps) {
                 <button
                   type="button"
                   onClick={() => removeOption(currentDropdown.id, option.id)}
-                  disabled={currentDropdownOptions.length <= 2}
-                  className="p-1 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1 text-slate-400 hover:text-red-500"
                 >
                   <FiX className="w-4 h-4" />
                 </button>
