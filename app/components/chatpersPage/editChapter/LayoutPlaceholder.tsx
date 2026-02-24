@@ -219,8 +219,14 @@ const LayoutPlaceholder = ({
         );
         break;
       case "text":
+        const vAlign = (widget.data as Record<string, unknown>)?.verticalAlign as string | undefined;
         widgetContent = (
-          <TextWidget value={textValue} onChange={handleChange} />
+          <TextWidget
+            value={textValue}
+            onChange={handleChange}
+            verticalAlign={(vAlign as "top" | "center" | "bottom") || "top"}
+            onVerticalAlignChange={(align) => updateWidget(widget.id, { ...widget.data, verticalAlign: align })}
+          />
         );
         break;
       case "glossary_text":

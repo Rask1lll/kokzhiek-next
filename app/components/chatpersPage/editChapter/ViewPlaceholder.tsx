@@ -209,5 +209,12 @@ export default function ViewPlaceholder({
     )
   ) : content;
 
-  return <div className="w-full">{wrappedContent}</div>;
+  const viewVerticalAlign = (widget.data as Record<string, unknown>)?.verticalAlign as string | undefined;
+  const viewAlignClass = viewVerticalAlign === "center"
+    ? "flex flex-col justify-center"
+    : viewVerticalAlign === "bottom"
+      ? "flex flex-col justify-end"
+      : "";
+
+  return <div className={`w-full h-full ${viewAlignClass}`}>{wrappedContent}</div>;
 }

@@ -30,9 +30,13 @@ const textColors = [
   { color: "#EA580C", label: "Оранжевый" },
 ];
 
+type VerticalAlign = "top" | "center" | "bottom";
+
 type TextWidgetProps = {
   value: string;
   onChange: (value: string) => void;
+  verticalAlign?: VerticalAlign;
+  onVerticalAlignChange?: (align: VerticalAlign) => void;
 };
 
 type FontSize = "small" | "normal" | "large" | "xlarge";
@@ -71,7 +75,7 @@ function ToolbarButton({
   );
 }
 
-export default function TextWidget({ value, onChange }: TextWidgetProps) {
+export default function TextWidget({ value, onChange, verticalAlign = "top", onVerticalAlignChange }: TextWidgetProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const [showHighlight, setShowHighlight] = useState(false);
@@ -230,8 +234,14 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
     handleInput();
   };
 
+  const editorAlignClass = verticalAlign === "center"
+    ? "flex flex-col justify-center"
+    : verticalAlign === "bottom"
+      ? "flex flex-col justify-end"
+      : "";
+
   return (
-    <div className="w-full">
+    <div className="w-full h-full flex flex-col">
       {/* Toolbar */}
       <div
         className={`flex items-center gap-1 mb-2 p-1 bg-gray-50 rounded-lg border border-gray-200 transition-opacity overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent ${"opacity-100"}`}
@@ -305,6 +315,46 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
             <FiAlignRight className="w-4 h-4" />
           </ToolbarButton>
         </div>
+
+        {/* Vertical alignment */}
+        {onVerticalAlignChange && (
+          <div className="flex items-center gap-0.5 border-r border-gray-200 pr-2 mr-1">
+            <ToolbarButton
+              onClick={() => onVerticalAlignChange("top")}
+              active={verticalAlign === "top"}
+              title="По верхнему краю"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16" />
+                <path d="M12 4v12" />
+                <path d="M8 12l4 4 4-4" />
+              </svg>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => onVerticalAlignChange("center")}
+              active={verticalAlign === "center"}
+              title="По центру (вертикально)"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12h16" />
+                <path d="M12 5v14" />
+                <path d="M8 8l4-3 4 3" />
+                <path d="M8 16l4 3 4-3" />
+              </svg>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => onVerticalAlignChange("bottom")}
+              active={verticalAlign === "bottom"}
+              title="По нижнему краю"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 20h16" />
+                <path d="M12 20V8" />
+                <path d="M8 12l4-4 4 4" />
+              </svg>
+            </ToolbarButton>
+          </div>
+        )}
 
         {/* Lists */}
         <div className="flex items-center gap-0.5 border-r border-gray-200 pr-2 mr-1">
@@ -479,20 +529,22 @@ export default function TextWidget({ value, onChange }: TextWidgetProps) {
       )}
 
       {/* Editor */}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        onSelect={handleSelectionChange}
-        onKeyUp={handleSelectionChange}
-        onMouseUp={handleSelectionChange}
-        className="w-full text-wrap wrap-anywhere min-h-[80px] p-2 outline-none text-gray-800 prose prose-sm max-w-none
-          *:my-1 [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
-          focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400
-          cursor-text"
-        data-placeholder="Введите текст..."
-        suppressContentEditableWarning
-      />
+      <div className={`flex-1 ${editorAlignClass}`}>
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleInput}
+          onSelect={handleSelectionChange}
+          onKeyUp={handleSelectionChange}
+          onMouseUp={handleSelectionChange}
+          className="w-full text-wrap wrap-anywhere min-h-[80px] p-2 outline-none text-gray-800 prose prose-sm max-w-none
+            *:my-1 [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
+            focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400
+            cursor-text"
+          data-placeholder="Введите текст..."
+          suppressContentEditableWarning
+        />
+      </div>
     </div>
   );
 }
