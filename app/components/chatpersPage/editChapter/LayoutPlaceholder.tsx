@@ -39,6 +39,7 @@ import ConceptMap from "./taskBlocks/ConceptMap";
 import Sort from "./taskBlocks/Sort";
 import Order from "./taskBlocks/Order";
 import DragDrop from "./taskBlocks/DragDrop";
+import OpenAnswer from "./taskBlocks/OpenAnswer";
 import TaskBlockWrapper from "./taskBlocks/TaskBlockWrapper";
 import TaskSettingsMenu from "./taskBlocks/TaskSettingsMenu";
 import TableWidget from "./widgetBlocks/TableWidget";
@@ -394,6 +395,13 @@ const LayoutPlaceholder = ({
         widgetContent = (
           <TaskBlockWrapper widgetId={widget.id}>
             <DragDrop widgetId={widget.id} />
+          </TaskBlockWrapper>
+        );
+        break;
+      case "open_answer":
+        widgetContent = (
+          <TaskBlockWrapper widgetId={widget.id}>
+            <OpenAnswer widgetId={widget.id} />
           </TaskBlockWrapper>
         );
         break;

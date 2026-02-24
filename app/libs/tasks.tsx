@@ -14,6 +14,7 @@ import {
   FiList,
   FiHash,
   FiBookOpen,
+  FiFileText,
 } from "react-icons/fi";
 
 export const tasks = [
@@ -100,6 +101,12 @@ export const tasks = [
     title: "Кроссворд",
     description: "Разгадывание кроссворда по определениям",
     icon: <FiGrid className="w-5 h-5 text-purple-500" />,
+  },
+  {
+    type: "open_answer",
+    title: "Открытый ответ",
+    description: "Развёрнутый текстовый ответ (эссе, сочинение)",
+    icon: <FiFileText className="w-5 h-5 text-rose-500" />,
   },
 ];
 

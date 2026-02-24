@@ -37,6 +37,7 @@ import SortView from "./taskViews/SortView";
 import OrderView from "./taskViews/OrderView";
 import SentenceOrderView from "./taskViews/SentenceOrderView";
 import DragDropView from "./taskViews/DragDropView";
+import OpenAnswerView from "./taskViews/OpenAnswerView";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -164,6 +165,9 @@ export default function ViewPlaceholder({
       break;
     case "drag_drop":
       content = <DragDropView widgetId={widget.id} />;
+      break;
+    case "open_answer":
+      content = <OpenAnswerView widgetId={widget.id} />;
       break;
 
     // Container widgets

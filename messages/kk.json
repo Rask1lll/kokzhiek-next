@@ -561,7 +561,12 @@
     "addCard": "Карточка қосу",
     "deleteCard": "Карточканы жою",
     "textPlaceholder": "Мәтін...",
-    "answerPlaceholderShort": "жауап"
+    "answerPlaceholderShort": "жауап",
+    "openAnswerPlaceholder": "Дұрыс жауапты енгізіңіз...",
+    "hasCorrectAnswer": "Дұрыс жауабы бар",
+    "correctAnswerLabel": "Дұрыс жауап:",
+    "studentAnswerPlaceholder": "Жауабыңызды енгізіңіз...",
+    "answerAccepted": "Жауабыңыз қабылданды және оқытушы тексереді"
   },
   "widgetModal": {
     "title": "Виджет түрін таңдаңыз",
@@ -634,7 +639,9 @@
     "word_search": "Әріптер торы",
     "word_searchDesc": "Әріптер торынан сөздерді іздеу",
     "crossword": "Кроссворд",
-    "crosswordDesc": "Анықтамалар бойынша кроссвордты шешу"
+    "crosswordDesc": "Анықтамалар бойынша кроссвордты шешу",
+    "open_answer": "Ашық жауап",
+    "open_answerDesc": "Толық мәтінді жауап (эссе, шығарма)"
   },
   "blockEditor": {
     "blockMenu": "Блок мәзірі",

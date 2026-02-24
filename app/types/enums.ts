@@ -12,6 +12,7 @@ export enum TaskType {
   SENTENCE_ORDER = "sentence_order",
   WORD_SEARCH = "word_search",
   CROSSWORD = "crossword",
+  OPEN_ANSWER = "open_answer",
 }
 
 // Типы виджетов (widgets)

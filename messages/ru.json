@@ -560,7 +560,12 @@
     "addCard": "Добавить карточку",
     "deleteCard": "Удалить карточку",
     "textPlaceholder": "Текст...",
-    "answerPlaceholderShort": "ответ"
+    "answerPlaceholderShort": "ответ",
+    "openAnswerPlaceholder": "Введите эталонный ответ...",
+    "hasCorrectAnswer": "Есть правильный ответ",
+    "correctAnswerLabel": "Правильный ответ:",
+    "studentAnswerPlaceholder": "Введите ваш ответ...",
+    "answerAccepted": "Ваш ответ принят и будет проверен преподавателем"
   },
   "widgetModal": {
     "title": "Выберите тип виджета",
@@ -633,7 +638,9 @@
     "word_search": "Сетка букв",
     "word_searchDesc": "Поиск слов в сетке букв",
     "crossword": "Кроссворд",
-    "crosswordDesc": "Разгадывание кроссворда по определениям"
+    "crosswordDesc": "Разгадывание кроссворда по определениям",
+    "open_answer": "Открытый ответ",
+    "open_answerDesc": "Развёрнутый текстовый ответ (эссе, сочинение)"
   },
   "blockEditor": {
     "blockMenu": "Меню блока",
