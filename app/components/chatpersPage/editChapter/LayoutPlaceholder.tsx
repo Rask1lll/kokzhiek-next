@@ -443,10 +443,29 @@ const LayoutPlaceholder = ({
       <img src={wSignUrl} alt="Условный знак" className={`${signSizeClass[wSignSize] || signSizeClass.md} object-contain flex-shrink-0`} />
     ) : null;
 
-    const wrappedContent = signImg ? (
+    const wrappedContent = wSignUrl ? (
       wSignMode === "absolute" ? (
         <div className="relative">
-          <div className="absolute -left-10 top-0">{signImg}</div>
+          {wSignSize === "sm" && (
+            <div className="absolute top-0 -left-8">
+              <img src={wSignUrl} alt="Условный знак" className="w-6 h-6 object-contain" />
+            </div>
+          )}
+          {wSignSize === "md" && (
+            <div className="absolute top-0 -left-10">
+              <img src={wSignUrl} alt="Условный знак" className="w-8 h-8 object-contain" />
+            </div>
+          )}
+          {wSignSize === "lg" && (
+            <div className="absolute top-0 -left-14">
+              <img src={wSignUrl} alt="Условный знак" className="w-12 h-12 object-contain" />
+            </div>
+          )}
+          {wSignSize === "xl" && (
+            <div className="absolute top-0 -left-18">
+              <img src={wSignUrl} alt="Условный знак" className="w-16 h-16 object-contain" />
+            </div>
+          )}
           <div>{widgetContent}</div>
         </div>
       ) : (

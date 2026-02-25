@@ -565,7 +565,14 @@
     "hasCorrectAnswer": "Есть правильный ответ",
     "correctAnswerLabel": "Правильный ответ:",
     "studentAnswerPlaceholder": "Введите ваш ответ...",
-    "answerAccepted": "Ваш ответ принят и будет проверен преподавателем"
+    "answerAccepted": "Ваш ответ принят и будет проверен преподавателем",
+    "replacePhoto": "Заменить фото",
+    "uploadPhoto": "Загрузить фото",
+    "uploading": "Загрузка...",
+    "questionNotFound": "Вопрос не найден",
+    "loadErrorPrefix": "Ошибка загрузки:",
+    "hint": "Подсказка",
+    "showHint": "Показать подсказку"
   },
   "widgetModal": {
     "title": "Выберите тип виджета",

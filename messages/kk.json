@@ -566,7 +566,14 @@
     "hasCorrectAnswer": "Дұрыс жауабы бар",
     "correctAnswerLabel": "Дұрыс жауап:",
     "studentAnswerPlaceholder": "Жауабыңызды енгізіңіз...",
-    "answerAccepted": "Жауабыңыз қабылданды және оқытушы тексереді"
+    "answerAccepted": "Жауабыңыз қабылданды және оқытушы тексереді",
+    "replacePhoto": "Фотоны ауыстыру",
+    "uploadPhoto": "Фото жүктеу",
+    "uploading": "Жүктелуде...",
+    "questionNotFound": "Сұрақ табылмады",
+    "loadErrorPrefix": "Жүктеу қатесі:",
+    "showHint": "Кеңес көрсету",
+    "hint": "Кеңес"
   },
   "widgetModal": {
     "title": "Виджет түрін таңдаңыз",

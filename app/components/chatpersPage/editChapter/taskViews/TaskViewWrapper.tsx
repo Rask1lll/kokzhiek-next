@@ -60,13 +60,13 @@ export default function TaskViewWrapper({
   }, [showHint]);
 
   if (loading) {
-    return <p className="text-gray-400">Загрузка...</p>;
+    return <p className="text-gray-400">{t("taskEditor.loading")}</p>;
   }
 
   if (error) {
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-600">Ошибка загрузки: {error}</p>
+        <p className="text-red-600">{t("taskEditor.loadErrorPrefix")} {error}</p>
       </div>
     );
   }
@@ -74,7 +74,7 @@ export default function TaskViewWrapper({
   if (!currentQuestion) {
     return (
       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-yellow-600">Вопрос не найден</p>
+        <p className="text-yellow-600">{t("taskEditor.questionNotFound")}</p>
       </div>
     );
   }
@@ -137,10 +137,10 @@ export default function TaskViewWrapper({
                     showAlert(hint, "hint", 10000);
                   }}
                   className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-purple-700 hover:bg-purple-200 shrink-0"
-                  title="Показать подсказку"
+                  title={t("taskEditor.showHint")}
                 >
                   <FiHelpCircle className="w-4 h-4" />
-                  <span>Подсказка</span>
+                  <span>{t("taskEditor.hint")}</span>
                 </button>
               )}
             </div>
@@ -173,10 +173,10 @@ export default function TaskViewWrapper({
                       showAlert(hint, "hint", 10000);
                     }}
                     className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-purple-700 hover:bg-purple-200 shrink-0"
-                    title="Показать подсказку"
+                    title={t("taskEditor.showHint")}
                   >
                     <FiHelpCircle className="w-4 h-4" />
-                    <span>Подсказка</span>
+                    <span>{t("taskEditor.hint")}</span>
                   </button>
                 )}
               </div>
