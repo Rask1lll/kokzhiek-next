@@ -6,6 +6,13 @@ import ViewPlaceholder from "../ViewPlaceholder";
 
 type TableBorderStyle = "solid" | "dashed" | "dotted" | "none";
 
+type CellMerge = {
+  row: number;
+  col: number;
+  rowSpan: number;
+  colSpan: number;
+};
+
 type TableData = {
   rows?: number;
   columns?: number;
@@ -14,11 +21,27 @@ type TableData = {
   borderStyle?: TableBorderStyle;
   cellPadding?: number;
   showOuterBorder?: boolean;
+  merges?: CellMerge[];
 };
 
 type TableViewProps = {
   widget: Widget;
 };
+
+function getMergeAt(row: number, col: number, merges: CellMerge[]): CellMerge | null {
+  return merges.find((m) => m.row === row && m.col === col) || null;
+}
+
+function isCoveredByMerge(row: number, col: number, merges: CellMerge[]): boolean {
+  return merges.some(
+    (m) =>
+      row >= m.row &&
+      row < m.row + m.rowSpan &&
+      col >= m.col &&
+      col < m.col + m.colSpan &&
+      !(row === m.row && col === m.col)
+  );
+}
 
 export default function TableView({ widget }: TableViewProps) {
   const tableData = widget.data as TableData;
@@ -30,6 +53,7 @@ export default function TableView({ widget }: TableViewProps) {
   const borderStyle = tableData?.borderStyle || "solid";
   const cellPadding = tableData?.cellPadding ?? 8;
   const showOuterBorder = tableData?.showOuterBorder ?? true;
+  const merges: CellMerge[] = tableData?.merges || [];
   const children = widget.children || [];
 
   // Get widget at specific cell
@@ -61,24 +85,35 @@ export default function TableView({ widget }: TableViewProps) {
         className="grid bg-white rounded-lg overflow-hidden"
         style={{
           gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          gridTemplateRows: `repeat(${rows}, auto)`,
           border: outerBorderStyle,
           gap: 0,
         }}
       >
         {rowArray.map((row) =>
           colArray.map((col) => {
+            if (isCoveredByMerge(row, col, merges)) return null;
+
+            const merge = getMergeAt(row, col, merges);
+            const colSpan = merge?.colSpan || 1;
+            const rowSpan = merge?.rowSpan || 1;
             const cellWidget = getWidgetAtCell(row, col);
-            const isLastRow = row === rows - 1;
-            const isLastCol = col === columns - 1;
+
+            const cellRightEdge = col + colSpan;
+            const cellBottomEdge = row + rowSpan;
+            const showRightBorder = cellRightEdge < columns;
+            const showBottomBorder = cellBottomEdge < rows;
 
             return (
               <div
                 key={`${row}-${col}`}
                 className="min-h-[40px] bg-white"
                 style={{
+                  gridColumn: `${col + 1} / span ${colSpan}`,
+                  gridRow: `${row + 1} / span ${rowSpan}`,
                   padding: `${cellPadding}px`,
-                  borderRight: isLastCol ? "none" : cellBorderStyle,
-                  borderBottom: isLastRow ? "none" : cellBorderStyle,
+                  borderRight: showRightBorder ? cellBorderStyle : "none",
+                  borderBottom: showBottomBorder ? cellBorderStyle : "none",
                 }}
               >
                 {cellWidget ? (
