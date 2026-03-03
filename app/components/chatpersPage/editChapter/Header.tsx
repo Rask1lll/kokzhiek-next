@@ -4,7 +4,13 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BiArrowBack } from "react-icons/bi";
-import { FiDownload, FiChevronLeft, FiChevronRight, FiEdit2, FiEye } from "react-icons/fi";
+import {
+  FiDownload,
+  FiChevronLeft,
+  FiChevronRight,
+  FiEdit2,
+  FiEye,
+} from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/hooks/useAuth";
 import { canEditBook } from "@/app/libs/permissions";
@@ -44,7 +50,11 @@ export default function ChapterHeader() {
     fetchBookOwner();
   }, [bookId]);
 
-  const canEdit = canEditBook(user, bookCreatedBy ?? undefined, collaboratorIds);
+  const canEdit = canEditBook(
+    user,
+    bookCreatedBy ?? undefined,
+    collaboratorIds,
+  );
 
   const handleSaveAsPdf = () => {
     const header = document.querySelector("header");
@@ -77,7 +87,9 @@ export default function ChapterHeader() {
                 title={prevChapter.title}
               >
                 <FiChevronLeft className="text-base" />
-                <span className="hidden sm:inline max-w-[120px] truncate">{prevChapter.title}</span>
+                <span className="hidden sm:inline max-w-[120px] truncate">
+                  {prevChapter.title}
+                </span>
               </Link>
             ) : (
               <span className="flex items-center px-2 py-1.5 text-gray-300 text-sm cursor-default">
@@ -90,7 +102,9 @@ export default function ChapterHeader() {
                 className="flex items-center gap-1 px-2 py-1.5 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
                 title={nextChapter.title}
               >
-                <span className="hidden sm:inline max-w-[120px] truncate">{nextChapter.title}</span>
+                <span className="hidden sm:inline max-w-[120px] truncate">
+                  {nextChapter.title}
+                </span>
                 <FiChevronRight className="text-base" />
               </Link>
             ) : (
@@ -121,8 +135,8 @@ export default function ChapterHeader() {
                 className={`flex items-center justify-center rounded-md p-2.5 transition-colors ${
                   isEdit
                     ? "bg-blue-500 text-white shadow"
-                    // ? "bg-sky-600 text-white shadow"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    : // ? "bg-sky-600 text-white shadow"
+                      "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                 }`}
               >
                 <FiEdit2 className="w-4 h-4" />

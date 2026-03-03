@@ -13,6 +13,7 @@ import { handleLogout as apiLogout } from "@/app/services/authorization/authApi"
 import { removeToken } from "@/app/libs/auth";
 import { getRoleLabel } from "@/app/libs/roles";
 import { canAccessDashboard } from "@/app/libs/permissions";
+import { BiExit } from "react-icons/bi";
 
 export default function Navbar() {
   const { user, loading } = useAuth();
@@ -50,9 +51,9 @@ export default function Navbar() {
   const userRole = getRoleLabel(user);
   return (
     <header className="bg-white border-b border-gray-300 relative z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <nav className="hidden md:flex items-center space-x-1">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center w-full justify-between mb-3 pt-5">
+          <nav className="flex items-center space-x-1">
             <Logo />
             {canAccessDashboard(user) && (
               <Link
@@ -64,14 +65,14 @@ export default function Navbar() {
             )}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center  gap-5 ">
             {loading ? (
               <UserSkeleton />
             ) : userEmail ? (
-              <div className="relative" ref={menuRef}>
+              <div className="relative not-md:hidden" ref={menuRef}>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex hidden sm:block  items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="flex  sm:block  items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                   type="button"
                 >
                   <div className="text-left">
@@ -105,66 +106,60 @@ export default function Navbar() {
                 )}
               </div>
             ) : null}
-            <LanguageSwitcher />
-
+            <div className="not-md:hidden">
+              <LanguageSwitcher />
+            </div>
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              type="button"
+              className="md:hidden  transition-colors"
+              onClick={() => setIsBurgerOpen((prev) => !prev)}
             >
-              <span className="block w-5 h-0.5 bg-gray-600 mb-1" />
-              <span className="block w-5 h-0.5 bg-gray-600 mb-1" />
-              <span className="block w-5 h-0.5 bg-gray-600" />
+              <div className=" w-5 h-0.5 bg-gray-600 mt" />
+              <div className=" w-5 h-0.5 bg-gray-600 mt-1" />
+              <div className=" w-5 h-0.5 bg-gray-600 mt-1" />
             </button>
           </div>
         </div>
-        <div className="md:hidden border-gray-200 pt-4 pb-3">
-          {isBurgerOpen && (
+        <div className="md:hidden border-gray-200 pt-4">
+          {isBurgerOpen && canAccessDashboard(user) && (
             <div className="flex flex-col space-y-2 mb-4">
-              {canAccessDashboard(user) && (
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
-                >
-                  <span className="w-4 h-4 rounded-full bg-gray-300" />
-                  <span>{t("dashboard")}</span>
-                </Link>
-              )}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200"
+              >
+                <span className="w-4 h-4 rounded-full bg-gray-300" />
+                <span>{t("dashboard")}</span>
+              </Link>
             </div>
           )}
 
+          {/* юзер на мобилке */}
+
           {loading ? (
             <UserSkeletonMobile />
-          ) : userEmail ? (
-            <div className="border-t pt-4">
-              <div className="flex items-center gap-2 px-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">
-                    {userName
-                      ? userName
-                          .split(" ")
-                          .map((n: string) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)
-                      : userEmail[0].toUpperCase()}
-                  </span>
+          ) : userEmail && isBurgerOpen ? (
+            <div className="border-t border-gray-200 pt-4 pb-4">
+              <div className="flex items-center justify-between gap-2 px-3 mb-3">
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 bg-linear-to-r from-blue-300 to-purple-200 rounded-full flex items-center justify-center" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {userName || userEmail}
+                    </p>
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <span className="w-3 h-3 rounded-full bg-gray-300" />
+                      {userRole}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {userName || userEmail}
-                  </p>
-                  <p className="text-xs text-gray-500 flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full bg-gray-300" />
-                    {userRole}
-                  </p>
-                </div>
+
+                <LanguageSwitcher />
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full rounded-lg transition-colors"
+                className="flex items-center gap-2 px-5 py-2 text-md mt-6 text-red-600 bg-red-50  rounded-lg transition-colors"
                 type="button"
               >
-                <span className="w-4 h-4 rounded-full bg-red-300" />
+                <BiExit width={20} height={20} />
                 <span>{t("logout")}</span>
               </button>
             </div>

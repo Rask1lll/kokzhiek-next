@@ -55,7 +55,10 @@ type BooksFilterBarProps = {
   hideStatuses?: StatusFilterId[];
 };
 
-export default function BooksFilterBar({ onChange, hideStatuses }: BooksFilterBarProps) {
+export default function BooksFilterBar({
+  onChange,
+  hideStatuses,
+}: BooksFilterBarProps) {
   const t = useTranslations("filters");
   const tStatus = useTranslations("status");
   const [search, setSearch] = useState("");
@@ -74,12 +77,14 @@ export default function BooksFilterBar({ onChange, hideStatuses }: BooksFilterBa
     });
   }, []);
 
-  const STATUS_FILTERS = ([
-    { id: "all", label: t("allBooks") },
-    { id: "draft", label: tStatus("draft") },
-    { id: "pending", label: tStatus("pending") },
-    { id: "published", label: tStatus("published") },
-  ] as const).filter((f) => !hideStatuses?.includes(f.id));
+  const STATUS_FILTERS = (
+    [
+      { id: "all", label: t("allBooks") },
+      { id: "draft", label: tStatus("draft") },
+      { id: "pending", label: tStatus("pending") },
+      { id: "published", label: tStatus("published") },
+    ] as const
+  ).filter((f) => !hideStatuses?.includes(f.id));
 
   const SORT_OPTIONS = [
     { id: "recent-desc", label: t("newestFirst") },
@@ -97,7 +102,8 @@ export default function BooksFilterBar({ onChange, hideStatuses }: BooksFilterBa
     const currentSearch = next.search ?? search;
     const currentStatus = next.status ?? activeStatus;
     const currentGradeId = next.gradeId !== undefined ? next.gradeId : gradeId;
-    const currentSubjectId = next.subjectId !== undefined ? next.subjectId : subjectId;
+    const currentSubjectId =
+      next.subjectId !== undefined ? next.subjectId : subjectId;
 
     const fullState: BooksFilterState = {
       search: currentSearch,
@@ -153,7 +159,11 @@ export default function BooksFilterBar({ onChange, hideStatuses }: BooksFilterBa
   return (
     <div className="w-full px-12 py-6">
       <div className="flex flex-col gap-4">
-        <BooksSearchInput value={search} onChange={handleSearchChange} onSearch={handleSearch} />
+        <BooksSearchInput
+          value={search}
+          onChange={handleSearchChange}
+          onSearch={handleSearch}
+        />
 
         <div className="flex flex-col gap-3 md:flex-row md:justify-between">
           <BooksStatusFilter
@@ -178,7 +188,7 @@ export default function BooksFilterBar({ onChange, hideStatuses }: BooksFilterBa
             <select
               value={subjectId ?? ""}
               onChange={handleSubjectChange}
-              className="px-2 py-1.5 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-2 py-1.5 rounded-lg border not-sm:w-3xs border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">{t("allSubjects")}</option>
               {subjects.map((subject) => (
