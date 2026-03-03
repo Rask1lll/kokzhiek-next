@@ -102,7 +102,9 @@
     "lessonCount_other": "глав",
     "deleteSection": "Удалить раздел",
     "deleteSectionConfirm": "Вы уверены, что хотите удалить раздел \"{title}\"? Главы останутся без раздела.",
-    "section": "Раздел"
+    "section": "Раздел",
+    "sidebarOpen": "Открыть оглавление",
+    "sidebarClose": "Закрыть оглавление"
   },
   "common": {
     "save": "Сохранить",

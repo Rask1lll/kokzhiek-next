@@ -1,0 +1,10 @@
+---
+description: Next.js frontend architecture
+globs: ["app/**/*.{ts,tsx}", "components/**/*.tsx"]
+---
+
+- Prefer Server Components unless interactivity is required.
+- Use "use client" only when needed.
+- Do not implement API routes.
+- Do not implement server business logic.
+- Keep layouts clean and minimal.

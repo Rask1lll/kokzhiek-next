@@ -1,0 +1,9 @@
+---
+description: State management rules
+globs: ["**/*.tsx"]
+---
+
+- Use local state when possible.
+- Use global store only when necessary.
+- Do not store server data in global state unless required.
+- Separate UI state from server state.

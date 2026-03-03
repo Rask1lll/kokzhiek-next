@@ -24,27 +24,22 @@ import { CSS } from "@dnd-kit/utilities";
 import CreateBlock from "@/app/components/chatpersPage/CreateBlock";
 import LayoutsList from "@/app/components/chatpersPage/editChapter/LayoutsList";
 import Layout from "@/app/components/chatpersPage/editChapter/Layout";
+import BookTocSidebar from "@/app/components/bookDetailsPage.tsx/BookTocSidebar";
 import { useModalWindowStore } from "@/app/store/modalWindowStore";
 import { useConstructor } from "@/app/hooks/useConstructor";
 import { useBlocks } from "@/app/hooks/useBlocks";
 import { useChapterPresence } from "@/app/hooks/useChapterPresence";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isAuthor } from "@/app/libs/roles";
+import { useChaptersStore } from "@/app/store/chaptersStore";
+import { handleGetBook } from "@/app/services/book/booksApi";
 import { Block } from "@/app/types/block";
+import ChapterContentSkeleton from "./ChapterContentSkeleton";
 
 export function ChapterPageSkeleton() {
   return (
     <div className="min-h-screen w-screen mt-20 flex flex-col items-center py-10">
-      <div className="w-5/6 space-y-6">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-32 animate-pulse"
-          >
-            <div className="bg-gray-200 rounded w-full h-full" />
-          </div>
-        ))}
-      </div>
+      <ChapterContentSkeleton />
     </div>
   );
 }
@@ -105,8 +100,26 @@ export default function ChapterPageClient() {
   const { create: createBlock, swap: swapBlocks } = useBlocks();
   const { user } = useAuth();
   const { joinChapter, leaveChapter } = useChapterPresence(user);
+  const { sections, chapters, setSections, setChapters } = useChaptersStore();
 
   const [activeId, setActiveId] = useState<number | null>(null);
+
+  // Загружаем оглавление книги для сайдбара (разделы и главы)
+  useEffect(() => {
+    if (!bookId) return;
+    let cancelled = false;
+    handleGetBook(Number(bookId))
+      .then((res) => {
+        if (!cancelled && res?.data) {
+          setSections(res.data.sections ?? []);
+          setChapters(res.data.chapters ?? []);
+        }
+      })
+      .catch((err) => console.error("Error fetching book toc:", err));
+    return () => {
+      cancelled = true;
+    };
+  }, [bookId, setSections, setChapters]);
 
   // Configure sensors for drag detection
   const sensors = useSensors(
@@ -171,16 +184,27 @@ export default function ChapterPageClient() {
     );
   }
 
-  if (isLoading) {
-    return <ChapterPageSkeleton />;
-  }
-
   const activeBlock = activeId ? blocks.find((b) => b.id === activeId) : null;
 
   return (
-    <div className="h-screen w-screen mt-20 flex flex-col items-center py-10 overflow-y-auto chapter-scrollbar">
-      <div className="2xl:w-5/6 w-full space-y-1">
-        <DndContext
+    <div className="min-h-screen w-screen mt-14 flex">
+      {/* Сайдбар с деревом — всегда виден, не перерисовывается при смене главы */}
+      {bookId && (
+        <BookTocSidebar
+          bookId={bookId}
+          sections={sections}
+          standaloneChapters={chapters}
+          currentChapterId={chapterId}
+          canEdit={isEditMode}
+        />
+      )}
+
+      <div className="flex-1 min-w-0 flex flex-col items-center py-10 overflow-y-auto chapter-scrollbar">
+        {isLoading ? (
+          <ChapterContentSkeleton />
+        ) : (
+        <div className="2xl:w-5/6 w-full space-y-1">
+          <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
@@ -209,7 +233,9 @@ export default function ChapterPageClient() {
           </DragOverlay>
         </DndContext>
 
-        {isEditMode && <CreateBlock onClick={handleCreate} />}
+          {isEditMode && <CreateBlock onClick={handleCreate} />}
+        </div>
+        )}
       </div>
     </div>
   );

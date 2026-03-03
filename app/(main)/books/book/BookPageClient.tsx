@@ -8,8 +8,7 @@ import ChaptersContainer from "@/app/components/bookDetailsPage.tsx/ChaptersCont
 import { useEffect, useState } from "react";
 import { useChaptersStore } from "@/app/store/chaptersStore";
 import { Book } from "@/app/types/book";
-import { handleDeleteBook } from "@/app/services/book/booksApi";
-import { getAuthHeaders } from "@/app/libs/auth";
+import { handleDeleteBook, handleGetBook } from "@/app/services/book/booksApi";
 import { useChapterPresence } from "@/app/hooks/useChapterPresence";
 import { useAuth } from "@/app/hooks/useAuth";
 import { isAuthor } from "@/app/libs/roles";
@@ -56,19 +55,15 @@ export default function BookPageClient() {
     if (!id) return;
 
     async function fetchBook() {
+      if (!id) return;
       setIsLoading(true);
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${id}`,
-          {
-            headers: getAuthHeaders(),
-            method: "GET",
-          }
-        );
-        const res = await response.json();
-        setSections(res.data?.sections ?? []);
-        setChapters(res.data?.chapters ?? []);
-        setBook(res.data);
+        const res = await handleGetBook(Number(id));
+        if (res?.data) {
+          setSections(res.data.sections ?? []);
+          setChapters(res.data.chapters ?? []);
+          setBook(res.data);
+        }
       } catch (error) {
         console.error("Error fetching book:", error);
       } finally {

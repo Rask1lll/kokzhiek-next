@@ -1,0 +1,10 @@
+---
+description: Global project rules
+alwaysApply: true
+---
+
+- Use TypeScript only.
+- Do not use `any`.
+- Prefer Server Components.
+- Do not expose secrets to client.
+- Keep components small and single-responsibility.

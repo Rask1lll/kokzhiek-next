@@ -7,8 +7,8 @@ import { BiArrowBack } from "react-icons/bi";
 import { FiDownload, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/hooks/useAuth";
-import { getAuthHeaders } from "@/app/libs/auth";
 import { canEditBook } from "@/app/libs/permissions";
+import { handleGetBook } from "@/app/services/book/booksApi";
 import { useBlocksStore } from "@/app/store/blocksStore";
 
 export default function ChapterHeader() {
@@ -29,21 +29,12 @@ export default function ChapterHeader() {
 
     async function fetchBookOwner() {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${bookId}`,
-          {
-            headers: getAuthHeaders(),
-            method: "GET",
+        const res = await handleGetBook(Number(bookId));
+        if (res?.data) {
+          if (res.data.created_by) setBookCreatedBy(res.data.created_by);
+          if (res.data.collaborators) {
+            setCollaboratorIds(res.data.collaborators.map((c) => c.id));
           }
-        );
-        const res = await response.json();
-        if (res.data?.created_by) {
-          setBookCreatedBy(res.data.created_by);
-        }
-        if (res.data?.collaborators) {
-          setCollaboratorIds(
-            res.data.collaborators.map((c: { id: number }) => c.id)
-          );
         }
       } catch (error) {
         console.error("Error fetching book owner:", error);

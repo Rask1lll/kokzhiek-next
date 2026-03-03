@@ -1,0 +1,11 @@
+---
+description: API integration rules
+globs: ["lib/**/*.ts", "services/**/*.ts"]
+---
+
+- All data comes from external Laravel API.
+- Create a dedicated API client layer.
+- Never hardcode URLs inside components.
+- Use environment variables for base URL.
+- Validate API responses with Zod.
+- Handle loading and error states.

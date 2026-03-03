@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { BiArrowBack } from "react-icons/bi";
 import { FiDownload } from "react-icons/fi";
-import { getAuthHeaders } from "@/app/libs/auth";
+import { handleGetBook } from "@/app/services/book/booksApi";
 import { getChapterState } from "@/app/services/constructor/constructorApi";
 import { Book } from "@/app/types/book";
 import { Chapter } from "@/app/types/chapter";
@@ -36,16 +36,9 @@ export default function BookPrintClient() {
       setError(null);
 
       try {
-        const bookResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/books/${bookId}`,
-          {
-            headers: getAuthHeaders(),
-            method: "GET",
-          }
-        );
-        const bookRes = await bookResponse.json();
+        const bookRes = await handleGetBook(Number(bookId));
 
-        if (!bookRes.data) {
+        if (!bookRes?.data) {
           setError(t("notFound"));
           return;
         }
