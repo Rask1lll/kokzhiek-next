@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BiArrowBack } from "react-icons/bi";
-import { FiDownload, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiDownload, FiChevronLeft, FiChevronRight, FiEdit2, FiEye } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/hooks/useAuth";
 import { canEditBook } from "@/app/libs/permissions";
@@ -113,27 +113,31 @@ export default function ChapterHeader() {
           )}
 
           {canEdit && (
-            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-100 p-1 text-sm">
+            <div className="flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm shadow-sm">
               <Link
                 href={`${path}?chapter=${chapter}&book=${bookId}&edit=1`}
-                className={`px-4 py-1.5 rounded-md transition ${
+                title={t("editing")}
+                aria-label={t("editing")}
+                className={`flex items-center justify-center rounded-md p-2.5 transition-colors ${
                   isEdit
-                    ? "bg-white text-sky-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-blue-500 text-white shadow"
+                    // ? "bg-sky-600 text-white shadow"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                 }`}
               >
-                {t("editing")}
+                <FiEdit2 className="w-4 h-4" />
               </Link>
-
               <Link
                 href={`${path}?chapter=${chapter}&book=${bookId}`}
-                className={`px-4 py-1.5 rounded-md transition ${
+                title={t("preview")}
+                aria-label={t("preview")}
+                className={`flex items-center justify-center rounded-md p-2.5 transition-colors ${
                   !isEdit
-                    ? "bg-white text-sky-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-sky-600 text-white shadow"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                 }`}
               >
-                {t("preview")}
+                <FiEye className="w-4 h-4" />
               </Link>
             </div>
           )}
