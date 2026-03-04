@@ -82,7 +82,7 @@ export default function SortView({ widgetId }: SortViewProps) {
   // Get cards assigned to each column
   const getCardsInColumn = (columnId: string) => {
     return allCards.filter(
-      (card) => assignments[card.id.toString()] === columnId
+      (card) => assignments[card.id.toString()] === columnId,
     );
   };
 
@@ -147,8 +147,8 @@ export default function SortView({ widgetId }: SortViewProps) {
                     isSelected
                       ? "bg-blue-100 border-blue-400 scale-105"
                       : isAssigned
-                      ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
-                      : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                        ? "bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed"
+                        : "bg-white border-slate-300 hover:border-blue-400 hover:shadow-md cursor-pointer"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -180,7 +180,9 @@ export default function SortView({ widgetId }: SortViewProps) {
               ? "Нажмите на ответ, чтобы переместить карточку:"
               : "Ответы:"}
           </h3>
-          <div className={`grid gap-4 ${getGridCols(columns.length)}`}>
+          <div
+            className={`sm:grid flex flex-col gap-4 ${getGridCols(columns.length)}`}
+          >
             {columns.map((col) => {
               const columnData = columnsMap[col.id];
               const cardsInColumn = getCardsInColumn(col.id);
@@ -193,7 +195,7 @@ export default function SortView({ widgetId }: SortViewProps) {
                       handleColumnSelect(col.id);
                     }
                   }}
-                  className={`p-4 rounded-lg border-2 min-h-[150px] transition-all ${
+                  className={`xl:p-4 p-2 rounded-lg border-2 min-h-[150px] transition-all ${
                     selectedCardId !== null
                       ? "bg-blue-50 border-blue-400 cursor-pointer hover:bg-blue-100 hover:shadow-md"
                       : "bg-slate-50 border-slate-200"
@@ -214,7 +216,7 @@ export default function SortView({ widgetId }: SortViewProps) {
                       cardsInColumn.map((card) => (
                         <div
                           key={card.id}
-                          className="flex items-center justify-between bg-white rounded border border-slate-200 p-2"
+                          className="flex items-center relative justify-between bg-white rounded border border-slate-200 p-2"
                         >
                           <div className="flex items-center gap-2 flex-1">
                             {card.imageUrl && (
@@ -228,14 +230,14 @@ export default function SortView({ widgetId }: SortViewProps) {
                                 />
                               </div>
                             )}
-                            <span className="text-base md:text-lg lg:text-xl text-wrap wrap-anywhere text-gray-800">
+                            <span className="sm:text-base text-sm md:text-lg lg:text-xl mt-5 text-gray-800">
                               {card.text}
                             </span>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleRemoveAssignment(card.id)}
-                            className="text-xs text-red-500 hover:text-red-700 ml-2"
+                            className="text-xs absolute top-2 right-2 text-red-500 hover:text-red-700 ml-2"
                           >
                             Удалить
                           </button>

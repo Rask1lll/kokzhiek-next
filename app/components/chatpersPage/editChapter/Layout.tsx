@@ -19,16 +19,19 @@ type LayoutProps = {
   dragHandleProps?: Record<string, unknown>;
 };
 
-export default function Layout({
-  block,
-  dragHandleProps,
-}: LayoutProps) {
+export default function Layout({ block, dragHandleProps }: LayoutProps) {
   const { layout_type, widgets, id, style } = block;
   const columnsCount = getColumnsCount(layout_type);
   const groupedWidgets = groupWidgetsByColumn(widgets, columnsCount);
   const params = useSearchParams();
   const isEdit = params.get("edit");
-  const { blocks, remove: removeBlock, swap: swapBlocks, updateStyle, updateLayout } = useBlocks();
+  const {
+    blocks,
+    remove: removeBlock,
+    swap: swapBlocks,
+    updateStyle,
+    updateLayout,
+  } = useBlocks();
   const layOurRef = useRef<HTMLDivElement | null>(null);
 
   const blockColor = style?.color || "";
@@ -36,12 +39,13 @@ export default function Layout({
   // Получаем ширины колонок из style или используем дефолтные
   const defaultWidths = getDefaultColumnWidths(layout_type);
   const [columnWidths, setColumnWidths] = useState<number[]>(
-    style?.columnWidths || defaultWidths
+    style?.columnWidths || defaultWidths,
   );
 
   // Синхронизируем с style когда он обновляется с бэка
   useEffect(() => {
     if (style?.columnWidths) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setColumnWidths(style.columnWidths);
     } else {
       setColumnWidths(getDefaultColumnWidths(layout_type));
@@ -74,7 +78,10 @@ export default function Layout({
         }
 
         // Проверяем, что обе колонки остаются в допустимых пределах
-        if (newLeftWidth >= MIN_COLUMN_WIDTH && newRightWidth >= MIN_COLUMN_WIDTH) {
+        if (
+          newLeftWidth >= MIN_COLUMN_WIDTH &&
+          newRightWidth >= MIN_COLUMN_WIDTH
+        ) {
           newWidths[leftCol] = newLeftWidth;
           newWidths[rightCol] = newRightWidth;
         }
@@ -82,7 +89,7 @@ export default function Layout({
         return newWidths;
       });
     },
-    []
+    [],
   );
 
   // Сохранение при завершении перетаскивания
@@ -110,33 +117,52 @@ export default function Layout({
     await removeBlock(id);
   };
 
-  const hasCustomBorder = style?.border && typeof style.border === 'object' && 'width' in style.border;
+  const hasCustomBorder =
+    style?.border &&
+    typeof style.border === "object" &&
+    "width" in style.border;
 
   const getBlockStyles = () => {
-    const paddingValue = style?.padding && typeof style.padding === 'object' && 'top' in style.padding
-      ? `${(style.padding as { top: number; right: number; bottom: number; left: number }).top}px ${(style.padding as { top: number; right: number; bottom: number; left: number }).right}px ${(style.padding as { top: number; right: number; bottom: number; left: number }).bottom}px ${(style.padding as { top: number; right: number; bottom: number; left: number }).left}px`
-      : undefined;
-    
-    const marginValue = style?.margin && typeof style.margin === 'object' && 'top' in style.margin
-      ? `${(style.margin as { top: number; right: number; bottom: number; left: number }).top}px ${(style.margin as { top: number; right: number; bottom: number; left: number }).right}px ${(style.margin as { top: number; right: number; bottom: number; left: number }).bottom}px ${(style.margin as { top: number; right: number; bottom: number; left: number }).left}px`
-      : undefined;
+    const paddingValue =
+      style?.padding &&
+      typeof style.padding === "object" &&
+      "top" in style.padding
+        ? `${(style.padding as { top: number; right: number; bottom: number; left: number }).top}px ${(style.padding as { top: number; right: number; bottom: number; left: number }).right}px ${(style.padding as { top: number; right: number; bottom: number; left: number }).bottom}px ${(style.padding as { top: number; right: number; bottom: number; left: number }).left}px`
+        : undefined;
+
+    const marginValue =
+      style?.margin && typeof style.margin === "object" && "top" in style.margin
+        ? `${(style.margin as { top: number; right: number; bottom: number; left: number }).top}px ${(style.margin as { top: number; right: number; bottom: number; left: number }).right}px ${(style.margin as { top: number; right: number; bottom: number; left: number }).bottom}px ${(style.margin as { top: number; right: number; bottom: number; left: number }).left}px`
+        : undefined;
 
     const border = hasCustomBorder
-      ? (style.border as { width: number; color: string; radius: { topLeft: number; topRight: number; bottomRight: number; bottomLeft: number }; style: string })
+      ? (style.border as {
+          width: number;
+          color: string;
+          radius: {
+            topLeft: number;
+            topRight: number;
+            bottomRight: number;
+            bottomLeft: number;
+          };
+          style: string;
+        })
       : null;
 
-    const borderValue = border && border.width > 0
-      ? `${border.width}px ${border.style || 'solid'} ${border.color || '#000000'}`
-      : border && border.width === 0
-      ? 'none'
-      : undefined; // No border if no custom border defined
+    const borderValue =
+      border && border.width > 0
+        ? `${border.width}px ${border.style || "solid"} ${border.color || "#000000"}`
+        : border && border.width === 0
+          ? "none"
+          : undefined; // No border if no custom border defined
 
     const borderRadiusValue = border?.radius
       ? `${border.radius.topLeft}px ${border.radius.topRight}px ${border.radius.bottomRight}px ${border.radius.bottomLeft}px`
       : undefined;
 
     return {
-      backgroundColor: blockColor || (columnsCount === 1 ? "#f3f4f6" : "#EDEDED"),
+      backgroundColor:
+        blockColor || (columnsCount === 1 ? "#f3f4f6" : "#EDEDED"),
       padding: paddingValue,
       margin: marginValue,
       border: borderValue,
@@ -196,12 +222,9 @@ export default function Layout({
   if (columnsCount === 1) {
     const columnWidgets = groupedWidgets.get(0) || [];
     return (
-      <div
-        className="flex group/block w-full"
-        ref={layOurRef}
-      >
+      <div className="flex group/block w-full" ref={layOurRef}>
         <div
-          className={`w-full rounded-md transition-colors ${hasCustomBorder ? '' : 'ring ring-gray-300'}`}
+          className={`w-full rounded-md transition-colors ${hasCustomBorder ? "" : "ring ring-gray-300"}`}
           style={getBlockStyles()}
         >
           <Column
@@ -218,13 +241,10 @@ export default function Layout({
 
   // Multi-column layout
   return (
-    <div
-      className="flex group/block w-full"
-      ref={layOurRef}
-    >
+    <div className="flex group/block w-full" ref={layOurRef}>
       <div
         data-layout-container
-        className={`w-full flex rounded-md transition-colors overflow-hidden ${hasCustomBorder ? '' : 'ring ring-gray-300'}`}
+        className={`w-full flex rounded-md transition-colors overflow-hidden ${hasCustomBorder ? "" : "ring ring-gray-300"}`}
         style={getBlockStyles()}
       >
         {Array.from({ length: columnsCount }).map((_, colIndex) => {

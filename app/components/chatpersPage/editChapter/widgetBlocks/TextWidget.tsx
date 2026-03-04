@@ -75,7 +75,12 @@ function ToolbarButton({
   );
 }
 
-export default function TextWidget({ value, onChange, verticalAlign = "top", onVerticalAlignChange }: TextWidgetProps) {
+export default function TextWidget({
+  value,
+  onChange,
+  verticalAlign = "top",
+  onVerticalAlignChange,
+}: TextWidgetProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const [showHighlight, setShowHighlight] = useState(false);
@@ -90,7 +95,9 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
   const skipSyncRef = useRef(false);
   const [customHighlightColor, setCustomHighlightColor] = useState("#FEF08A");
   const [customTextColor, setCustomTextColor] = useState("#DC2626");
-  const [colorPickerModal, setColorPickerModal] = useState<"highlight" | "textColor" | null>(null);
+  const [colorPickerModal, setColorPickerModal] = useState<
+    "highlight" | "textColor" | null
+  >(null);
 
   // Initialize content from value
   useEffect(() => {
@@ -136,7 +143,10 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
   useEffect(() => {
     if (!showHighlight) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (highlightRef.current && !highlightRef.current.contains(e.target as Node)) {
+      if (
+        highlightRef.current &&
+        !highlightRef.current.contains(e.target as Node)
+      ) {
         setShowHighlight(false);
       }
     };
@@ -181,7 +191,10 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
   useEffect(() => {
     if (!showTextColor) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (textColorRef.current && !textColorRef.current.contains(e.target as Node)) {
+      if (
+        textColorRef.current &&
+        !textColorRef.current.contains(e.target as Node)
+      ) {
         setShowTextColor(false);
       }
     };
@@ -234,11 +247,12 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
     handleInput();
   };
 
-  const editorAlignClass = verticalAlign === "center"
-    ? "flex flex-col justify-center"
-    : verticalAlign === "bottom"
-      ? "flex flex-col justify-end"
-      : "";
+  const editorAlignClass =
+    verticalAlign === "center"
+      ? "flex flex-col justify-center"
+      : verticalAlign === "bottom"
+        ? "flex flex-col justify-end"
+        : "";
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -246,8 +260,8 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
       <div
         className={`flex items-center gap-1 mb-2 p-1 bg-gray-50 rounded-lg border border-gray-200 transition-opacity overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent ${"opacity-100"}`}
         style={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#d1d5db transparent'
+          scrollbarWidth: "thin",
+          scrollbarColor: "#d1d5db transparent",
         }}
       >
         {/* Text formatting */}
@@ -324,7 +338,15 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
               active={verticalAlign === "top"}
               title="По верхнему краю"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M4 4h16" />
                 <path d="M12 4v12" />
                 <path d="M8 12l4 4 4-4" />
@@ -335,7 +357,15 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
               active={verticalAlign === "center"}
               title="По центру (вертикально)"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M4 12h16" />
                 <path d="M12 5v14" />
                 <path d="M8 8l4-3 4 3" />
@@ -347,7 +377,15 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
               active={verticalAlign === "bottom"}
               title="По нижнему краю"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M4 20h16" />
                 <path d="M12 20V8" />
                 <path d="M8 12l4-4 4 4" />
@@ -384,7 +422,15 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
               showHighlight ? "bg-blue-100 text-blue-600" : "text-gray-600"
             }`}
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
             </svg>
@@ -399,7 +445,15 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
               showTextColor ? "bg-blue-100 text-blue-600" : "text-gray-600"
             }`}
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M5 18h14" />
               <path d="M8 18l4-12 4 12" />
               <path d="M9.5 14h5" />
@@ -433,19 +487,26 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
             title="Убрать выделение"
             className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform flex items-center justify-center bg-white"
           >
-            <svg className="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              className="w-3.5 h-3.5 text-red-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => { setShowHighlight(false); setColorPickerModal("highlight"); }}
+            onClick={() => {
+              setShowHighlight(false);
+              setColorPickerModal("highlight");
+            }}
             title="Свой цвет"
             className="w-6 h-6 rounded-full border border-dashed border-gray-400 hover:scale-110 transition-transform flex items-center justify-center bg-white text-gray-500 text-sm font-bold"
-          >
-            
-          </button>
+          ></button>
         </div>
       )}
 
@@ -466,7 +527,12 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
               className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform flex items-center justify-center"
               style={{ backgroundColor: tc.color }}
             >
-              <span className="text-[10px] font-bold" style={{ color: tc.color === "#000000" ? "#fff" : "#fff" }}>A</span>
+              <span
+                className="text-[10px] font-bold"
+                style={{ color: tc.color === "#000000" ? "#fff" : "#fff" }}
+              >
+                A
+              </span>
             </button>
           ))}
           <button
@@ -476,32 +542,54 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
             title="Убрать цвет"
             className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform flex items-center justify-center bg-white"
           >
-            <svg className="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              className="w-3.5 h-3.5 text-red-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => { setShowTextColor(false); setColorPickerModal("textColor"); }}
+            onClick={() => {
+              setShowTextColor(false);
+              setColorPickerModal("textColor");
+            }}
             title="Свой цвет"
             className="w-6 h-6 rounded-full border border-dashed border-gray-400 hover:scale-110 transition-transform flex items-center justify-center bg-white text-gray-500 text-sm font-bold"
-          >
-            
-          </button>
+          ></button>
         </div>
       )}
 
       {/* Color picker modal */}
       {colorPickerModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onMouseDown={(e) => { if (e.target === e.currentTarget) setColorPickerModal(null); }}>
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setColorPickerModal(null);
+          }}
+        >
           <div className="bg-white rounded-lg p-5 shadow-xl">
             <h3 className="text-sm font-medium mb-3">
-              {colorPickerModal === "highlight" ? "Цвет выделения" : "Цвет текста"}
+              {colorPickerModal === "highlight"
+                ? "Цвет выделения"
+                : "Цвет текста"}
             </h3>
             <HexColorPicker
-              color={colorPickerModal === "highlight" ? customHighlightColor : customTextColor}
-              onChange={colorPickerModal === "highlight" ? setCustomHighlightColor : setCustomTextColor}
+              color={
+                colorPickerModal === "highlight"
+                  ? customHighlightColor
+                  : customTextColor
+              }
+              onChange={
+                colorPickerModal === "highlight"
+                  ? setCustomHighlightColor
+                  : setCustomTextColor
+              }
             />
             <div className="flex gap-2 mt-3">
               <button
@@ -537,7 +625,7 @@ export default function TextWidget({ value, onChange, verticalAlign = "top", onV
           onSelect={handleSelectionChange}
           onKeyUp={handleSelectionChange}
           onMouseUp={handleSelectionChange}
-          className="w-full text-wrap wrap-anywhere min-h-[80px] p-2 outline-none text-gray-800 prose prose-sm max-w-none
+          className="w-full text-wrap min-h-[80px] p-2 outline-none text-gray-800 prose prose-sm max-w-none
             *:my-1 [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
             focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400
             cursor-text"

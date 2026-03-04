@@ -17,7 +17,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
   const [chosenElement, setChosenElement] = useState<number | null>(null);
   const [usedCardIds, setUsedCardIds] = useState<Set<number>>(new Set());
   const [cellToCardMap, setCellToCardMap] = useState<Map<string, number>>(
-    new Map()
+    new Map(),
   );
   const [result, setResult] = useState<{
     is_correct: boolean;
@@ -33,7 +33,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
   const cells = useMemo(() => data?.cells || [], [data?.cells]);
   const options = useMemo(
     () => currentQuestion?.options || [],
-    [currentQuestion?.options]
+    [currentQuestion?.options],
   );
 
   // Get available answer options (options that are not used)
@@ -147,7 +147,7 @@ export default function DragDropView({ widgetId }: DragDropViewProps) {
                   <div
                     key={option.id}
                     className={`
-                    px-4 py-2 h-fit rounded-lg ring ring-blue-300/90 cursor-pointer font-medium
+                    px-4 py-2 rounded-lg ring ring-blue-300/90 cursor-pointer font-medium
                     text-base md:text-lg lg:text-xl
                     transition-all duration-200 select-none
                     ${

@@ -38,6 +38,7 @@ import OrderView from "./taskViews/OrderView";
 import SentenceOrderView from "./taskViews/SentenceOrderView";
 import DragDropView from "./taskViews/DragDropView";
 import OpenAnswerView from "./taskViews/OpenAnswerView";
+import Image from "next/image";
 
 type ViewPlaceholderProps = {
   widget: Widget;
@@ -70,7 +71,9 @@ export default function ViewPlaceholder({
       content = <TextView value={textValue} />;
       break;
     case "glossary_text":
-      const glossaryData = widget.data as { content?: string; wordIds?: string[] } | undefined;
+      const glossaryData = widget.data as
+        | { content?: string; wordIds?: string[] }
+        | undefined;
       content = (
         <GlossaryTextView
           value={{
@@ -108,7 +111,16 @@ export default function ViewPlaceholder({
       content = <EmbedView value={textValue} />;
       break;
     case "banner":
-      const bannerData = widget.data as { text?: string; bgColor?: string; textColor?: string; fontSize?: string; height?: number; bgImage?: string } | undefined;
+      const bannerData = widget.data as
+        | {
+            text?: string;
+            bgColor?: string;
+            textColor?: string;
+            fontSize?: string;
+            height?: number;
+            bgImage?: string;
+          }
+        | undefined;
       content = (
         <BannerView
           value={{
@@ -187,53 +199,59 @@ export default function ViewPlaceholder({
 
   // Sign display for content widgets
   const wd = widget.data as Record<string, unknown> | undefined;
-  const wSignUrl = !TASK_WIDGET_TYPES.has(widget.type) ? (wd?.signUrl as string | undefined) : undefined;
+  const wSignUrl = !TASK_WIDGET_TYPES.has(widget.type)
+    ? (wd?.signUrl as string | undefined)
+    : undefined;
   const wSignSize = (wd?.signSize as string) || "md";
   const wSignMode = (wd?.signMode as string) || "inline";
-  const signSizeClass: Record<string, string> = { sm: "w-6 h-6", md: "w-8 h-8", lg: "w-12 h-12", xl: "w-16 h-16" };
+  const signSizeClass: Record<string, string> = {
+    sm: "w-6 h-6",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
+    xl: "w-16 h-16",
+  };
   const signImg = wSignUrl ? (
-    <img src={wSignUrl} alt="Условный знак" className={`${signSizeClass[wSignSize] || signSizeClass.md} object-contain flex-shrink-0`} />
+    <img
+      src={wSignUrl}
+      alt="Условный знак"
+      className={`${signSizeClass[wSignSize] || signSizeClass.md} object-contain flex-shrink-0`}
+    />
   ) : null;
 
-  const wrappedContent = wSignUrl ? (
-    wSignMode === "absolute" ? (
-      <div className="relative">
-        {wSignSize === "sm" && (
-          <div className="absolute top-0 -left-8">
-            <img src={wSignUrl} alt="Условный знак" className="w-6 h-6 object-contain" />
-          </div>
-        )}
-        {wSignSize === "md" && (
-          <div className="absolute top-0 -left-10">
-            <img src={wSignUrl} alt="Условный знак" className="w-8 h-8 object-contain" />
-          </div>
-        )}
-        {wSignSize === "lg" && (
-          <div className="absolute top-0 -left-14">
-            <img src={wSignUrl} alt="Условный знак" className="w-12 h-12 object-contain" />
-          </div>
-        )}
-        {wSignSize === "xl" && (
-          <div className="absolute top-0 -left-18">
-            <img src={wSignUrl} alt="Условный знак" className="w-16 h-16 object-contain" />
-          </div>
-        )}
-        <div>{content}</div>
-      </div>
-    ) : (
-      <div className="flex items-start gap-2">
-        {signImg}
-        <div className="flex-1">{content}</div>
-      </div>
-    )
-  ) : content;
+  const viewVerticalAlign = (widget.data as Record<string, unknown>)
+    ?.verticalAlign as string | undefined;
+  const viewAlignClass =
+    viewVerticalAlign === "center"
+      ? "flex flex-col justify-center"
+      : viewVerticalAlign === "bottom"
+        ? "flex flex-col justify-end"
+        : "";
 
-  const viewVerticalAlign = (widget.data as Record<string, unknown>)?.verticalAlign as string | undefined;
-  const viewAlignClass = viewVerticalAlign === "center"
-    ? "flex flex-col justify-center"
-    : viewVerticalAlign === "bottom"
-      ? "flex flex-col justify-end"
-      : "";
-
-  return <div className={`w-full h-full ${viewAlignClass}`}>{wrappedContent}</div>;
+  return (
+    <div className={`w-full h-full ${viewAlignClass}`}>
+      {wSignUrl ? (
+        wSignMode === "absolute" ? (
+          <div className="relative">
+            <div className="absolute top-0 -left-10">
+              <Image
+                src={wSignUrl}
+                alt="Условный знак"
+                width={80}
+                height={80}
+                className="w-8 h-8"
+              />
+            </div>
+            <div>{content}</div>
+          </div>
+        ) : (
+          <div className="flex items-start gap-2">
+            {signImg}
+            <div className="flex-1">{content}</div>
+          </div>
+        )
+      ) : (
+        content
+      )}
+    </div>
+  );
 }

@@ -45,7 +45,13 @@ export function ChapterPageSkeleton() {
 }
 
 // Sortable block wrapper component
-function SortableBlock({ block, isEditMode }: { block: Block; isEditMode: boolean }) {
+function SortableBlock({
+  block,
+  isEditMode,
+}: {
+  block: Block;
+  isEditMode: boolean;
+}) {
   const {
     attributes,
     listeners,
@@ -74,7 +80,9 @@ function SortableBlock({ block, isEditMode }: { block: Block; isEditMode: boolea
     >
       <Layout
         block={block}
-        dragHandleProps={isEditMode ? { ...attributes, ...listeners } : undefined}
+        dragHandleProps={
+          isEditMode ? { ...attributes, ...listeners } : undefined
+        }
       />
     </div>
   );
@@ -83,7 +91,9 @@ function SortableBlock({ block, isEditMode }: { block: Block; isEditMode: boolea
 // Drag overlay component - follows cursor during drag
 function DragOverlayContent({ block }: { block: Block }) {
   return (
-    <div className={`bg-white flex w-full gap-2 shadow-2xl ring-2 ring-blue-400 opacity-90 scale-[0.93] transition-transform ${block.widgets?.some((w) => w.type === "banner") ? "p-0 overflow-hidden" : "p-1 rounded-lg"}`}>
+    <div
+      className={`bg-white flex w-full gap-2 shadow-2xl ring-2 ring-blue-400 opacity-90 scale-[0.93] transition-transform ${block.widgets?.some((w) => w.type === "banner") ? "p-0 overflow-hidden" : "p-1 rounded-lg"}`}
+    >
       <Layout block={block} />
     </div>
   );
@@ -130,7 +140,7 @@ export default function ChapterPageClient() {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // Отправляем join при входе в главу, leave при выходе (только для авторов)
@@ -153,7 +163,7 @@ export default function ChapterPageClient() {
           createBlock(layoutCode);
           removeContent();
         }}
-      />
+      />,
     );
   };
 
@@ -199,42 +209,47 @@ export default function ChapterPageClient() {
         />
       )}
 
-      <div className="flex-1 min-w-0 flex flex-col items-center py-10 overflow-y-auto chapter-scrollbar">
+      <div className="flex-1 min-w-0 flex flex-col items-center py-10 overflow-y-auto  chapter-scrollbar">
         {isLoading ? (
           <ChapterContentSkeleton />
         ) : (
-        <div className="2xl:w-5/6 w-full space-y-1">
-          <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <SortableContext
-            items={blocks.map((b) => b.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {blocks.map((block) => (
-              <SortableBlock
-                key={block.id}
-                block={block}
-                isEditMode={isEditMode}
-              />
-            ))}
-          </SortableContext>
+          <div className="2xl:w-5/6 w-full not-2xl:pl-12 space-y-1">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+            >
+              <SortableContext
+                items={blocks.map((b) => b.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {blocks.map((block) => (
+                  <SortableBlock
+                    key={block.id}
+                    block={block}
+                    isEditMode={isEditMode}
+                  />
+                ))}
+              </SortableContext>
 
-          {/* Drag overlay - the element that follows cursor */}
-          <DragOverlay adjustScale={false} dropAnimation={{
-            duration: 300,
-            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
-          }}>
-            {activeBlock ? <DragOverlayContent block={activeBlock} /> : null}
-          </DragOverlay>
-        </DndContext>
+              {/* Drag overlay - the element that follows cursor */}
+              <DragOverlay
+                adjustScale={false}
+                dropAnimation={{
+                  duration: 300,
+                  easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+                }}
+              >
+                {activeBlock ? (
+                  <DragOverlayContent block={activeBlock} />
+                ) : null}
+              </DragOverlay>
+            </DndContext>
 
-          {isEditMode && <CreateBlock onClick={handleCreate} />}
-        </div>
+            {isEditMode && <CreateBlock onClick={handleCreate} />}
+          </div>
         )}
       </div>
     </div>

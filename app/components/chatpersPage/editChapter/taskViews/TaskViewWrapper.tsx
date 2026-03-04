@@ -66,7 +66,9 @@ export default function TaskViewWrapper({
   if (error) {
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-600">{t("taskEditor.loadErrorPrefix")} {error}</p>
+        <p className="text-red-600">
+          {t("taskEditor.loadErrorPrefix")} {error}
+        </p>
       </div>
     );
   }
@@ -108,9 +110,7 @@ export default function TaskViewWrapper({
       )}
 
       {/* Content */}
-      <div
-        className={`relative mb-2 z-10 wrap-anywhere ${imageUrl ? "p-4" : ""}`}
-      >
+      <div className={`relative mb-2 z-10 ${imageUrl ? "p-4" : ""}`}>
         {/* Absolute mode: знак слева, выпирает за контент */}
         {conditionalSignMode === "absolute" && conditionalSign && (
           <span className="absolute -left-8 top-0 text-2xl font-semibold text-gray-700">

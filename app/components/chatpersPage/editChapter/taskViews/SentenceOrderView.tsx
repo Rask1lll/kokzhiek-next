@@ -23,7 +23,9 @@ function shuffleArrayWithSeed<T>(array: T[], seed: number): T[] {
   return shuffled;
 }
 
-export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) {
+export default function SentenceOrderView({
+  widgetId,
+}: SentenceOrderViewProps) {
   const { questions } = useQuestions(widgetId);
   const { loading, error, submit } = useAttempt(widgetId);
   const [shuffleSeed] = useState(() => Math.random());
@@ -33,7 +35,9 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
   } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [draggedId, setDraggedId] = useState<number | null>(null);
-  const [draggedFrom, setDraggedFrom] = useState<"available" | "sentence" | null>(null);
+  const [draggedFrom, setDraggedFrom] = useState<
+    "available" | "sentence" | null
+  >(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const questionsArray = questions;
@@ -47,7 +51,7 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
     .sort(
       (a, b) =>
         (options.find((o) => o.id === a)?.order || 0) -
-        (options.find((o) => o.id === b)?.order || 0)
+        (options.find((o) => o.id === b)?.order || 0),
     );
 
   // Shuffled available words (not yet placed in sentence)
@@ -60,14 +64,18 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
 
   // Update when options change
   useEffect(() => {
-    if (options.length > 0 && availableWords.length === 0 && sentenceWords.length === 0) {
+    if (
+      options.length > 0 &&
+      availableWords.length === 0 &&
+      sentenceWords.length === 0
+    ) {
       const optionIds = options
         .filter((opt) => opt.id !== undefined)
         .map((opt) => opt.id!)
         .sort(
           (a, b) =>
             (options.find((o) => o.id === a)?.order || 0) -
-            (options.find((o) => o.id === b)?.order || 0)
+            (options.find((o) => o.id === b)?.order || 0),
         );
       if (optionIds.length > 0) {
         setAvailableWords(shuffleArrayWithSeed([...optionIds], shuffleSeed));
@@ -80,7 +88,10 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
     return options.find((opt) => opt.id === id);
   };
 
-  const handleDragStart = (optionId: number, from: "available" | "sentence") => {
+  const handleDragStart = (
+    optionId: number,
+    from: "available" | "sentence",
+  ) => {
     setDraggedId(optionId);
     setDraggedFrom(from);
   };
@@ -100,21 +111,26 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
 
   const handleDrop = (e: React.DragEvent, targetIndex?: number) => {
     e.preventDefault();
+    e.stopPropagation();
     if (draggedId === null || draggedFrom === null) return;
 
     if (draggedFrom === "available") {
       // Moving from available to sentence
       setAvailableWords((prev) => prev.filter((id) => id !== draggedId));
       if (targetIndex !== undefined) {
+        console.log(1);
         // Insert at specific position
         setSentenceWords((prev) => {
           const newSentence = [...prev];
           newSentence.splice(targetIndex, 0, draggedId);
           return newSentence;
         });
+        return;
       } else {
+        console.log(2);
         // Add to end
         setSentenceWords((prev) => [...prev, draggedId]);
+        return;
       }
     } else if (draggedFrom === "sentence") {
       // Moving within sentence or back to available
@@ -126,7 +142,8 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
         setSentenceWords((prev) => {
           const newSentence = [...prev];
           newSentence.splice(sourceIndex, 1);
-          const insertIndex = targetIndex > sourceIndex ? targetIndex - 1 : targetIndex;
+          const insertIndex =
+            targetIndex > sourceIndex ? targetIndex - 1 : targetIndex;
           newSentence.splice(insertIndex, 0, draggedId);
           return newSentence;
         });
@@ -141,7 +158,10 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
     handleDragEnd();
   };
 
-  const handleWordClick = (optionId: number, from: "available" | "sentence") => {
+  const handleWordClick = (
+    optionId: number,
+    from: "available" | "sentence",
+  ) => {
     if (from === "available") {
       // Move from available to sentence
       setAvailableWords((prev) => prev.filter((id) => id !== optionId));
@@ -157,7 +177,7 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
   const renderWord = (
     optionId: number,
     isDragging: boolean,
-    isDragOver: boolean = false
+    isDragOver: boolean = false,
   ) => {
     const option = getOptionById(optionId);
     if (!option) return null;
@@ -165,12 +185,22 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
     return (
       <div
         draggable
-        onDragStart={() => handleDragStart(optionId, sentenceWords.includes(optionId) ? "sentence" : "available")}
+        onDragStart={() =>
+          handleDragStart(
+            optionId,
+            sentenceWords.includes(optionId) ? "sentence" : "available",
+          )
+        }
         onDragEnd={handleDragEnd}
         onDragOver={(e) => e.preventDefault()}
-        onClick={() => handleWordClick(optionId, sentenceWords.includes(optionId) ? "sentence" : "available")}
+        onClick={() =>
+          handleWordClick(
+            optionId,
+            sentenceWords.includes(optionId) ? "sentence" : "available",
+          )
+        }
         className={`
-          flex items-center gap-2 px-4 py-2 rounded-lg cursor-move select-none
+          flex items-center gap-2 w-full px-4 py-2 rounded-lg cursor-move select-none
           transition-all duration-200
           ${isDragging ? "opacity-50 scale-95" : ""}
           ${isDragOver ? "ring-2 ring-blue-500 ring-offset-2" : ""}
@@ -210,7 +240,7 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
         <div className="min-h-[80px] p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
           {/* <p className="text-sm text-gray-500 mb-3">Составьте предложение:</p> */}
           <div
-            className="flex flex-wrap gap-2 min-h-[60px] items-center"
+            className="flex flex-col gap-2 min-h-[60px] items-center"
             onDragOver={(e) => handleDragOver(e)}
             onDrop={(e) => handleDrop(e)}
           >
@@ -223,11 +253,12 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
                   key={optionId}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
+                  className="w-full"
                 >
                   {renderWord(
                     optionId,
                     draggedId === optionId,
-                    dragOverIndex === index
+                    dragOverIndex === index,
                   )}
                 </div>
               ))
@@ -240,11 +271,7 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
           {/* <p className="text-sm text-gray-500 mb-3">Доступные слова:</p> */}
           <div className="flex flex-wrap gap-2">
             {availableWords.map((optionId) =>
-              renderWord(
-                optionId,
-                draggedId === optionId,
-                false
-              )
+              renderWord(optionId, draggedId === optionId, false),
             )}
           </div>
         </div>
@@ -285,7 +312,6 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
               }
 
               setSubmitting(true);
-              // Преобразуем массив id в массив строк
               const order = sentenceWords.map((id) => id.toString());
               const answer = { order };
 
@@ -298,7 +324,7 @@ export default function SentenceOrderView({ widgetId }: SentenceOrderViewProps) 
               setSubmitting(false);
             }}
             disabled={sentenceWords.length === 0 || submitting || loading}
-            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {submitting || loading ? "Отправка..." : "Проверить ответ"}
           </button>

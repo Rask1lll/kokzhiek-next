@@ -36,7 +36,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ServiceWorkerRegistration />
+        {/* <ServiceWorkerRegistration /> */}
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
