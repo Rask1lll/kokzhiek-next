@@ -47,12 +47,12 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
   const focusNextInput = (
     questionId: string,
     currentLetterIndex: number,
-    answerLength: number
+    answerLength: number,
   ) => {
     // Try next cell in same row
     if (currentLetterIndex < answerLength - 1) {
       const nextRef = inputRefs.current.get(
-        getInputRef(questionId, currentLetterIndex + 1)
+        getInputRef(questionId, currentLetterIndex + 1),
       );
       if (nextRef) {
         nextRef.focus();
@@ -75,7 +75,7 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
     questionId: string,
     userAnswer: string,
     letterIndex?: number,
-    answerLength?: number
+    answerLength?: number,
   ) => {
     const newAnswers = { ...answers, [questionId]: userAnswer.toUpperCase() };
     setAnswers(newAnswers);
@@ -94,7 +94,7 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
   // Calculate max offset needed for crossword alignment
   const maxKeyLetterIndex = Math.max(
     0,
-    ...questionsList.map((q) => q.keyLetterIndex)
+    ...questionsList.map((q) => q.keyLetterIndex),
   );
 
   if (!currentQuestion || questionsList.length === 0) {
@@ -161,7 +161,7 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
                           letterIndex > 0
                         ) {
                           const prevRef = inputRefs.current.get(
-                            getInputRef(q.id, letterIndex - 1)
+                            getInputRef(q.id, letterIndex - 1),
                           );
                           if (prevRef) {
                             prevRef.focus();
@@ -173,13 +173,13 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
                           letterIndex < answerLength - 1
                         ) {
                           const nextRef = inputRefs.current.get(
-                            getInputRef(q.id, letterIndex + 1)
+                            getInputRef(q.id, letterIndex + 1),
                           );
                           if (nextRef) nextRef.focus();
                         }
                         if (e.key === "ArrowLeft" && letterIndex > 0) {
                           const prevRef = inputRefs.current.get(
-                            getInputRef(q.id, letterIndex - 1)
+                            getInputRef(q.id, letterIndex - 1),
                           );
                           if (prevRef) prevRef.focus();
                         }
@@ -211,19 +211,19 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
 
         {result && (
           <div
-            className={`mt-4 p-4 rounded-lg border-2 ${
+            className={`mt-4 lg:p-4 p-2 rounded-lg border-2 ${
               result.is_correct
                 ? "bg-green-50 border-green-300 text-green-800"
                 : "bg-red-50 border-red-300 text-red-800"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold">
+            <div className=" gap-2">
+              <span className="lg:text-lg block xl:text-xl text-md font-semibold">
                 {result.is_correct
                   ? getPositiveFeedback()
                   : getNegativeFeedback()}
               </span>
-              <span className="text-sm">(+{result.points_earned} балл)</span>
+              <span className="text-xs lg:text-sm">(+{result.points_earned} балл)</span>
             </div>
           </div>
         )}
@@ -247,7 +247,7 @@ export default function CrosswordView({ widgetId }: CrosswordViewProps) {
               const matchIdMap: Record<string, string> = {};
               questionsList.forEach((q) => {
                 const option = options.find(
-                  (opt) => opt.match_id === q.id || opt.body === q.answer
+                  (opt) => opt.match_id === q.id || opt.body === q.answer,
                 );
                 if (option?.match_id) {
                   matchIdMap[q.id] = option.match_id;

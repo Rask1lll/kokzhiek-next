@@ -33,7 +33,7 @@ type ConceptMap = {
 function createMatrix(
   width: number,
   height: number,
-  prevTable: Cell[][]
+  prevTable: Cell[][],
 ): Cell[][] {
   const result: Cell[][] = [];
 
@@ -83,10 +83,10 @@ function ArrowsLayerView({
 
 function TableView({ matrix }: { matrix: Cell[][] }) {
   return (
-    <div className="w-full flex flex-col gap-10">
+    <div className="w-fit overflow-auto flex p-3 flex-col gap-10">
       {matrix.map((row, i) => {
         return (
-          <div key={i} className="flex w-full justify-around">
+          <div key={i} className="flex gap-6 w-full  justify-around">
             {row.map((el) => {
               const hasText = el.text.trim().length > 0;
 
@@ -159,7 +159,7 @@ export default function ConceptMapView({ widgetId }: ConceptMapViewProps) {
     return createMatrix(
       table.tableSize.width,
       table.tableSize.height,
-      table.Cells
+      table.Cells,
     );
   }, [table.tableSize.width, table.tableSize.height, table.Cells]);
 
@@ -169,7 +169,7 @@ export default function ConceptMapView({ widgetId }: ConceptMapViewProps) {
 
   return (
     <TaskViewWrapper widgetId={widgetId}>
-      <div className="w-full max-w-full">
+      <div className="w-full relative overflow-x-scroll max-w-full">
         <Xwrapper>
           <TableView matrix={tableMatrix} />
           <ArrowsLayerView arrows={table.arrows} color={table.color} />

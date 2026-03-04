@@ -2,7 +2,10 @@
 
 import { useRef } from "react";
 import { FiTrash2 } from "react-icons/fi";
-import { useQuestionSettings, invalidateQuestions } from "./useQuestionSettings";
+import {
+  useQuestionSettings,
+  invalidateQuestions,
+} from "./useQuestionSettings";
 
 export function SignSettingsModal({ widgetId }: { widgetId: number }) {
   const {
@@ -44,9 +47,7 @@ export function SignSettingsModal({ widgetId }: { widgetId: number }) {
     if (!currentQuestion.id) return;
     const url = await uploadSign(currentQuestion.id, file);
     if (url) {
-      setCurrentQuestion((prev) =>
-        prev ? { ...prev, sign_url: url } : null
-      );
+      setCurrentQuestion((prev) => (prev ? { ...prev, sign_url: url } : null));
       invalidateQuestions(widgetId);
     }
   };
@@ -55,9 +56,7 @@ export function SignSettingsModal({ widgetId }: { widgetId: number }) {
     if (!currentQuestion.id) return;
     const success = await removeSign(currentQuestion.id);
     if (success) {
-      setCurrentQuestion((prev) =>
-        prev ? { ...prev, sign_url: null } : null
-      );
+      setCurrentQuestion((prev) => (prev ? { ...prev, sign_url: null } : null));
       invalidateQuestions(widgetId);
     }
   };
@@ -67,7 +66,7 @@ export function SignSettingsModal({ widgetId }: { widgetId: number }) {
     const newData = { ...currentQuestion.data, signSize: size };
     setCurrentQuestion((prev) => (prev ? { ...prev, data: newData } : null));
     update(currentQuestion.id, { data: newData }).then(() =>
-      invalidateQuestions(widgetId)
+      invalidateQuestions(widgetId),
     );
   };
 
@@ -76,7 +75,7 @@ export function SignSettingsModal({ widgetId }: { widgetId: number }) {
     const newData = { ...currentQuestion.data, conditionalSignMode: mode };
     setCurrentQuestion((prev) => (prev ? { ...prev, data: newData } : null));
     update(currentQuestion.id, { data: newData }).then(() =>
-      invalidateQuestions(widgetId)
+      invalidateQuestions(widgetId),
     );
   };
 
@@ -126,12 +125,14 @@ export function SignSettingsModal({ widgetId }: { widgetId: number }) {
           <div className="mb-4">
             <span className="text-sm text-gray-600 mb-2 block">Размер:</span>
             <div className="flex gap-2">
-              {([
-                { key: "sm", label: "S" },
-                { key: "md", label: "M" },
-                { key: "lg", label: "L" },
-                { key: "xl", label: "XL" },
-              ] as const).map((s) => (
+              {(
+                [
+                  { key: "sm", label: "S" },
+                  { key: "md", label: "M" },
+                  { key: "lg", label: "L" },
+                  { key: "xl", label: "XL" },
+                ] as const
+              ).map((s) => (
                 <button
                   key={s.key}
                   className={`px-3 py-2 rounded-lg text-sm border transition-colors ${

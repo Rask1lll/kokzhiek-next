@@ -73,7 +73,7 @@ export default function SingleChoiceView({ widgetId }: SingleChoiceViewProps) {
               className="w-5 h-5 mt-0.5 border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
             />
             <div className="flex-1 flex flex-col gap-2">
-              <span className="text-lg md:text-xl lg:text-2xl text-gray-800">
+              <span className="text-lg md:text-xl sm:text-lg text-sm lg:text-2xl text-gray-800">
                 {option.body}
               </span>
               {option.image_url && (
@@ -94,19 +94,19 @@ export default function SingleChoiceView({ widgetId }: SingleChoiceViewProps) {
         {/* Результат проверки */}
         {result && (
           <div
-            className={`mt-4 p-4 rounded-lg border-2 ${
+            className={`mt-4 p-2 lg:p-4 rounded-lg border-2 ${
               result.is_correct
                 ? "bg-green-50 border-green-300 text-green-800"
                 : "bg-red-50 border-red-300 text-red-800"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold">
+            <div className="gap-2">
+              <span className="text-base lg:text-lg xl:text-xl font-semibold block">
                 {result.is_correct
                   ? getPositiveFeedback()
                   : getNegativeFeedback()}
               </span>
-              <span className="text-sm">(+{result.points_earned} балл)</span>
+              <span className="text-xs lg:text-sm">(+{result.points_earned} балл)</span>
             </div>
           </div>
         )}

@@ -83,7 +83,7 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
   const getDirection = (
     index1: number,
     index2: number,
-    size: number
+    size: number,
   ): "horizontal" | "vertical" | "diagonal" | null => {
     const row1 = Math.floor(index1 / size);
     const col1 = index1 % size;
@@ -113,7 +113,7 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
   const isValidNextCell = (
     selectedIndices: number[],
     newIndex: number,
-    size: number
+    size: number,
   ): boolean => {
     if (selectedIndices.length === 0) {
       return true; // Первая ячейка - всегда валидна
@@ -135,7 +135,7 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
     const initialDirection = getDirection(
       selectedIndices[0],
       selectedIndices[1],
-      size
+      size,
     );
 
     // Новое направление должно совпадать с начальным
@@ -200,7 +200,7 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
       <>
         <div
           className={`w-full h-full grid ring ring-gray-500 rounded-xl ${gridType(
-            gridData.size
+            gridData.size,
           )}`}
         >
           {gridData.Cells.map((el, i) => {
@@ -212,7 +212,7 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
               <div
                 key={i}
                 onClick={() => handleCellClick(i)}
-                className={`text-xl md:text-2xl lg:text-3xl h-full min-h-7 text-center uppercase ring ring-gray-300 py-2 cursor-pointer transition-colors select-none ${
+                className={`text-xl md:text-2xl lg:text-3xl h-full min-h-7 text-center uppercase ring ring-gray-300 py-3 g cursor-pointer transition-colors select-none ${
                   isSelected
                     ? isLastSelected
                       ? "bg-blue-400 ring-blue-500 ring-2"
@@ -233,11 +233,11 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
                 <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-1">
                   Выбранное слово:
                 </p>
-                <p className="text-xl md:text-2xl lg:text-3xl font-bold text-blue-700 uppercase">
+                <p className="text-2xl md:text-2xl lg:text-3xl font-bold text-blue-700 uppercase">
                   {getCurrentWord()}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 not-md:hidden">
                 <button
                   onClick={addFoundWord}
                   className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
@@ -251,6 +251,20 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
                   Очистить
                 </button>
               </div>
+            </div>
+            <div className="flex gap-2 mt-4 md:hidden">
+              <button
+                onClick={addFoundWord}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+              >
+                Добавить
+              </button>
+              <button
+                onClick={clearSelection}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition-colors"
+              >
+                Очистить
+              </button>
             </div>
           </div>
         )}
@@ -267,14 +281,14 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
             ) : (
               answers.map((el, i) => {
                 return (
-                  <div className="flex gap-2 items-center" key={el.id}>
+                  <div className="flex lg:gap-2 gap-1 items-center" key={el.id}>
                     <span className="text-lg md:text-xl lg:text-2xl w-4">
                       {i + 1}.
                     </span>
-                    <div className="ring ring-gray-300 p-2 rounded-lg bg-gray-50 font-semibold text-lg md:text-xl lg:text-2xl uppercase">
+                    <div className="ring w-full ring-gray-300 p-2 rounded-lg bg-gray-50 font-semibold text-lg md:text-xl lg:text-2xl uppercase">
                       {el.answer}
                     </div>
-                    <div onClick={() => deleteAnswer(el.id)}>
+                    <div className="ml-2" onClick={() => deleteAnswer(el.id)}>
                       <BiTrash className="bg-red-200/50 rounded-full cursor-pointer text-red-400 w-7 h-7 p-1" />
                     </div>
                   </div>
@@ -286,19 +300,19 @@ export default function SearchWordView({ widgetId }: SearchWordViewProps) {
 
         {result && (
           <div
-            className={`mt-4 p-4 rounded-lg border-2 ${
+            className={`mt-4 p-2 lg:p-4 rounded-lg border-2 ${
               result.is_correct
                 ? "bg-green-50 border-green-300 text-green-800"
                 : "bg-red-50 border-red-300 text-red-800"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold">
+            <div className="gap-2">
+              <span className="text-base lg:text-lg xl:text-xl font-semibold block">
                 {result.is_correct
                   ? getPositiveFeedback()
                   : getNegativeFeedback()}
               </span>
-              <span className="text-sm">(+{result.points_earned} балл)</span>
+              <span className="text-xs lg:text-sm">(+{result.points_earned} балл)</span>
             </div>
           </div>
         )}

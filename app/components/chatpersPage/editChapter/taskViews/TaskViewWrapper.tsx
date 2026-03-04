@@ -150,13 +150,13 @@ export default function TaskViewWrapper({
           </div>
         ) : (
           // Inline mode: знак стоит в одной строке с контентом
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2 ">
             {conditionalSign && (
               <span className="text-2xl font-semibold text-gray-700 flex-shrink-0">
                 {conditionalSign}
               </span>
             )}
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               {/* Header with question body and hint button */}
               <div className="flex items-start justify-between gap-4 mb-4">
                 {showQuestionBody && body && (

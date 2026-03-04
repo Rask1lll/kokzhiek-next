@@ -33,7 +33,7 @@ export default function DropDownView({ widgetId }: DropDownViewProps) {
   }, [data?.dropdowns]);
   const options = useMemo(
     () => currentQuestion?.options || [],
-    [currentQuestion?.options]
+    [currentQuestion?.options],
   );
 
   // Create a map of dropdownId -> options array
@@ -116,25 +116,25 @@ export default function DropDownView({ widgetId }: DropDownViewProps) {
 
   return (
     <TaskViewWrapper widgetId={widgetId} showQuestionBody={false}>
-      <div className="text-lg md:text-xl lg:text-2xl text-gray-800 leading-relaxed">
+      <div className="text-lg sm:text-lg text-sm md:text-xl lg:text-2xl text-gray-800 leading-relaxed">
         {renderContent()}
       </div>
 
       {result && (
         <div
-          className={`mt-4 p-4 rounded-lg border-2 ${
+          className={`mt-4 p-2 lg:p-4 rounded-lg border-2 ${
             result.is_correct
               ? "bg-green-50 border-green-300 text-green-800"
               : "bg-red-50 border-red-300 text-red-800"
           }`}
         >
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold">
+          <div className="gap-2">
+            <span className="text-base lg:text-lg xl:text-xl font-semibold block">
               {result.is_correct
                 ? getPositiveFeedback()
                 : getNegativeFeedback()}
             </span>
-            <span className="text-sm">(+{result.points_earned} балл)</span>
+            <span className="text-xs lg:text-sm">(+{result.points_earned} балл)</span>
           </div>
         </div>
       )}

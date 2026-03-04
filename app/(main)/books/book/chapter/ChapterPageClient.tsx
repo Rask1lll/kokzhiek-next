@@ -213,7 +213,7 @@ export default function ChapterPageClient() {
         {isLoading ? (
           <ChapterContentSkeleton />
         ) : (
-          <div className="2xl:w-5/6 w-full not-2xl:pl-12 space-y-1">
+          <div className="2xl:w-5/6 w-full space-y-1">
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
